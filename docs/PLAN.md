@@ -41,10 +41,10 @@ Dưới đây là chi tiết phân chia công việc từ F01 đến F10 dựa t
 - [x] Phân tích đặc tả kỹ thuật `task-flow.md`.
 - [x] Xác định các gaps và giải pháp kiến trúc trong `task_flow_analysis.md`.
 
-### F03. Database Schema [planned]
-- [ ] Thiết lập tệp `prisma/schema.prisma` với 7 bảng: `User`, `Project`, `ProjectMember`, `Task`, `TaskHistory`, `Comment`, `Notification`.
-- [ ] Cấu hình các Enums cần thiết: `Role`, `MemberRole`, `TaskStatus`, `Priority`, `ProjectStatus`, `NotificationType`.
-- [ ] Thiết lập ràng buộc khóa ngoại (ví dụ: quan hệ creator/assignee giữa `User` và `Task`, onDelete Cascade cho các quan hệ phụ thuộc).
+### F03. Database Schema [in-progress]
+- [x] Thiết lập tệp `prisma/schema.prisma` với 7 bảng: `User`, `Project`, `ProjectMember`, `Task`, `TaskHistory`, `Comment`, `Notification`.
+- [x] Cấu hình các Enums cần thiết: `Role`, `MemberRole`, `TaskStatus`, `Priority`, `ProjectStatus`, `NotificationType`.
+- [x] Thiết lập ràng buộc khóa ngoại (ví dụ: quan hệ creator/assignee giữa `User` và `Task`, onDelete Cascade cho các quan hệ phụ thuộc).
 - [ ] Thực hiện chạy Migration khởi tạo cơ sở dữ liệu: `npx prisma migrate dev --name init`.
 - [ ] Viết script gieo dữ liệu thử nghiệm `prisma/seed.ts` (tạo sẵn Leader, Member, các Projects và Tasks mẫu để phục vụ test).
 
