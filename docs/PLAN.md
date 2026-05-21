@@ -1,6 +1,6 @@
 # Project Plan - TaskFlow
 
-This document outlines the product roadmap, technology stack, features, and detailed 11-phase implementation plan for **TaskFlow**. It serves as the primary source of truth for the project's roadmap and direction.
+This document outlines the product roadmap, technology stack, features, and detailed tasks breakdown for **TaskFlow**. It serves as the primary source of truth for the project's roadmap and direction.
 
 ---
 
@@ -28,110 +28,89 @@ This document outlines the product roadmap, technology stack, features, and deta
 
 ---
 
-## 3. Features & Status
+## 3. Features & Tasks Breakdown
 
-| #   | Feature                   | Status      | Description / Reference                                            |
-| --- | ------------------------- | ----------- | ------------------------------------------------------------------ |
-| F01 | Project Setup             | done        | Khởi tạo cấu trúc dự án và tài liệu hướng dẫn cho agent             |
-| F02 | Spec Analysis             | done        | Phân tích đặc tả dự án và lập kế hoạch thực hiện                   |
-| F03 | Database Schema           | planned     | Xây dựng Prisma schema và cơ sở dữ liệu (Phiai đoạn 1)              |
-| F04 | Auth & RBAC               | planned     | Xác thực JWT và ma trận phân quyền (Giai đoạn 2, 3)                |
-| F05 | API Endpoints             | planned     | Xây dựng các API Projects, Members, Tasks, Comments (Giai đoạn 4-6) |
-| F06 | WebSocket Events          | planned     | Tích hợp Socket.io để xử lý đồng bộ thời gian thực (Giai đoạn 5)    |
-| F07 | UI/Pages Detail           | planned     | Xây dựng Layouts và 10 Pages nghiệp vụ (Giai đoạn 7, 10)           |
-| F08 | Backend Implementation    | planned     | Express + Prisma + Socket.io hoàn chỉnh (Giai đoạn 1-6)            |
-| F09 | Frontend Implementation   | planned     | React pages + stores + hooks (Giai đoạn 7-11)                      |
-| F10 | Testing & Deployment      | planned     | Vitest, Docker, CI/CD                                               |
+Dưới đây là chi tiết phân chia công việc từ F01 đến F10 dựa trên tài liệu đặc tả `task-flow.md`:
 
----
+### F01. Project Setup [done]
+- [x] Khởi tạo cấu trúc thư mục monorepo gốc.
+- [x] Tạo file hướng dẫn Agent (`AGENTS.md`).
+- [x] Tạo file quy chuẩn hoạt động Agent thu gọn (`.agents/rules/main.md`).
 
-## 4. Detailed 11-Phase Implementation Roadmap
+### F02. Spec Analysis [done]
+- [x] Phân tích đặc tả kỹ thuật `task-flow.md`.
+- [x] Xác định các gaps và giải pháp kiến trúc trong `task_flow_analysis.md`.
 
-Dưới đây là kế hoạch triển khai chi tiết từng bước dựa trên đặc tả kỹ thuật của dự án:
+### F03. Database Schema [planned]
+- [ ] Thiết lập tệp `prisma/schema.prisma` với 7 bảng: `User`, `Project`, `ProjectMember`, `Task`, `TaskHistory`, `Comment`, `Notification`.
+- [ ] Cấu hình các Enums cần thiết: `Role`, `MemberRole`, `TaskStatus`, `Priority`, `ProjectStatus`, `NotificationType`.
+- [ ] Thiết lập ràng buộc khóa ngoại (ví dụ: quan hệ creator/assignee giữa `User` và `Task`, onDelete Cascade cho các quan hệ phụ thuộc).
+- [ ] Thực hiện chạy Migration khởi tạo cơ sở dữ liệu: `npx prisma migrate dev --name init`.
+- [ ] Viết script gieo dữ liệu thử nghiệm `prisma/seed.ts` (tạo sẵn Leader, Member, các Projects và Tasks mẫu để phục vụ test).
 
-### Giai đoạn 1: Thiết lập Cơ sở dữ liệu & Prisma Schema
-* **Mục tiêu:** Cài đặt Prisma ORM, định nghĩa Schema và chuẩn bị dữ liệu mẫu.
-* **Chi tiết công việc:**
-  1. Thiết lập tệp `prisma/schema.prisma` với đầy đủ các bảng: `User`, `Project`, `ProjectMember`, `Task`, `TaskHistory`, `Comment`, `Notification` cùng các Enums tương ứng.
-  2. Tạo migrations ban đầu bằng Prisma (`npx prisma migrate dev`).
-  3. Viết script `prisma/seed.ts` để gieo dữ liệu thử nghiệm (tạo sẵn tài khoản admin, leader, member, các dự án mẫu và task mẫu).
+### F04. Auth & RBAC [planned]
+- [ ] Thiết lập cơ chế tạo JWT Access Token (15 phút, lưu trong memory) và Refresh Token (7 ngày, lưu ở localStorage).
+- [ ] Viết middleware xác thực token `authMiddleware` trên Backend.
+- [ ] Viết middleware phân quyền `rbacMiddleware` kiểm soát quyền hạn (LEADER/MEMBER) đối với tài nguyên dự án và task.
+- [ ] Thiết lập bảo vệ định tuyến trên Frontend bằng cách sử dụng `PrivateRoute` (nếu chưa đăng nhập) và `RoleGuard` (nếu vai trò không được cấp quyền).
 
-### Giai đoạn 2: Cấu hình Backend Core & Middlewares
-* **Mục tiêu:** Dựng khung ứng dụng Express và viết các middleware nền tảng.
-* **Chi tiết công việc:**
-  1. Khởi tạo Express với TypeScript, cấu hình CORS, rate limiter, và Winston logger.
-  2. Xây dựng lớp xử lý lỗi tập trung `AppError` và middleware `errorHandler`.
-  3. Viết `authMiddleware` (xác thực token JWT).
-  4. Viết `rbacMiddleware` (kiểm tra quyền truy cập dựa trên vai trò hệ thống hoặc vai trò trong dự án).
+### F05. API Endpoints [planned]
+- [ ] **Auth APIs:** Đăng ký (mặc định role MEMBER), Đăng nhập, Làm mới token (`/api/auth/refresh`), Đăng xuất, và Profile (lấy/cập nhật thông tin cá nhân).
+- [ ] **Project APIs:** CRUD dự án (LEADER mới được tạo; chỉ Owner của dự án mới được sửa/xóa).
+- [ ] **Project Member APIs:** Thêm thành viên bằng email, sửa vai trò member, và xóa thành viên khỏi dự án (LEADER/Owner only).
+- [ ] **Task APIs:** CRUD nhiệm vụ (Project LEADER được tạo/sửa/xóa; Assignee/LEADER cập nhật status; Member sắp xếp vị trí).
+- [ ] **Comment APIs:** Thêm bình luận vào task, xóa bình luận (chỉ tác giả được quyền xóa).
+- [ ] **Notification APIs:** Lấy danh sách thông báo và đánh dấu đã đọc (`/api/notifications/:id/read` và `/api/notifications/read-all`).
+- [ ] **Stats/Dashboard APIs:** Xem thống kê chi tiết dự án (dành cho Leader) hoặc thống kê cá nhân (dành cho Member).
 
-### Giai đoạn 3: Xây dựng API Xác thực (Authentication APIs)
-* **Mục tiêu:** Hoàn thiện luồng đăng ký, đăng nhập và cấp phát JWT.
-* **Chi tiết công việc:**
-  1. API Đăng ký (`/api/auth/register`): Mặc định gán vai trò `MEMBER`.
-  2. API Đăng nhập (`/api/auth/login`): Trả về `accessToken` (15m, in memory) và `refreshToken` (7d, cookie/localStorage).
-  3. API Làm mới token (`/api/auth/refresh`): Sử dụng `refreshToken` để cấp lại `accessToken`.
-  4. API Đăng xuất (`/api/auth/logout`) và API lấy thông tin cá nhân (`/api/auth/me`).
+### F06. WebSocket Events [planned]
+- [ ] Khởi chạy máy chủ Socket.io trên Backend tích hợp xác thực JWT qua handshake.
+- [ ] Xử lý sự kiện Client tham gia/rời phòng dự án (`join-project`, `leave-project`).
+- [ ] Phát các sự kiện thay đổi công việc realtime đến các thành viên trong room dự án:
+  - `task:created`, `task:updated`, `task:deleted`
+  - `task:status-changed` (khi di chuyển cột Kanban)
+  - `task:reordered` (khi đổi thứ tự trong cột)
+  - `comment:added` (khi có bình luận mới)
+  - `member:added`, `member:removed` (khi thay đổi nhân sự dự án)
+- [ ] Phát thông báo cá nhân (`notification`) trực tiếp đến client của người dùng.
 
-### Giai đoạn 4: API Dự án & Quản lý Thành viên (Project & Member APIs)
-* **Mục tiêu:** Cung cấp đầy đủ các thao tác quản trị dự án.
-* **Chi tiết công việc:**
-  1. API CRUD cho Projects (chỉ LEADER trở lên được quyền tạo; chỉnh sửa/xóa yêu cầu quyền Owner của dự án).
-  2. API quản lý thành viên dự án: Thêm thành viên bằng email, sửa vai trò thành viên (`LEADER`/`MEMBER`), và xóa thành viên khỏi dự án.
+### F07. UI/Pages Detail [planned]
+- [ ] Thiết kế Layout dùng chung: `AuthLayout` (centered card) và `DashboardLayout` (Sidebar + Header tích hợp NotificationBell và Avatar dropdown).
+- [ ] Dựng khung định tuyến cho 10 trang giao diện chính:
+  1. **Login:** Đăng nhập hệ thống.
+  2. **Register:** Đăng ký (mặc định role MEMBER).
+  3. **Dashboard:** Thống kê dự án dạng biểu đồ (Leader) hoặc thống kê cá nhân (Member).
+  4. **Projects:** Danh sách dự án dạng Grid/List kèm thanh tìm kiếm & bộ lọc.
+  5. **ProjectDetail:** Quản lý dự án với cấu trúc Tabs (Overview, Board, Members, Settings).
+  6. **TaskBoard:** Bảng Kanban 4 cột (`TODO`, `IN_PROGRESS`, `REVIEW`, `DONE`) hỗ trợ kéo thả.
+  7. **MyTasks:** Bảng danh sách nhiệm vụ được giao cho cá nhân.
+  8. **Members:** Quản lý danh sách thành viên dự án.
+  9. **Settings:** Chỉnh sửa thông tin, đổi mật khẩu, và chuyển theme (sáng/tối).
+  10. **NotFound:** Trang hiển thị lỗi 404.
+- [ ] Thiết kế các Modals: `TaskDetailModal` (chứa bình luận và lịch sử `TaskHistory`), `TaskFormModal` (tạo/sửa task).
 
-### Giai đoạn 5: API Nhiệm vụ & Sự kiện Real-time (Task CRUD & WebSocket)
-* **Mục tiêu:** Quản lý Tasks, kéo thả trên Kanban và đồng bộ qua socket.
-* **Chi tiết công việc:**
-  1. API CRUD cho Tasks (yêu cầu quyền LEADER của dự án).
-  2. API cập nhật trạng thái Task dành cho thành viên được gán (`/api/tasks/:id/status`).
-  3. API sắp xếp thứ tự Task (`/api/tasks/reorder`) để lưu vị trí kéo thả trên giao diện.
-  4. Tích hợp Socket.io: Gửi tín hiệu realtime khi task được tạo, cập nhật, đổi trạng thái hoặc reorder tới các thành viên cùng phòng dự án.
+### F08. Backend Implementation [planned]
+- [ ] Cài đặt cấu trúc dự án `backend/` và cài đặt các dependencies (express, prisma, socket.io, jsonwebtoken, bcrypt, zod, winston).
+- [ ] Tạo file cấu hình môi trường `.env.development`.
+- [ ] Khởi tạo Prisma client singleton trong file `src/lib/prisma.ts`.
+- [ ] Viết trình ghi log lỗi bằng Winston logger.
 
-### Giai đoạn 6: API Bình luận & Thông báo (Comment & Notification APIs)
-* **Mục tiêu:** Xử lý trao đổi trên task và hệ thống thông báo cho người dùng.
-* **Chi tiết công việc:**
-  1. API đăng/xóa bình luận trên task (chỉ xóa được bình luận của chính mình).
-  2. API lấy danh sách thông báo và đánh dấu đã đọc (`/api/notifications`).
-  3. Tự động tạo và gửi thông báo qua socket khi có hoạt động gán task, cập nhật task, hoặc bình luận mới.
+### F09. Frontend Implementation [planned]
+- [ ] Khởi tạo thư mục `frontend/` bằng Vite (React + TypeScript).
+- [ ] Cài đặt dependencies (zustand, @tanstack/react-query, axios, socket.io-client, antd, tailwindcss, @dnd-kit/core, react-hook-form, zod, recharts).
+- [ ] Cấu hình Axios instance kèm interceptor tự động gọi API refresh token khi gặp lỗi 401.
+- [ ] Xây dựng các Zustand stores (`authStore`, `uiStore`).
+- [ ] Tạo các custom hooks sử dụng TanStack Query v5 để quản lý cache dữ liệu từ Server.
+- [ ] Tích hợp kéo thả trên Kanban board dùng `@dnd-kit/core` kết hợp cơ chế **Optimistic Updates** qua React Query.
 
-### Giai đoạn 7: Xây dựng Layout & Định tuyến Frontend (Layout & Navigation)
-* **Mục tiêu:** Tạo khung giao diện ứng dụng.
-* **Chi tiết công việc:**
-  1. Cấu hình định tuyến bằng `react-router-dom v6` với các route bảo vệ (`PrivateRoute`, `RoleGuard`).
-  2. Thiết kế `AuthLayout` (giao diện trung tâm không sidebar cho Login/Register).
-  3. Thiết kế `DashboardLayout` gồm: Sidebar (điều hướng nhanh), Header (tìm kiếm, avatar, và NotificationBell hiển thị số thông báo chưa đọc).
-
-### Giai đoạn 8: Tích hợp API & Quản lý State Frontend
-* **Mục tiêu:** Kết nối API và quản lý dữ liệu toàn cục.
-* **Chi tiết công việc:**
-  1. Cấu hình instance Axios với interceptors: tự động đính kèm `accessToken` vào Header, tự động bắt mã lỗi 401 để gọi API refresh token và thử lại request bị lỗi.
-  2. Thiết kế Zustand store `authStore` để quản lý thông tin đăng nhập trong bộ nhớ tạm và `uiStore` để quản lý theme (light/dark) hoặc sidebar.
-
-### Giai đoạn 9: Viết Custom Hooks cho TanStack Query v5
-* **Mục tiêu:** Quản lý cache và truy vấn dữ liệu từ Server.
-* **Chi tiết công việc:**
-  1. Viết custom hooks cho các API Projects (`useProjects`, `useProjectDetail`).
-  2. Viết custom hooks cho API Tasks (`useTasks`, `useUpdateTaskStatus`).
-  3. Áp dụng cơ chế **Optimistic Updates** cho thao tác kéo thả task để đảm bảo UI cập nhật ngay lập tức trước khi API phản hồi.
-
-### Giai đoạn 10: Xây dựng 10 Trang giao diện & Modals
-* **Mục tiêu:** Hoàn thiện toàn bộ các trang chức năng.
-* **Chi tiết công việc:**
-  1. Login, Register, NotFound pages.
-  2. Dashboard: Biểu đồ thống kê (Recharts) chi tiết cho LEADER (thống kê dự án, trạng thái) và tối giản cho MEMBER (cá nhân).
-  3. Projects (dạng Grid/List) & ProjectDetail (gồm các tab: Overview, Board, Members, Settings).
-  4. TaskBoard (bảng Kanban 4 cột kéo thả).
-  5. MyTasks (bảng Table hiển thị các công việc cá nhân).
-  6. Xây dựng các Modals: `TaskDetailModal` (hiển thị lịch sử thay đổi TaskHistory, phần bình luận), `TaskFormModal` (tạo/sửa task), `AddMemberModal`.
-
-### Giai đoạn 11: Tích hợp Socket.io Client & Hoàn thiện ứng dụng
-* **Mục tiêu:** Đồng bộ real-time trên Client và kiểm thử tổng thể.
-* **Chi tiết công việc:**
-  1. Tạo `SocketProvider` bao bọc ứng dụng để quản lý kết nối socket dựa trên JWT token.
-  2. Lắng nghe các sự kiện socket (`task:updated`, `comment:added`, v.v.) để tự động cập nhật cache của TanStack Query và hiển thị thông báo toast (Ant Design `message`).
+### F10. Testing & Deployment [planned]
+- [ ] Viết Unit Test cho Frontend sử dụng Vitest và React Testing Library.
+- [ ] Viết Integration Test cho các API Backend sử dụng Vitest và Supertest.
+- [ ] Thiết lập Docker cấu hình `Dockerfile` và `docker-compose.yml` để chạy ứng dụng ở môi trường local.
 
 ---
 
-## 5. Resolved Decisions (Quyết định thiết kế đã chốt)
+## 4. Resolved Decisions (Quyết định thiết kế đã chốt)
 
 Dựa trên đặc tả dự án tại [task-flow.md](file:///c:/project/task-flow/task-flow.md), các câu hỏi thiết kế đã được thống nhất như sau:
 * **Quyền truy cập Dashboard:** Member có quyền truy cập Dashboard nhưng chỉ hiển thị số liệu thống kê cá nhân (số task được gán, hoàn thành, quá hạn). Leader/Admin sẽ xem được biểu đồ thống kê tổng quan của toàn bộ dự án.
@@ -142,7 +121,7 @@ Dựa trên đặc tả dự án tại [task-flow.md](file:///c:/project/task-fl
 
 ---
 
-## 6. Architecture & Technical Rules
+## 5. Architecture & Technical Rules
 
 * **Monorepo:** Cả `frontend/` và `backend/` nằm trong cùng thư mục gốc của dự án.
 * **Bảo mật:** Mọi API thay đổi trạng thái hoặc chỉnh sửa dữ liệu bắt buộc đi qua bộ lọc middleware RBAC để kiểm soát quyền chặt chẽ.
