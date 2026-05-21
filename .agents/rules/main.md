@@ -22,13 +22,17 @@ Trước khi thực hiện bất kỳ nhiệm vụ nào, bạn phải đọc cá
    * **Normal:** Tính năng/hành vi mới -> Thêm một dòng vào `docs/PROGRESS.md` -> Code -> Cập nhật trạng thái hoàn thành.
    * **Big:** Liên quan Auth, Schema, RBAC, nhiều tính năng -> Cập nhật `docs/PLAN.md` -> Xác nhận với người dùng -> Ghi nhận vào `docs/DECISIONS.md`.
 3. **Trong khi làm việc:** Tạo/Cập nhật file `task.md` (nếu có) làm TODO list để theo dõi tiến độ.
-4. **Đồng bộ:** Sau khi hoàn thành và kiểm thử, commit và push toàn bộ thay đổi lên GitHub.
+4. **Đồng bộ:** Chỉ commit và push lên GitHub khi người dùng yêu cầu trực tiếp, không tự động push sau mỗi task.
 
 ---
 
 ## 2. QUY TẮC PHÁT TRIỂN CỐT LÕI (DEVELOPMENT RULES)
 
 Mọi mã nguồn được tạo ra phải tuân thủ nghiêm ngặt các quy tắc dưới đây. Chi tiết kỹ thuật cụ thể (Database, API, WebSocket, UI Pages) cần tham khảo trực tiếp tại [task-flow.md](file:///c:/project/task-flow/task-flow.md).
+
+* **Phát triển và Build:**
+  * **Không chạy build ở frontend:** Không chạy lệnh `npm run build` ở thư mục `frontend` trừ khi được yêu cầu trực tiếp. Chỉ chạy chế độ dev (`npm run dev`).
+  * **Tránh trùng cổng:** Trước khi mở server, kiểm tra các background tasks để tránh lỗi `EADDRINUSE` (cổng 5000 của Backend và cổng 5173 của Frontend).
 
 * **TypeScript:** Luôn sử dụng TypeScript chặt chẽ, tuyệt đối không dùng `any`. Khai báo rõ ràng interfaces/types cho props, state và API.
 * **State Management:**

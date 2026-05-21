@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+backend/dist/
+frontend/dist/
+
+# Database
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+
+# Environment variables
+backend/.env
+backend/.env.development
+backend/.env.production
+
+# Logs
+backend/logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

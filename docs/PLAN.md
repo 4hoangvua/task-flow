@@ -41,42 +41,42 @@ Dưới đây là chi tiết phân chia công việc từ F01 đến F10 dựa t
 - [x] Phân tích đặc tả kỹ thuật `task-flow.md`.
 - [x] Xác định các gaps và giải pháp kiến trúc trong `task_flow_analysis.md`.
 
-### F03. Database Schema [in-progress]
+### F03. Database Schema [done]
 - [x] Thiết lập tệp `prisma/schema.prisma` với 7 bảng: `User`, `Project`, `ProjectMember`, `Task`, `TaskHistory`, `Comment`, `Notification`.
 - [x] Cấu hình các Enums cần thiết: `Role`, `MemberRole`, `TaskStatus`, `Priority`, `ProjectStatus`, `NotificationType`.
 - [x] Thiết lập ràng buộc khóa ngoại (ví dụ: quan hệ creator/assignee giữa `User` và `Task`, onDelete Cascade cho các quan hệ phụ thuộc).
-- [ ] Thực hiện chạy Migration khởi tạo cơ sở dữ liệu: `npx prisma migrate dev --name init`.
-- [ ] Viết script gieo dữ liệu thử nghiệm `prisma/seed.ts` (tạo sẵn Leader, Member, các Projects và Tasks mẫu để phục vụ test).
+- [x] Thực hiện chạy Migration khởi tạo cơ sở dữ liệu: `npx prisma migrate dev --name init`.
+- [x] Viết script gieo dữ liệu thử nghiệm `prisma/seed.ts` (tạo sẵn Leader, Member, các Projects và Tasks mẫu để phục vụ test).
 
-### F04. Auth & RBAC [planned]
-- [ ] Thiết lập cơ chế tạo JWT Access Token (15 phút, lưu trong memory) và Refresh Token (7 ngày, lưu ở localStorage).
-- [ ] Viết middleware xác thực token `authMiddleware` trên Backend.
-- [ ] Viết middleware phân quyền `rbacMiddleware` kiểm soát quyền hạn (LEADER/MEMBER) đối với tài nguyên dự án và task.
-- [ ] Thiết lập bảo vệ định tuyến trên Frontend bằng cách sử dụng `PrivateRoute` (nếu chưa đăng nhập) và `RoleGuard` (nếu vai trò không được cấp quyền).
+### F04. Auth & RBAC [done]
+- [x] Thiết lập cơ chế tạo JWT Access Token (15 phút, lưu trong memory) và Refresh Token (7 ngày, lưu ở localStorage).
+- [x] Viết middleware xác thực token `authMiddleware` trên Backend.
+- [x] Viết middleware phân quyền `rbacMiddleware` kiểm soát quyền hạn (LEADER/MEMBER) đối với tài nguyên dự án và task.
+- [x] Thiết lập bảo vệ định tuyến trên Frontend bằng cách sử dụng `PrivateRoute` (nếu chưa đăng nhập) và `RoleGuard` (nếu vai trò không được cấp quyền).
 
-### F05. API Endpoints [planned]
-- [ ] **Auth APIs:** Đăng ký (mặc định role MEMBER), Đăng nhập, Làm mới token (`/api/auth/refresh`), Đăng xuất, và Profile (lấy/cập nhật thông tin cá nhân).
-- [ ] **Project APIs:** CRUD dự án (LEADER mới được tạo; chỉ Owner của dự án mới được sửa/xóa).
-- [ ] **Project Member APIs:** Thêm thành viên bằng email, sửa vai trò member, và xóa thành viên khỏi dự án (LEADER/Owner only).
-- [ ] **Task APIs:** CRUD nhiệm vụ (Project LEADER được tạo/sửa/xóa; Assignee/LEADER cập nhật status; Member sắp xếp vị trí).
-- [ ] **Comment APIs:** Thêm bình luận vào task, xóa bình luận (chỉ tác giả được quyền xóa).
-- [ ] **Notification APIs:** Lấy danh sách thông báo và đánh dấu đã đọc (`/api/notifications/:id/read` và `/api/notifications/read-all`).
-- [ ] **Stats/Dashboard APIs:** Xem thống kê chi tiết dự án (dành cho Leader) hoặc thống kê cá nhân (dành cho Member).
+### F05. API Endpoints [done]
+- [x] **Auth APIs:** Đăng ký (mặc định role MEMBER), Đăng nhập, Làm mới token (`/api/auth/refresh`), Đăng xuất, và Profile (lấy/cập nhật thông tin cá nhân).
+- [x] **Project APIs:** CRUD dự án (LEADER mới được tạo; chỉ Owner của dự án mới được sửa/xóa).
+- [x] **Project Member APIs:** Thêm thành viên bằng email, sửa vai trò member, và xóa thành viên khỏi dự án (LEADER/Owner only).
+- [x] **Task APIs:** CRUD nhiệm vụ (Project LEADER được tạo/sửa/xóa; Assignee/LEADER cập nhật status; Member sắp xếp vị trí).
+- [x] **Comment APIs:** Thêm bình luận vào task, xóa bình luận (chỉ tác giả được quyền xóa).
+- [x] **Notification APIs:** Lấy danh sách thông báo và đánh dấu đã đọc (`/api/notifications/:id/read` và `/api/notifications/read-all`).
+- [x] **Stats/Dashboard APIs:** Xem thống kê chi tiết dự án (dành cho Leader) hoặc thống kê cá nhân (dành cho Member).
 
-### F06. WebSocket Events [planned]
-- [ ] Khởi chạy máy chủ Socket.io trên Backend tích hợp xác thực JWT qua handshake.
-- [ ] Xử lý sự kiện Client tham gia/rời phòng dự án (`join-project`, `leave-project`).
-- [ ] Phát các sự kiện thay đổi công việc realtime đến các thành viên trong room dự án:
+### F06. WebSocket Events [done]
+- [x] Khởi chạy máy chủ Socket.io trên Backend tích hợp xác thực JWT qua handshake.
+- [x] Xử lý sự kiện Client tham gia/rời phòng dự án (`join-project`, `leave-project`).
+- [x] Phát các sự kiện thay đổi công việc realtime đến các thành viên trong room dự án:
   - `task:created`, `task:updated`, `task:deleted`
   - `task:status-changed` (khi di chuyển cột Kanban)
   - `task:reordered` (khi đổi thứ tự trong cột)
   - `comment:added` (khi có bình luận mới)
   - `member:added`, `member:removed` (khi thay đổi nhân sự dự án)
-- [ ] Phát thông báo cá nhân (`notification`) trực tiếp đến client của người dùng.
+- [x] Phát thông báo cá nhân (`notification`) trực tiếp đến client của người dùng.
 
-### F07. UI/Pages Detail [planned]
-- [ ] Thiết kế Layout dùng chung: `AuthLayout` (centered card) và `DashboardLayout` (Sidebar + Header tích hợp NotificationBell và Avatar dropdown).
-- [ ] Dựng khung định tuyến cho 10 trang giao diện chính:
+### F07. UI/Pages Detail [done]
+- [x] Thiết kế Layout dùng chung: `AuthLayout` (centered card) và `DashboardLayout` (Sidebar + Header tích hợp NotificationBell và Avatar dropdown).
+- [x] Dựng khung định tuyến cho 10 trang giao diện chính:
   1. **Login:** Đăng nhập hệ thống.
   2. **Register:** Đăng ký (mặc định role MEMBER).
   3. **Dashboard:** Thống kê dự án dạng biểu đồ (Leader) hoặc thống kê cá nhân (Member).
@@ -87,26 +87,36 @@ Dưới đây là chi tiết phân chia công việc từ F01 đến F10 dựa t
   8. **Members:** Quản lý danh sách thành viên dự án.
   9. **Settings:** Chỉnh sửa thông tin, đổi mật khẩu, và chuyển theme (sáng/tối).
   10. **NotFound:** Trang hiển thị lỗi 404.
-- [ ] Thiết kế các Modals: `TaskDetailModal` (chứa bình luận và lịch sử `TaskHistory`), `TaskFormModal` (tạo/sửa task).
-
-### F08. Backend Implementation [planned]
-- [ ] Cài đặt cấu trúc dự án `backend/` và cài đặt các dependencies (express, prisma, socket.io, jsonwebtoken, bcrypt, zod, winston).
-- [ ] Tạo file cấu hình môi trường `.env.development`.
-- [ ] Khởi tạo Prisma client singleton trong file `src/lib/prisma.ts`.
-- [ ] Viết trình ghi log lỗi bằng Winston logger.
-
-### F09. Frontend Implementation [planned]
-- [ ] Khởi tạo thư mục `frontend/` bằng Vite (React + TypeScript).
-- [ ] Cài đặt dependencies (zustand, @tanstack/react-query, axios, socket.io-client, antd, tailwindcss, @dnd-kit/core, react-hook-form, zod, recharts).
-- [ ] Cấu hình Axios instance kèm interceptor tự động gọi API refresh token khi gặp lỗi 401.
-- [ ] Xây dựng các Zustand stores (`authStore`, `uiStore`).
-- [ ] Tạo các custom hooks sử dụng TanStack Query v5 để quản lý cache dữ liệu từ Server.
-- [ ] Tích hợp kéo thả trên Kanban board dùng `@dnd-kit/core` kết hợp cơ chế **Optimistic Updates** qua React Query.
+- [x] Cấu hình Axios instance kèm interceptor tự động gọi API refresh token khi gặp lỗi 401.
+- [x] Xây dựng các Zustand stores (`authStore`, `uiStore`).
+- [x] Tạo các custom hooks sử dụng TanStack Query v5 để quản lý cache dữ liệu từ Server.
+- [x] Tích hợp kéo thả trên Kanban board dùng `@dnd-kit/core` kết hợp cơ chế **Optimistic Updates** qua React Query.
 
 ### F10. Testing & Deployment [planned]
 - [ ] Viết Unit Test cho Frontend sử dụng Vitest và React Testing Library.
 - [ ] Viết Integration Test cho các API Backend sử dụng Vitest và Supertest.
 - [ ] Thiết lập Docker cấu hình `Dockerfile` và `docker-compose.yml` để chạy ứng dụng ở môi trường local.
+
+---
+
+## 3.1. UI/Styling Fixes & Maintenance Log
+
+Phần này tóm tắt các hạng mục sửa đổi giao diện, styling, và RBAC UI đã hoàn thành.
+Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/changelogs/`](file:///c:/project/task-flow/docs/changelogs/).
+
+> **Hướng dẫn cho Agent:** Khi sửa lỗi UI, styling, responsive, RBAC hiển thị hoặc các vấn đề cấu hình:
+> 1. Tạo (hoặc cập nhật) file `docs/changelogs/YYYY-MM-DD.md` với ngày hôm đó.
+> 2. Ghi lại: **Vấn đề** → **Sửa** → **Quy tắc ghi nhớ** cho mỗi bản sửa.
+> 3. Chỉ ghi tóm tắt trạng thái (done/in-progress) tại mục 3.1 này trong PLAN.md.
+> 4. KHÔNG ghi chi tiết dài ở đây — chuyển vào changelogs.
+
+### Tóm tắt hạng mục [done]
+- [x] Cấu hình Tailwind CSS v4 + Ant Design (plugin, vite.config, index.css)
+- [x] CORS động hỗ trợ mọi port localhost
+- [x] Sửa container full-width + responsive mobile/tablet/desktop
+- [x] Phân quyền hiển thị giao diện (RBAC UI) toàn bộ (Projects, ProjectDetail, TaskBoard, TaskDetailModal)
+
+📁 Chi tiết: [`docs/changelogs/2026-05-21.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-21.md)
 
 ---
 

@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -13,7 +13,7 @@ model User {
   passwordHash String
   name         String
   avatar       String?
-  role         Role     @default(MEMBER)
+  role         String   @default("MEMBER")
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -31,7 +31,7 @@ model Project {
   id          String        @id @default(uuid())
   name        String
   description String?
-  status      ProjectStatus @default(ACTIVE)
+  status      String        @default("ACTIVE")
   ownerId     String
   owner       User          @relation(fields: [ownerId], references: [id])
   members     ProjectMember[]
@@ -44,7 +44,7 @@ model ProjectMember {
   id        String     @id @default(uuid())
   projectId String
   userId    String
-  role      MemberRole @default(MEMBER)
+  role      String     @default("MEMBER")
   joinedAt  DateTime   @default(now())
   project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user      User       @relation(fields: [userId], references: [id])
@@ -56,8 +56,8 @@ model Task {
   id          String     @id @default(uuid())
   title       String
   description String?
-  status      TaskStatus @default(TODO)
-  priority    Priority   @default(MEDIUM)
+  status      String     @default("TODO")
+  priority    String     @default("MEDIUM")
   order       Int        @default(0)
   deadline    DateTime?
   projectId   String
@@ -98,7 +98,7 @@ model TaskHistory {
 model Notification {
   id        String           @id @default(uuid())
   userId    String
-  type      NotificationType
+  type      String
   title     String
   message   String
   taskId    String?
@@ -108,39 +108,4 @@ model Notification {
   createdAt DateTime         @default(now())
 }
 
-enum Role {
-  ADMIN
-  LEADER
-  MEMBER
-}
 
-enum MemberRole {
-  LEADER
-  MEMBER
-}
-
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  REVIEW
-  DONE
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum ProjectStatus {
-  ACTIVE
-  ARCHIVED
-}
-
-enum NotificationType {
-  TASK_ASSIGNED
-  TASK_UPDATED
-  COMMENT_ADDED
-  DEADLINE_APPROACHING
-}

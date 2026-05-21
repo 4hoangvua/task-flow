@@ -28,3 +28,24 @@ Record important architectural, design, or implementation choices here so future
 - Added URGENT to Priority enum
 - ProjectDetail uses Tabs (Overview | Board | Members | Settings)
 **Why:** Waiting for human answers on all questions would delay the entire project. These defaults are the most common patterns for task management apps and can be adjusted later.
+
+### D-002: SQLite for Local Development
+
+**Date:** 2026-05-21
+**Context:** Local PostgreSQL and Docker environments are not running on the system, which blocked database migrations and verification of the backend and frontend.
+**Decision:** Migrated the Prisma database provider to SQLite using a local file database (`dev.db`), and converted custom schema enums to SQLite-compatible String types.
+**Why:** Enables running the database, migrations, and seeding scripts locally. This provides a self-contained, lightweight development and testing workspace that works out-of-the-box. The schema can easily be pointed back to PostgreSQL for production environments.
+
+### D-003: Frontend Role-Based Access Control (RBAC) Alignment
+
+**Date:** 2026-05-21
+**Context:** The application UI had some visual actions (like settings tab, inviting members, updating task status, editing tasks, deleting members) visible to normal project members even though the backend correctly restricts these operations. This can lead to confusing UI interactions (clicks that end up failing with API errors).
+**Decision:** Fully align the frontend UI with backend RBAC checks:
+- Hide "Create Project" button on Projects list page for global `MEMBER`s.
+- Hide "Settings" tab in `ProjectDetail` for non-leaders.
+- Hide Member invitation and delete/role change actions for non-leaders.
+- Hide "Add Task" buttons on Task board and column headers for non-leaders.
+- Hide "Edit Task" and "Delete Task" in Task details modal for non-leaders.
+- Disable changing task status dropdown unless the user is the project leader/admin OR the task assignee.
+- Block drag-and-drop column transitions unless the user is the project leader/admin OR the task assignee.
+**Why:** Improves UX by hiding options that users don't have access to execute, preventing "permission denied" error popups and enhancing security and interface cleanliness.

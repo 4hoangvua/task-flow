@@ -5,10 +5,12 @@ Copy this file to your project root as `AGENTS.md` when starting a new project.
 ## Read Order
 
 1. This file — how agents work.
-2. `docs/PLAN.md` — what we're building and what's next.
-3. `docs/PROGRESS.md` — what's done and what's proven.
-4. `docs/DECISIONS.md` — why important choices were made.
-5. The user prompt — what the human wants right now.
+2. `task-flow.md` — complete technical spec, folder structure, libraries, known fixes & gotchas.
+3. `docs/PLAN.md` — what we're building and what's next.
+4. `docs/PROGRESS.md` — what's done and what's proven.
+5. `docs/DECISIONS.md` — why important choices were made.
+6. `docs/changelogs/` — daily logs of UI/styling/config fixes (read the latest file for recent context).
+7. The user prompt — what the human wants right now.
 
 ## Task Loop
 
@@ -19,7 +21,25 @@ For every task:
 3. Classify: is this **tiny** (quick fix), **normal** (a feature), or **big** (risky/multi-part)?
 4. Do the work.
 5. Update `PLAN.md`, `PROGRESS.md`, or `DECISIONS.md` if anything changed.
-6. Say what you did and what you didn't attempt.
+6. If the work involved UI/styling/config fixes, update `docs/changelogs/YYYY-MM-DD.md`.
+7. Say what you did and what you didn't attempt.
+
+## Development Rules
+
+- **Do NOT run `npm run build`** in the frontend unless explicitly requested. Only use `npm run dev` for local development.
+- **Do NOT push to GitHub** unless the user explicitly requests it.
+- **Port Conflicts:** Before starting any server, check if it is already running in background tasks (e.g. Node backend on port `5000`, Vite frontend on port `5173`) to avoid `EADDRINUSE` errors.
+- **Tailwind v4:** Uses `@tailwindcss/vite` plugin. NO `tailwind.config.js`. CSS-first config via `@import "tailwindcss"` in `index.css`.
+- **SQLite:** Prisma uses String columns instead of enums. Values enforced by Zod schemas.
+
+## Changelog Rules
+
+When fixing UI, styling, responsive layout, RBAC display, CORS, or any configuration issues:
+
+1. **Create or update** `docs/changelogs/YYYY-MM-DD.md` (use today's date).
+2. For each fix, document: **Vấn đề** (Issue) → **Sửa** (Fix) → **Quy tắc ghi nhớ** (Rule to remember).
+3. **Update `PLAN.md` section 3.1** with only a summary line (done/in-progress). Do NOT put detailed logs in PLAN.md.
+4. This keeps PLAN.md clean and changelogs comprehensive for future reference.
 
 ## Size Rules
 
