@@ -25,7 +25,7 @@ TaskFlow là ứng dụng quản lý công việc (Task Management) real-time, h
 
 | #   | Feature                   | Status      | Notes                                                              |
 | --- | ------------------------- | ----------- | ------------------------------------------------------------------ |
-| F01 | Project Setup             | in-progress | Khởi tạo cấu trúc dự án và tài liệu hướng dẫn cho agent             |
+| F01 | Project Setup             | done        | Khởi tạo cấu trúc dự án và tài liệu hướng dẫn cho agent             |
 | F02 | Spec Analysis             | done        | Phân tích task-flow.md, xác định gaps & bổ sung chi tiết            |
 | F03 | Database Schema           | planned     | Sửa Prisma schema: timestamps, relations, Notification, TaskHistory |
 | F04 | Auth & RBAC               | planned     | JWT flow, role matrix, protected routes                             |
