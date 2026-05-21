@@ -102,13 +102,7 @@ Dưới đây là chi tiết phân chia công việc từ F01 đến F10 dựa t
 ## 3.1. UI/Styling Fixes & Maintenance Log
 
 Phần này tóm tắt các hạng mục sửa đổi giao diện, styling, và RBAC UI đã hoàn thành.
-Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/changelogs/`](file:///c:/project/task-flow/docs/changelogs/).
-
-> **Hướng dẫn cho Agent:** Khi sửa lỗi UI, styling, responsive, RBAC hiển thị hoặc các vấn đề cấu hình:
-> 1. Tạo (hoặc cập nhật) file `docs/changelogs/YYYY-MM-DD.md` với ngày hôm đó.
-> 2. Ghi lại: **Vấn đề** → **Sửa** → **Quy tắc ghi nhớ** cho mỗi bản sửa.
-> 3. Chỉ ghi tóm tắt trạng thái (done/in-progress) tại mục 3.1 này trong PLAN.md.
-> 4. KHÔNG ghi chi tiết dài ở đây — chuyển vào changelogs.
+Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/changelogs/`](file:///c:/project/task-flow/docs/changelogs/) theo hướng dẫn ghi chép quy định tại [`AGENTS.md`](file:///c:/project/task-flow/AGENTS.md).
 
 ### Tóm tắt hạng mục [done]
 - [x] Cấu hình Tailwind CSS v4 + Ant Design (plugin, vite.config, index.css)

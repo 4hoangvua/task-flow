@@ -37,9 +37,13 @@ For every task:
 When fixing UI, styling, responsive layout, RBAC display, CORS, or any configuration issues:
 
 1. **Create or update** `docs/changelogs/YYYY-MM-DD.md` (use today's date).
-2. For each fix, document: **Vấn đề** (Issue) → **Sửa** (Fix) → **Quy tắc ghi nhớ** (Rule to remember).
-3. **Update `PLAN.md` section 3.1** with only a summary line (done/in-progress). Do NOT put detailed logs in PLAN.md.
-4. This keeps PLAN.md clean and changelogs comprehensive for future reference.
+2. Document each fix/maintenance category as a checklist task group:
+   - Use `### [x] Category Name` for headers.
+   - Use `- [x] Technical task description` for detail items.
+   - Avoid verbose explanations. Focus on technical clarity, listing modified files with absolute paths in the markdown link format (e.g. `[filename](file:///path/to/file)`).
+3. **Update `docs/PLAN.md` section 3.1** with only a summary line (done/in-progress). Do NOT put detailed logs in PLAN.md.
+4. This keeps PLAN.md clean and changelogs technical, readable for both developers and future AI agents.
+
 
 ## Size Rules
 
