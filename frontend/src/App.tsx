@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { PrivateRoute } from './routes/PrivateRoute';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { AuthLayout } from './layouts/AuthLayout';
+import { useAuthStore } from './stores/authStore';
+import { Spin } from 'antd';
 
 // Pages
 import { Login } from './pages/Login';
@@ -15,6 +17,21 @@ import { Settings } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
 
 export const App: React.FC = () => {
+  const isInitialized = useAuthStore((state) => state.isInitialized);
+  const initialize = useAuthStore((state) => state.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  if (!isInitialized) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <Spin size="large" tip="Đang khôi phục phiên đăng nhập..." />
+      </div>
+    );
+  }
+
   return (
     <Routes>
       {/* Public Auth Routes */}

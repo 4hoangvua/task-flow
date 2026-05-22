@@ -112,14 +112,14 @@ export const Projects: React.FC = () => {
   ];
 
   return (
-    <div>
+    <div className="space-y-6 pt-6">
       {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <ProjectOutlined className="text-indigo-600" /> Danh sách dự án
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <ProjectOutlined className="text-indigo-600 dark:text-indigo-400" /> Danh sách dự án
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Quản lý và xem tiến độ các dự án trong hệ thống.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-sm">Quản lý và xem tiến độ các dự án trong hệ thống.</p>
         </div>
 
         {isLeaderOrAdmin && (
@@ -127,7 +127,7 @@ export const Projects: React.FC = () => {
             type="primary"
             icon={<PlusOutlined />}
             size="large"
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="shadow-md font-semibold"
             onClick={() => setIsModalVisible(true)}
           >
             Tạo dự án mới
@@ -136,7 +136,7 @@ export const Projects: React.FC = () => {
       </div>
 
       {/* Filter and View toggles */}
-      <Card className="mb-6 shadow-sm">
+      <Card className="mb-10 shadow-sm border border-slate-200/50 dark:border-slate-800/50 notebook-card">
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
             <Input
@@ -158,7 +158,7 @@ export const Projects: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 border-t md:border-none pt-3 md:pt-0">
+          <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800 md:border-none pt-3 md:pt-0">
             <Button
               type={viewMode === 'grid' ? 'primary' : 'default'}
               icon={<AppstoreOutlined />}
@@ -175,67 +175,81 @@ export const Projects: React.FC = () => {
 
       {/* Projects List/Grid container */}
       {isLoading ? (
-        <div className="flex justify-center p-12"><Spin size="large" /></div>
+        <div className="flex justify-center items-center p-12 min-h-[250px]"><Spin size="large" /></div>
       ) : filteredProjects.length === 0 ? (
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
           <Empty description="Không tìm thấy dự án nào" />
         </Card>
       ) : viewMode === 'grid' ? (
-        <Row gutter={[20, 20]}>
+        <Row gutter={[20, 20]} className='mt-6'>
           {filteredProjects.map((project: Project) => (
             <Col xs={24} sm={12} lg={8} key={project.id}>
               <Card
-                hoverable
-                className="shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100 dark:border-slate-800"
+                className="premium-card shadow-sm notebook-card rounded-2xl flex flex-col justify-between"
+                bodyStyle={{ padding: '24px 24px 16px 24px' }}
                 actions={[
-                  <div key="action-view" className="text-indigo-600 hover:text-indigo-800 font-semibold py-1 flex items-center justify-center gap-1.5" onClick={() => navigate(`/projects/${project.id}`)}>
-                    Vào dự án <ArrowRightOutlined />
-                  </div>
+                  <button
+                    key="action-view"
+                    className="w-full text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold py-1 text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-none bg-transparent"
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                  >
+                    Vào dự án <ArrowRightOutlined className="text-[10px]" />
+                  </button>
                 ]}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <h3
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                    className="text-lg font-bold text-slate-800 dark:text-slate-200 hover:text-indigo-600 cursor-pointer line-clamp-1 flex-1 mr-2"
-                  >
-                    {project.name}
-                  </h3>
-                  <Tag color={project.status === 'ACTIVE' ? 'success' : 'default'}>
-                    {project.status === 'ACTIVE' ? 'Hoạt động' : 'Lưu trữ'}
-                  </Tag>
-                </div>
+                <div>
+                  <div className="flex items-start justify-between mb-3.5">
+                    <h3
+                      onClick={() => navigate(`/projects/${project.id}`)}
+                      className="text-base font-bold text-slate-800 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer line-clamp-1 flex-1 mr-2 transition-colors"
+                    >
+                      {project.name}
+                    </h3>
+                    <Tag
+                      bordered={false}
+                      className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${project.status === 'ACTIVE'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/50'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                        }`}
+                    >
+                      {project.status === 'ACTIVE' ? 'Hoạt động' : 'Lưu trữ'}
+                    </Tag>
+                  </div>
 
-                <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 h-10 mb-4">
-                  {project.description || 'Không có mô tả chi tiết cho dự án này.'}
-                </p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 h-9 mb-5 leading-relaxed">
+                    {project.description || 'Không có mô tả chi tiết cho dự án này.'}
+                  </p>
 
-                <div className="border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
-                  <Row gutter={12} className="mb-4">
-                    <Col span={12}>
-                      <span className="text-xs text-slate-400 block mb-1">THÀNH VIÊN</span>
-                      <Space size={4}>
-                        <Avatar icon={<UserOutlined />} size="small" className="bg-slate-200 text-slate-600" />
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          {project._count?.members || 0}
-                        </span>
-                      </Space>
-                    </Col>
-                    <Col span={12}>
-                      <span className="text-xs text-slate-400 block mb-1">CÔNG VIỆC</span>
-                      <Space size={4}>
-                        <ProjectOutlined className="text-slate-400" />
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          {project._count?.tasks || 0}
-                        </span>
-                      </Space>
-                    </Col>
-                  </Row>
+                  <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4.5 mb-2">
+                    <Row gutter={12} className="mb-4.5">
+                      <Col span={12}>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1 font-bold uppercase tracking-wider">Thành viên</span>
+                        <Space size={6}>
+                          <Avatar icon={<UserOutlined />} size="small" className="bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 dark:text-indigo-400 border border-indigo-100/20 dark:border-indigo-900/30" />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {project._count?.members || 0}
+                          </span>
+                        </Space>
+                      </Col>
+                      <Col span={12}>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1 font-bold uppercase tracking-wider">Công việc</span>
+                        <Space size={6}>
+                          <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 border border-slate-200/20 dark:border-slate-700/30">
+                            <ProjectOutlined className="text-xs" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {project._count?.tasks || 0}
+                          </span>
+                        </Space>
+                      </Col>
+                    </Row>
 
-                  <div className="flex justify-between items-center text-xs text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <CalendarOutlined /> {formatDate(project.createdAt).split(' ')[0]}
-                    </span>
-                    <span className="text-slate-500 font-medium">Chủ: {project.owner?.name || 'N/A'}</span>
+                    <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <CalendarOutlined className="text-xs" /> {formatDate(project.createdAt).split(' ')[0]}
+                      </span>
+                      <span className="truncate max-w-[120px]">Chủ: <span className="font-semibold text-slate-600 dark:text-slate-400">{project.owner?.name || 'N/A'}</span></span>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -243,14 +257,16 @@ export const Projects: React.FC = () => {
           ))}
         </Row>
       ) : (
-        <Card className="shadow-sm overflow-hidden" bodyStyle={{ padding: 0 }}>
-          <Table
-            dataSource={filteredProjects}
-            columns={columns}
-            rowKey="id"
-            pagination={{ pageSize: 10 }}
-          />
-        </Card>
+        <div className="mt-6">
+          <Card className="shadow-sm overflow-hidden border border-slate-200/50 dark:border-slate-800/50" bodyStyle={{ padding: 0 }}>
+            <Table
+              dataSource={filteredProjects}
+              columns={columns}
+              rowKey="id"
+              pagination={{ pageSize: 10 }}
+            />
+          </Card>
+        </div>
       )}
 
       {/* Create Project Modal */}
@@ -279,10 +295,10 @@ export const Projects: React.FC = () => {
             <Input.TextArea placeholder="Mô tả chi tiết dự án (không bắt buộc)..." rows={4} />
           </Form.Item>
 
-          <Form.Item className="mb-0 flex justify-end gap-2">
-            <Space>
+          <Form.Item className="mb-0 flex justify-end">
+            <Space size={10}>
               <Button onClick={() => setIsModalVisible(false)}>Hủy</Button>
-              <Button type="primary" htmlType="submit" loading={isCreating} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button type="primary" htmlType="submit" loading={isCreating} className="font-semibold">
                 Tạo mới
               </Button>
             </Space>

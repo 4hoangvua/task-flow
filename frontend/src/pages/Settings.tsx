@@ -34,7 +34,7 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="pt-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -103,7 +103,7 @@ export const Settings: React.FC = () => {
                   type="primary"
                   htmlType="submit"
                   loading={isUpdatingProfile}
-                  className="bg-indigo-600 w-full"
+                  className="w-full"
                 >
                   Lưu thay đổi
                 </Button>
@@ -170,7 +170,7 @@ export const Settings: React.FC = () => {
                   type="primary"
                   htmlType="submit"
                   loading={isChangingPassword}
-                  className="bg-indigo-600 w-full"
+                  className="w-full"
                 >
                   Đổi mật khẩu
                 </Button>
@@ -184,16 +184,19 @@ export const Settings: React.FC = () => {
 };
 
 // Helper for Role Tag inside component
-const Tag = ({ children, color, className }: any) => (
-  <span
-    className={`inline-block text-[10px] px-2 py-0.5 rounded font-semibold tracking-wide ${
-      color === 'purple'
-        ? 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400'
-        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-    } ${className}`}
-  >
-    {children}
-  </span>
-);
+const Tag = ({ children, color, className }: any) => {
+  const isPurple = color === 'purple';
+  return (
+    <span
+      className={`inline-block text-[10px] px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider ${
+        isPurple
+          ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400'
+          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+      } ${className}`}
+    >
+      {children}
+    </span>
+  );
+};
 
 export default Settings;

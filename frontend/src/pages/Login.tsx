@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, Input, Button, Checkbox } from 'antd';
+import { Form, Input, Button, Checkbox, Alert } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 
@@ -45,6 +45,22 @@ export const Login: React.FC = () => {
 
   return (
     <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+      {localStorage.getItem('authDebugError') && (
+        <Alert
+          message="Lỗi khôi phục phiên"
+          description={
+            <pre className="text-[10px] font-mono whitespace-pre-wrap max-h-40 overflow-y-auto mt-1 p-2 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200/50 dark:border-slate-800/50">
+              {localStorage.getItem('authDebugError')}
+            </pre>
+          }
+          type="warning"
+          showIcon
+          closable
+          className="mb-4"
+          onClose={() => localStorage.removeItem('authDebugError')}
+        />
+      )}
+
       {/* Email Input */}
       <Form.Item
         validateStatus={errors.email ? 'error' : ''}
@@ -112,7 +128,7 @@ export const Login: React.FC = () => {
         size="large"
         block
         loading={isLoggingIn}
-        className="bg-indigo-600 hover:bg-indigo-500 border-none shadow-md h-11 text-sm font-semibold rounded-lg mb-4"
+        className="shadow-lg font-semibold mb-4"
       >
         Đăng nhập
       </Button>

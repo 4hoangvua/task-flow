@@ -11,8 +11,8 @@ export const AuthLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-radial from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950 p-4 transition-colors duration-300">
-      <div className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-300" style={{ background: 'var(--bg)' }}>
+      <div className="w-full max-w-md notebook-card rounded-2xl shadow-xl overflow-hidden">
         <div className="p-8">
           <div className="flex flex-col items-center mb-8">
             <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-3">

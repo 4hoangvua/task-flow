@@ -93,10 +93,16 @@ api.interceptors.response.use(
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
+      } catch (refreshError: any) {
         processQueue(refreshError, null);
         isRefreshing = false;
-        useAuthStore.getState().logout();
+        
+        // Only trigger logout and clear tokens on explicit 400 or 401 auth failures
+        const status = refreshError.response?.status;
+        if (status === 400 || status === 401) {
+          useAuthStore.getState().logout();
+        }
+        
         return Promise.reject(refreshError);
       }
     }

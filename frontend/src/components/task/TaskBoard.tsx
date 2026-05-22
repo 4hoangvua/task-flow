@@ -23,7 +23,6 @@ import { useTasks } from '../../hooks/useTasks';
 import { useProjectMembers } from '../../hooks/useProjects';
 import { useAuth } from '../../hooks/useAuth';
 import type { Task, TaskStatus } from '../../types';
-import { getPriorityColor } from '../../utils/helpers';
 import { TaskDetailModal } from './TaskDetailModal';
 import { TaskFormModal } from './TaskFormModal';
 
@@ -33,10 +32,10 @@ interface TaskBoardProps {
 }
 
 const COLUMNS: { id: TaskStatus; title: string; color: string; border: string; dot: string }[] = [
-  { id: 'TODO', title: 'Cần làm', color: 'bg-slate-50 dark:bg-slate-900/30', border: 'border-slate-200 dark:border-slate-800', dot: 'bg-slate-400' },
-  { id: 'IN_PROGRESS', title: 'Đang thực hiện', color: 'bg-blue-50/20 dark:bg-blue-950/5', border: 'border-blue-100 dark:border-blue-950/40', dot: 'bg-blue-500' },
-  { id: 'REVIEW', title: 'Chờ đánh giá', color: 'bg-amber-50/20 dark:bg-amber-950/5', border: 'border-amber-100 dark:border-amber-950/40', dot: 'bg-amber-500' },
-  { id: 'DONE', title: 'Hoàn thành', color: 'bg-emerald-50/20 dark:bg-emerald-950/5', border: 'border-emerald-100 dark:border-emerald-950/40', dot: 'bg-emerald-500' },
+  { id: 'TODO', title: 'Cần làm', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-slate-400' },
+  { id: 'IN_PROGRESS', title: 'Đang thực hiện', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-indigo-500' },
+  { id: 'REVIEW', title: 'Chờ đánh giá', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-amber-500' },
+  { id: 'DONE', title: 'Hoàn thành', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-emerald-500' },
 ];
 
 // Draggable Task Card
@@ -66,37 +65,46 @@ const SortableTaskCard = ({ task, onClick }: { task: Task; onClick: () => void }
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className={`p-4 mb-3 bg-white dark:bg-slate-900 border rounded-xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${
-        isOverdue ? 'border-red-200 dark:border-red-950 bg-red-50/10' : 'border-slate-100 dark:border-slate-800/80'
-      }`}
+      className={`p-4 mb-3.5 bg-[var(--bg-card)] border rounded-2xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing premium-card select-none ${isOverdue
+        ? 'border-rose-200 dark:border-rose-950/40 bg-rose-50/5 dark:bg-rose-950/5'
+        : 'border-slate-200/50 dark:border-slate-800/80'
+        }`}
     >
-      <div className="flex justify-between items-start gap-2 mb-2">
-        <Tag color={getPriorityColor(task.priority)} className="m-0 text-[10px] font-semibold py-0.5 px-1.5 rounded">
-          {task.priority}
+      <div className="flex justify-between items-center gap-2 mb-3">
+        <Tag
+          bordered={false}
+          className={`m-0 text-[10px] font-extrabold uppercase tracking-wider py-0.5 px-2.5 rounded-full ${task.priority === 'HIGH' || task.priority === 'URGENT'
+            ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
+            : task.priority === 'MEDIUM'
+              ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+            }`}
+        >
+          {task.priority === 'LOW' ? 'Thấp' : task.priority === 'MEDIUM' ? 'Trung bình' : task.priority === 'HIGH' ? 'Cao' : 'Khẩn cấp'}
         </Tag>
         {task.deadline && (
-          <span className={`text-[10px] flex items-center gap-1 font-medium ${isOverdue ? 'text-red-500' : 'text-slate-400'}`}>
-            <CalendarOutlined /> {new Date(task.deadline).toLocaleDateString('vi-VN')}
+          <span className={`text-[11px] flex items-center gap-1 font-semibold ${isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
+            <CalendarOutlined className="text-xs" /> {new Date(task.deadline).toLocaleDateString('vi-VN')}
           </span>
         )}
       </div>
 
-      <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-2 mb-3">
+      <h4 className="text-[14px] font-bold text-slate-800 dark:text-slate-200 line-clamp-2 mb-4 leading-relaxed">
         {task.title}
       </h4>
 
-      <div className="flex justify-between items-center border-t border-slate-50 dark:border-slate-800/50 pt-2.5 mt-2">
-        <span className="text-[10px] text-slate-400 font-mono">#{task.id.substring(0, 8)}</span>
+      <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800/80 pt-3 mt-3">
+        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono tracking-wider">#{task.id.substring(0, 8).toUpperCase()}</span>
         <Space size={6}>
           {task.assignee ? (
             <Tooltip title={`Người thực hiện: ${task.assignee.name}`}>
-              <Avatar src={task.assignee.avatar} size={20} className="bg-indigo-600 text-[10px]">
+              <Avatar src={task.assignee.avatar} size={24} className="bg-indigo-600 border border-indigo-100 dark:border-slate-800 shadow-sm text-[11px] font-semibold">
                 {task.assignee.name[0].toUpperCase()}
               </Avatar>
             </Tooltip>
           ) : (
             <Tooltip title="Chưa gán người thực hiện">
-              <Avatar size={20} icon={<UserOutlined />} className="bg-slate-100 text-slate-400 border border-slate-200 dark:border-slate-800" />
+              <Avatar size={24} icon={<UserOutlined />} className="bg-slate-50 dark:bg-slate-800 text-slate-400 border border-slate-200/50 dark:border-slate-700/50 shadow-xs" />
             </Tooltip>
           )}
         </Space>
@@ -253,7 +261,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
   return (
     <div className="h-full">
       {/* Board Controls */}
-      <Card className="mb-6 shadow-sm">
+      <Card className="mb-10 shadow-sm border border-slate-200/50 dark:border-slate-800/50 notebook-card">
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
             <Input
@@ -296,7 +304,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setIsFormOpen(true)}
-              className="bg-indigo-600 hover:bg-indigo-700"
             >
               Thêm công việc
             </Button>
@@ -309,9 +316,9 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
         <div className="flex justify-center p-12"><Spin size="large" /></div>
       ) : (
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          <Row gutter={[16, 16]} className="flex-nowrap overflow-x-auto pb-4">
+          <div className="mt-6 flex gap-4 overflow-x-auto pb-4 w-full">
             {COLUMNS.map((column) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={column.id} className="min-w-[280px]">
+              <div key={column.id} className="flex-1 min-w-[280px] max-w-[320px] shrink-0">
                 <DroppableColumn
                   column={column}
                   tasks={getColumnTasks(column.id)}
@@ -322,9 +329,9 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
                   onAddTaskClick={() => setIsFormOpen(true)}
                   isProjectLeader={isProjectLeader}
                 />
-              </Col>
+              </div>
             ))}
-          </Row>
+          </div>
         </DndContext>
       )}
 

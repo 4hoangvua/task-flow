@@ -26,14 +26,10 @@ export const ProjectDetail: React.FC = () => {
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
-  if (!id) {
-    return <Card><Empty description="Không tìm thấy ID dự án" /></Card>;
-  }
-
   // API hooks
-  const { project, isLoading: isLoadingProject, updateProject, deleteProject } = useProjectDetail(id);
-  const { members, isLoading: isLoadingMembers, addMember, updateMemberRole, deleteMember } = useProjectMembers(id);
-  const { tasks } = useTasks(id);
+  const { project, isLoading: isLoadingProject, updateProject, deleteProject } = useProjectDetail(id || '');
+  const { members, isLoading: isLoadingMembers, addMember, updateMemberRole, deleteMember } = useProjectMembers(id || '');
+  const { tasks } = useTasks(id || '');
 
   // Forms
   const [inviteForm] = Form.useForm();
@@ -49,6 +45,10 @@ export const ProjectDetail: React.FC = () => {
       });
     }
   }, [project, settingsForm]);
+
+  if (!id) {
+    return <Card><Empty description="Không tìm thấy ID dự án" /></Card>;
+  }
 
   if (isLoadingProject) {
     return <div className="flex justify-center p-24"><Spin size="large" /></div>;
@@ -202,17 +202,24 @@ export const ProjectDetail: React.FC = () => {
   ];
 
   return (
-    <div>
+    <div className="space-y-6 pt-6">
       {/* Project Header */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <ProjectOutlined className="text-indigo-600" /> {project.name}
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <ProjectOutlined className="text-indigo-600 dark:text-indigo-400" /> {project.name}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">
-              Trạng thái: {' '}
-              <Tag color={project.status === 'ACTIVE' ? 'success' : 'default'}>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm flex items-center gap-2">
+              <span>Trạng thái:</span>
+              <Tag 
+                bordered={false} 
+                className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                  project.status === 'ACTIVE' 
+                    ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/50' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                }`}
+              >
                 {project.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đã lưu trữ'}
               </Tag>
             </p>
@@ -229,42 +236,43 @@ export const ProjectDetail: React.FC = () => {
           {
             key: 'overview',
             label: (
-              <span>
+              <span className="flex items-center gap-2">
                 <InfoCircleOutlined /> Tổng quan
               </span>
             ),
             children: (
               <Space direction="vertical" size={20} className="w-full">
-                <Row gutter={[16, 16]}>
+                <Row gutter={[20, 20]}>
                   {/* Overview Stats */}
                   <Col xs={24} lg={16}>
-                    <Card title="Tiến độ dự án" className="shadow-sm">
-                      <Row gutter={16} align="middle">
-                        <Col xs={24} sm={8} className="flex justify-center mb-4 sm:mb-0">
+                    <Card title={<span className="font-bold text-sm">Tiến độ dự án</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 h-full">
+                      <Row gutter={20} align="middle">
+                        <Col xs={24} sm={8} className="flex justify-center mb-6 sm:mb-0">
                           <Progress
                             type="circle"
                             percent={progressPercent}
-                            strokeColor={{ '0%': '#4f46e5', '100%': '#10b981' }}
-                            width={130}
+                            strokeColor={{ '0%': '#6366f1', '100%': '#10b981' }}
+                            width={132}
+                            strokeWidth={8}
                           />
                         </Col>
                         <Col xs={24} sm={16}>
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                              <span className="text-xs text-slate-400 block mb-1">CẦN LÀM</span>
-                              <span className="text-xl font-bold text-slate-700 dark:text-slate-300">{todoTasks}</span>
+                            <div className="p-3.5 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 rounded-xl">
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Cần làm</span>
+                              <span className="text-2xl font-extrabold text-slate-700 dark:text-slate-300">{todoTasks}</span>
                             </div>
-                            <div className="p-3 bg-blue-50/50 dark:bg-blue-950/10 rounded-lg">
-                              <span className="text-xs text-slate-400 block mb-1">ĐANG LÀM</span>
-                              <span className="text-xl font-bold text-blue-600 dark:text-blue-400">{inProgressTasks}</span>
+                            <div className="p-3.5 bg-blue-50/20 dark:bg-blue-950/5 border border-blue-100/10 dark:border-blue-900/10 rounded-xl">
+                              <span className="text-[10px] text-blue-500 dark:text-blue-400 font-bold uppercase tracking-wider block mb-1">Đang làm</span>
+                              <span className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{inProgressTasks}</span>
                             </div>
-                            <div className="p-3 bg-amber-50/50 dark:bg-amber-950/10 rounded-lg">
-                              <span className="text-xs text-slate-400 block mb-1">ĐÁNH GIÁ</span>
-                              <span className="text-xl font-bold text-amber-600 dark:text-amber-400">{reviewTasks}</span>
+                            <div className="p-3.5 bg-amber-50/20 dark:bg-amber-950/5 border border-amber-100/10 dark:border-amber-900/10 rounded-xl">
+                              <span className="text-[10px] text-amber-500 dark:text-amber-400 font-bold uppercase tracking-wider block mb-1">Đánh giá</span>
+                              <span className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{reviewTasks}</span>
                             </div>
-                            <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/10 rounded-lg">
-                              <span className="text-xs text-slate-400 block mb-1">HOÀN THÀNH</span>
-                              <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{doneTasks}</span>
+                            <div className="p-3.5 bg-emerald-50/20 dark:bg-emerald-950/5 border border-emerald-100/10 dark:border-emerald-900/10 rounded-xl">
+                              <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-bold uppercase tracking-wider block mb-1">Hoàn thành</span>
+                              <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{doneTasks}</span>
                             </div>
                           </div>
                         </Col>
@@ -274,20 +282,20 @@ export const ProjectDetail: React.FC = () => {
 
                   {/* Owner Card */}
                   <Col xs={24} lg={8}>
-                    <Card title="Chủ sở hữu & Ngày tạo" className="shadow-sm h-full">
-                      <div className="space-y-4">
-                        <div>
-                          <span className="text-xs text-slate-400 block">CHỦ DỰ ÁN</span>
-                          <Space className="mt-1">
-                            <Avatar src={project.owner?.avatar} icon={<UserOutlined />} className="bg-red-500" />
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    <Card title={<span className="font-bold text-sm">Chủ sở hữu & Ngày tạo</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 h-full">
+                      <div className="space-y-5">
+                        <div className="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 p-3 rounded-xl">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Chủ dự án</span>
+                          <Space className="mt-2">
+                            <Avatar src={project.owner?.avatar} icon={<UserOutlined />} className="bg-rose-500 border border-rose-100/20 shadow-xs" />
+                            <span className="font-bold text-slate-700 dark:text-slate-300 text-sm">
                               {project.owner?.name || 'N/A'}
                             </span>
                           </Space>
                         </div>
-                        <div>
-                          <span className="text-xs text-slate-400 block">NGÀY BẮT ĐẦU</span>
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        <div className="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 p-3 rounded-xl">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Ngày bắt đầu</span>
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 block mt-2">
                             {formatDate(project.createdAt)}
                           </span>
                         </div>
@@ -296,9 +304,9 @@ export const ProjectDetail: React.FC = () => {
                   </Col>
                 </Row>
 
-                {/* Description and members overview */}
-                <Card title="Mô tả dự án" className="shadow-sm">
-                  <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
+                {/* Description */}
+                <Card title={<span className="font-bold text-sm">Mô tả dự án</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">
                     {project.description || 'Không có mô tả chi tiết cho dự án này.'}
                   </p>
                 </Card>
@@ -308,7 +316,7 @@ export const ProjectDetail: React.FC = () => {
           {
             key: 'board',
             label: (
-              <span>
+              <span className="flex items-center gap-2">
                 <TableOutlined /> Bảng công việc
               </span>
             ),
@@ -317,7 +325,7 @@ export const ProjectDetail: React.FC = () => {
           {
             key: 'members',
             label: (
-              <span>
+              <span className="flex items-center gap-2">
                 <TeamOutlined /> Thành viên ({members.length})
               </span>
             ),
@@ -325,8 +333,8 @@ export const ProjectDetail: React.FC = () => {
               <Space direction="vertical" size={20} className="w-full">
                 {/* Invite Member Card */}
                 {isProjectLeader && (
-                  <Card title="Mời thành viên mới" className="shadow-sm">
-                    <Form form={inviteForm} layout="inline" onFinish={handleInviteMember}>
+                  <Card title={<span className="font-bold text-sm">Mời thành viên mới</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+                    <Form form={inviteForm} layout="inline" onFinish={handleInviteMember} className="gap-y-3">
                       <Form.Item
                         name="email"
                         rules={[
@@ -352,8 +360,8 @@ export const ProjectDetail: React.FC = () => {
                         />
                       </Form.Item>
 
-                      <Form.Item>
-                        <Button type="primary" htmlType="submit" icon={<PlusOutlined />} className="bg-indigo-600 hover:bg-indigo-700">
+                      <Form.Item className="mr-0">
+                        <Button type="primary" htmlType="submit" icon={<PlusOutlined />} className="font-semibold">
                           Thêm
                         </Button>
                       </Form.Item>
@@ -362,7 +370,7 @@ export const ProjectDetail: React.FC = () => {
                 )}
 
                 {/* Members list table */}
-                <Card title="Danh sách thành viên" className="shadow-sm overflow-hidden" bodyStyle={{ padding: 0 }}>
+                <Card title={<span className="font-bold text-sm">Danh sách thành viên</span>} className="shadow-sm overflow-hidden border border-slate-200/50 dark:border-slate-800/50" bodyStyle={{ padding: 0 }}>
                   <Table
                     dataSource={members}
                     columns={isProjectLeader ? memberColumns : memberColumns.filter((col) => col.key !== 'action')}
@@ -377,12 +385,12 @@ export const ProjectDetail: React.FC = () => {
           isProjectLeader ? {
             key: 'settings',
             label: (
-              <span>
+              <span className="flex items-center gap-2">
                 <SettingOutlined /> Cấu hình dự án
               </span>
             ),
             children: (
-              <Card title="Cấu hình thông tin dự án" className="shadow-sm">
+              <Card title={<span className="font-bold text-sm">Cấu hình thông tin dự án</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
                 <Form
                   form={settingsForm}
                   layout="vertical"
@@ -411,7 +419,7 @@ export const ProjectDetail: React.FC = () => {
                   </Form.Item>
 
                   <Form.Item>
-                    <Button type="primary" htmlType="submit" className="bg-indigo-600">
+                    <Button type="primary" htmlType="submit" className="font-semibold">
                       Lưu thay đổi
                     </Button>
                   </Form.Item>
@@ -419,8 +427,8 @@ export const ProjectDetail: React.FC = () => {
 
                 {isOwner && (
                   <>
-                    <div className="border-t border-red-100 dark:border-red-950 mt-8 pt-6">
-                      <h4 className="text-red-500 font-bold text-sm mb-2 flex items-center gap-1.5">
+                    <div className="border-t border-slate-200 dark:border-slate-800 mt-8 pt-6">
+                      <h4 className="text-red-500 dark:text-red-400 font-extrabold text-sm mb-2 flex items-center gap-1.5">
                         <ExclamationCircleOutlined /> Danger Zone (Vùng nguy hiểm)
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
@@ -435,7 +443,7 @@ export const ProjectDetail: React.FC = () => {
                         cancelText="Hủy"
                         okButtonProps={{ danger: true, size: 'large' }}
                       >
-                        <Button type="primary" danger>
+                        <Button type="primary" danger className="font-semibold">
                           Xóa dự án này
                         </Button>
                       </Popconfirm>

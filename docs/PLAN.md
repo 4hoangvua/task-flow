@@ -109,8 +109,15 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] CORS động hỗ trợ mọi port localhost
 - [x] Sửa container full-width + responsive mobile/tablet/desktop
 - [x] Phân quyền hiển thị giao diện (RBAC UI) toàn bộ (Projects, ProjectDetail, TaskBoard, TaskDetailModal)
-
-📁 Chi tiết: [`docs/changelogs/2026-05-21.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-21.md)
+- [x] Nâng cấp giao diện Header tốt hơn và premium (breadcrumbs động, theme switcher Sun/Moon, notifications, user card dropdown) (2026-05-22)
+- [x] Sửa lỗi cấu hình khởi chạy của MCP Antd server (2026-05-22)
+- [x] Hiện đại hóa Modals, trang Công việc, trang Cấu hình và sửa các lỗi biên dịch React Hooks / cú pháp (2026-05-22)
+- [x] Dọn dẹp và chuẩn hóa toàn bộ các mã màu Tailwind CSS không hợp lệ trên toàn hệ thống (2026-05-22)
+- [x] Sửa lỗi biên dịch Alert ở Login.tsx, khoảng cách bố cục MyTasks.tsx, và cơ chế tự động đăng xuất do lỗi mạng khi reload (2026-05-22)
+- [x] Chuyển đổi toàn bộ UI sang phong cách sách ghi chú (Notebook Theme), dính sidebar (sticky top), xóa glassmorphism, và tăng kích thước typography/khoảng cách (2026-05-22)
+- [x] Cố định Sidebar, sửa lỗi Header xuyên thấu, đồng bộ hóa màu nền và cải thiện việc đổi chế độ sáng/tối (2026-05-23)
+- [x] Khắc phục lỗi hiển thị Kanban (bị bể và lệch), chỉ giữ tab dự án cố định, bỏ các bộ lọc cố định khác và sửa lỗi lộ nội dung cuộn bên dưới thanh tab sticky (2026-05-23)
+📁 Chi tiết: [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) (Xem thêm [`docs/changelogs/2026-05-22.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-22.md) và [`docs/changelogs/2026-05-21.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-21.md) cho các thay đổi trước đó)
 
 ---
 

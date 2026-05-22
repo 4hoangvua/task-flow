@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Select, Tag, Space, Button, Spin, Empty, Alert } from 'antd';
-import { CheckSquareOutlined, CalendarOutlined, EyeOutlined, ProjectOutlined } from '@ant-design/icons';
+import { Card, Table, Select, Tag, Space, Button, Spin, Empty, Alert, Input } from 'antd';
+import { CheckSquareOutlined, CalendarOutlined, EyeOutlined, ProjectOutlined, SearchOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useProjects } from '../hooks/useProjects';
 import { useTasks } from '../hooks/useTasks';
-import { formatDate, getPriorityColor } from '../utils/helpers';
+import { formatDate } from '../utils/helpers';
 import type { Task, TaskStatus } from '../types';
 import { TaskDetailModal } from '../components/task/TaskDetailModal';
 
@@ -16,6 +16,11 @@ export const MyTasks: React.FC = () => {
   // Task Detail Modal State
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  // Filter States
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [priorityFilter, setPriorityFilter] = useState('ALL');
 
   // Set default project to first active project if available
   useEffect(() => {
@@ -30,6 +35,15 @@ export const MyTasks: React.FC = () => {
   // Filter tasks assigned to me
   const myTasks = tasks.filter((t) => t.assigneeId === currentUser?.id);
 
+  // Apply filters: search text, status, priority
+  const filteredMyTasks = myTasks.filter((t) => {
+    const matchesSearch = t.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      t.description?.toLowerCase().includes(searchText.toLowerCase());
+    const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
+    const matchesPriority = priorityFilter === 'ALL' || t.priority === priorityFilter;
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
       await updateStatus({ id: taskId, status: newStatus });
@@ -43,7 +57,7 @@ export const MyTasks: React.FC = () => {
       title: 'Mã công việc',
       dataIndex: 'id',
       key: 'id',
-      render: (id: string) => <span className="font-mono text-xs">#{id.substring(0, 8)}</span>,
+      render: (id: string) => <span className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800/60 px-2 py-1 rounded text-slate-500 dark:text-slate-400">#{id.substring(0, 8).toUpperCase()}</span>,
       width: 120,
     },
     {
@@ -56,7 +70,7 @@ export const MyTasks: React.FC = () => {
             setSelectedTaskId(record.id);
             setIsDetailOpen(true);
           }}
-          className="font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+          className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 cursor-pointer transition-colors"
         >
           {title}
         </span>
@@ -66,8 +80,18 @@ export const MyTasks: React.FC = () => {
       title: 'Độ ưu tiên',
       dataIndex: 'priority',
       key: 'priority',
-      render: (priority: any) => (
-        <Tag color={getPriorityColor(priority)}>{priority}</Tag>
+      render: (priority: string) => (
+        <Tag
+          bordered={false}
+          className={`m-0 text-[10px] font-extrabold uppercase tracking-wider py-0.5 px-2.5 rounded-full ${priority === 'HIGH' || priority === 'URGENT'
+            ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
+            : priority === 'MEDIUM'
+              ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+            }`}
+        >
+          {priority === 'LOW' ? 'Thấp' : priority === 'MEDIUM' ? 'Trung bình' : priority === 'HIGH' ? 'Cao' : 'Khẩn cấp'}
+        </Tag>
       ),
       width: 120,
     },
@@ -88,23 +112,23 @@ export const MyTasks: React.FC = () => {
           ]}
         />
       ),
-      width: 180,
+      width: 160,
     },
     {
       title: 'Hạn chót',
       dataIndex: 'deadline',
       key: 'deadline',
       render: (deadline: string) => {
-        if (!deadline) return <span className="text-slate-400">Không có</span>;
+        if (!deadline) return <span className="text-slate-400 text-xs">Không có</span>;
         const isOverdue = new Date(deadline) < new Date();
         return (
-          <Space className={isOverdue ? 'text-red-500 font-medium' : 'text-slate-500'}>
-            <CalendarOutlined />
+          <Space className={`text-xs ${isOverdue ? 'text-rose-500 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>
+            <CalendarOutlined className="text-xs" />
             <span>{formatDate(deadline)}</span>
           </Space>
         );
       },
-      width: 200,
+      width: 180,
     },
     {
       title: 'Hành động',
@@ -113,6 +137,7 @@ export const MyTasks: React.FC = () => {
         <Button
           type="primary"
           ghost
+          size="small"
           icon={<EyeOutlined />}
           onClick={() => {
             setSelectedTaskId(record.id);
@@ -122,70 +147,124 @@ export const MyTasks: React.FC = () => {
           Chi tiết
         </Button>
       ),
-      width: 120,
+      width: 110,
     },
   ];
 
   return (
-    <div>
+    <div className="space-y-6 pt-6">
       {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <CheckSquareOutlined className="text-indigo-600" /> Công việc của tôi
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <CheckSquareOutlined className="text-indigo-600 dark:text-indigo-400" /> Công việc của tôi
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
-            Theo dõi và cập nhật trạng thái các công việc được giao cho bạn.
+          <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-sm">
+            Theo dõi và cập nhật trạng thái các công việc được giao cho cá nhân bạn.
           </p>
         </div>
-
-        {projects.length > 0 && (
-          <Space>
-            <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Chọn dự án:</span>
-            <Select
-              value={selectedProjectId}
-              onChange={setSelectedProjectId}
-              className="w-56"
-              loading={isLoadingProjects}
-              options={projects.map((p) => ({ value: p.id, label: p.name }))}
-            />
-          </Space>
-        )}
       </div>
 
       {isLoadingProjects ? (
         <div className="flex justify-center p-12"><Spin size="large" /></div>
       ) : projects.length === 0 ? (
-        <Card className="shadow-sm">
-          <Empty description="Bạn chưa tham gia dự án nào. Vui lòng liên hệ Leader để được thêm vào dự án!" />
+        <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+          <Empty description="Bạn chưa tham gia dự án nào. Vui lòng liên hệ Trưởng nhóm để được thêm vào dự án!" />
         </Card>
-      ) : !selectedProjectId ? (
-        <Alert message="Vui lòng chọn một dự án để xem danh sách công việc của bạn." type="info" showIcon />
       ) : (
-        <Card className="shadow-sm overflow-hidden" bodyStyle={{ padding: 0 }}>
-          {isLoadingTasks ? (
-            <div className="flex justify-center p-12"><Spin size="large" /></div>
-          ) : myTasks.length === 0 ? (
-            <div className="p-8">
-              <Empty
-                image={<ProjectOutlined className="text-5xl text-slate-200" />}
-                description={
-                  <div className="text-slate-500 mt-2">
-                    Chúc mừng! Bạn không có công việc nào cần giải quyết trong dự án này.
+        <div className="space-y-8">
+          {/* Filter Card */}
+          <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 notebook-card">
+            <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+              <div className="flex flex-1 flex-col sm:flex-row flex-wrap gap-3.5">
+                {/* Project Selector */}
+                {projects.length > 0 && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Dự án:</span>
+                    <Select
+                      value={selectedProjectId}
+                      onChange={setSelectedProjectId}
+                      className="w-full sm:w-56"
+                      loading={isLoadingProjects}
+                      options={projects.map((p) => ({ value: p.id, label: p.name }))}
+                    />
                   </div>
-                }
-              />
+                )}
+
+                {/* Search input */}
+                <Input
+                  placeholder="Tìm kiếm công việc..."
+                  prefix={<SearchOutlined className="text-slate-400" />}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="w-full sm:max-w-xs"
+                  allowClear
+                />
+
+                {/* Status Selector */}
+                <Select
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                  className="w-full sm:w-44"
+                  options={[
+                    { value: 'ALL', label: 'Tất cả trạng thái' },
+                    { value: 'TODO', label: 'Cần làm' },
+                    { value: 'IN_PROGRESS', label: 'Đang làm' },
+                    { value: 'REVIEW', label: 'Chờ đánh giá' },
+                    { value: 'DONE', label: 'Hoàn thành' },
+                  ]}
+                />
+
+                {/* Priority Selector */}
+                <Select
+                  value={priorityFilter}
+                  onChange={setPriorityFilter}
+                  className="w-full sm:w-40"
+                  options={[
+                    { value: 'ALL', label: 'Mọi độ ưu tiên' },
+                    { value: 'LOW', label: 'Độ ưu tiên: Thấp' },
+                    { value: 'MEDIUM', label: 'Độ ưu tiên: TB' },
+                    { value: 'HIGH', label: 'Độ ưu tiên: Cao' },
+                    { value: 'URGENT', label: 'Độ ưu tiên: Khẩn cấp' },
+                  ]}
+                />
+              </div>
             </div>
+          </Card>
+
+          {/* Tasks List */}
+          {!selectedProjectId ? (
+            <Alert message="Vui lòng chọn một dự án để xem danh sách công việc của bạn." type="info" showIcon />
           ) : (
-            <Table
-              dataSource={myTasks}
-              columns={columns}
-              rowKey="id"
-              pagination={{ pageSize: 10 }}
-            />
+            <div className='mt-10'>
+              <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 overflow-hidden notebook-card" styles={{ body: { padding: 0 } }}>
+                {isLoadingTasks ? (
+                  <div className="flex justify-center p-12"><Spin size="large" /></div>
+                ) : filteredMyTasks.length === 0 ? (
+                  <div className="p-12">
+                    <Empty
+                      image={<ProjectOutlined className="text-5xl text-indigo-200 dark:text-slate-800" />}
+                      description={
+                        <div className="text-slate-500 dark:text-slate-400 mt-3 text-sm">
+                          Không tìm thấy công việc nào phù hợp với bộ lọc trong dự án này.
+                        </div>
+                      }
+                    />
+                  </div>
+                ) : (
+                  <Table
+                    dataSource={filteredMyTasks}
+                    columns={columns}
+                    rowKey="id"
+                    pagination={{ pageSize: 10, showSizeChanger: true }}
+                  />
+                )}
+              </Card>
+            </div>
           )}
-        </Card>
-      )}
+        </div>
+      )
+      }
 
       {/* Task Detail Modal */}
       {selectedTaskId && selectedProjectId && isDetailOpen && (

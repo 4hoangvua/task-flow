@@ -143,7 +143,7 @@ export const Register: React.FC = () => {
         size="large"
         block
         loading={isRegistering}
-        className="bg-indigo-600 hover:bg-indigo-500 border-none shadow-md h-11 text-sm font-semibold rounded-lg mb-4"
+        className="shadow-lg font-semibold mb-4"
       >
         Đăng ký
       </Button>

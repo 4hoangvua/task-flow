@@ -87,7 +87,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
           type="primary"
           onClick={handleSubmit}
           loading={isEditMode ? isUpdating : isCreating}
-          className="bg-indigo-600 hover:bg-indigo-700"
         >
           {isEditMode ? 'Cập nhật' : 'Tạo mới'}
         </Button>,
