@@ -19,6 +19,7 @@ import { useTasks } from '../hooks/useTasks';
 import { TaskBoard } from '../components/task/TaskBoard';
 import { formatDate, getRoleColor } from '../utils/helpers';
 import type { ProjectMember } from '../types';
+import { ProjectStatusTag } from '../components/common/ProjectStatusTag';
 
 export const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +57,7 @@ export const ProjectDetail: React.FC = () => {
 
   if (!project) {
     return (
-      <Card className="shadow-sm">
+      <Card className="shadow-sm border border-[var(--border)]">
         <Empty description="Dự án không tồn tại hoặc bạn không có quyền truy cập." />
         <div className="flex justify-center mt-4">
           <Button onClick={() => navigate('/projects')}>Quay lại danh sách</Button>
@@ -129,8 +130,8 @@ export const ProjectDetail: React.FC = () => {
       key: 'name',
       render: (_: any, record: ProjectMember) => (
         <Space>
-          <Avatar src={record.user?.avatar} icon={<UserOutlined />} className="bg-indigo-600" />
-          <span className="font-semibold text-slate-700 dark:text-slate-200">
+          <Avatar src={record.user?.avatar} icon={<UserOutlined />} className="bg-[var(--accent)]" />
+          <span className="font-semibold text-[var(--text)]">
             {record.user?.name || 'N/A'}
             {project.ownerId === record.userId && (
               <Tag color="red" className="ml-2 text-[10px]">Chủ dự án</Tag>
@@ -207,21 +208,12 @@ export const ProjectDetail: React.FC = () => {
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-              <ProjectOutlined className="text-indigo-600 dark:text-indigo-400" /> {project.name}
+            <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-h)] flex items-center gap-2.5">
+              <ProjectOutlined className="text-[var(--accent)]" /> {project.name}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm flex items-center gap-2">
+            <p className="text-[var(--text-secondary)] mt-2 text-sm flex items-center gap-2">
               <span>Trạng thái:</span>
-              <Tag 
-                bordered={false} 
-                className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
-                  project.status === 'ACTIVE' 
-                    ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/50' 
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                }`}
-              >
-                {project.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đã lưu trữ'}
-              </Tag>
+              <ProjectStatusTag status={project.status} />
             </p>
           </div>
         </div>
@@ -245,22 +237,22 @@ export const ProjectDetail: React.FC = () => {
                 <Row gutter={[20, 20]}>
                   {/* Overview Stats */}
                   <Col xs={24} lg={16}>
-                    <Card title={<span className="font-bold text-sm">Tiến độ dự án</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 h-full">
+                    <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Tiến độ dự án</span>} className="shadow-sm border border-[var(--border)] h-full">
                       <Row gutter={20} align="middle">
                         <Col xs={24} sm={8} className="flex justify-center mb-6 sm:mb-0">
                           <Progress
                             type="circle"
                             percent={progressPercent}
-                            strokeColor={{ '0%': '#6366f1', '100%': '#10b981' }}
+                            strokeColor={{ '0%': 'var(--accent)', '100%': '#10b981' }}
                             width={132}
                             strokeWidth={8}
                           />
                         </Col>
                         <Col xs={24} sm={16}>
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3.5 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 rounded-xl">
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Cần làm</span>
-                              <span className="text-2xl font-extrabold text-slate-700 dark:text-slate-300">{todoTasks}</span>
+                            <div className="p-3.5 bg-[var(--bg)]/50 border border-[var(--border)] rounded-xl">
+                              <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider block mb-1">Cần làm</span>
+                              <span className="text-2xl font-extrabold text-[var(--text)]">{todoTasks}</span>
                             </div>
                             <div className="p-3.5 bg-blue-50/20 dark:bg-blue-950/5 border border-blue-100/10 dark:border-blue-900/10 rounded-xl">
                               <span className="text-[10px] text-blue-500 dark:text-blue-400 font-bold uppercase tracking-wider block mb-1">Đang làm</span>
@@ -282,20 +274,20 @@ export const ProjectDetail: React.FC = () => {
 
                   {/* Owner Card */}
                   <Col xs={24} lg={8}>
-                    <Card title={<span className="font-bold text-sm">Chủ sở hữu & Ngày tạo</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 h-full">
+                    <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Chủ sở hữu & Ngày tạo</span>} className="shadow-sm border border-[var(--border)] h-full">
                       <div className="space-y-5">
-                        <div className="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 p-3 rounded-xl">
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Chủ dự án</span>
+                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-3 rounded-xl">
+                           <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider block">Chủ dự án</span>
                           <Space className="mt-2">
                             <Avatar src={project.owner?.avatar} icon={<UserOutlined />} className="bg-rose-500 border border-rose-100/20 shadow-xs" />
-                            <span className="font-bold text-slate-700 dark:text-slate-300 text-sm">
+                            <span className="font-bold text-[var(--text)] text-sm">
                               {project.owner?.name || 'N/A'}
                             </span>
                           </Space>
                         </div>
-                        <div className="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 p-3 rounded-xl">
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Ngày bắt đầu</span>
-                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 block mt-2">
+                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-3 rounded-xl">
+                          <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider block">Ngày bắt đầu</span>
+                          <span className="text-sm font-bold text-[var(--text)] block mt-2">
                             {formatDate(project.createdAt)}
                           </span>
                         </div>
@@ -305,8 +297,8 @@ export const ProjectDetail: React.FC = () => {
                 </Row>
 
                 {/* Description */}
-                <Card title={<span className="font-bold text-sm">Mô tả dự án</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
-                  <p className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">
+                <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Mô tả dự án</span>} className="shadow-sm border border-[var(--border)]">
+                  <p className="text-xs text-[var(--text-secondary)] whitespace-pre-wrap leading-relaxed">
                     {project.description || 'Không có mô tả chi tiết cho dự án này.'}
                   </p>
                 </Card>
@@ -325,7 +317,7 @@ export const ProjectDetail: React.FC = () => {
           {
             key: 'members',
             label: (
-              <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2">
                 <TeamOutlined /> Thành viên ({members.length})
               </span>
             ),
@@ -333,7 +325,7 @@ export const ProjectDetail: React.FC = () => {
               <Space direction="vertical" size={20} className="w-full">
                 {/* Invite Member Card */}
                 {isProjectLeader && (
-                  <Card title={<span className="font-bold text-sm">Mời thành viên mới</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+                  <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Mời thành viên mới</span>} className="shadow-sm border border-[var(--border)]">
                     <Form form={inviteForm} layout="inline" onFinish={handleInviteMember} className="gap-y-3">
                       <Form.Item
                         name="email"
@@ -344,7 +336,7 @@ export const ProjectDetail: React.FC = () => {
                         className="flex-1"
                         style={{ minWidth: 260 }}
                       >
-                        <Input prefix={<MailOutlined className="text-slate-400" />} placeholder="Nhập email thành viên cần mời..." />
+                        <Input prefix={<MailOutlined className="text-[var(--text-tertiary)]" />} placeholder="Nhập email thành viên cần mời..." />
                       </Form.Item>
 
                       <Form.Item
@@ -370,7 +362,7 @@ export const ProjectDetail: React.FC = () => {
                 )}
 
                 {/* Members list table */}
-                <Card title={<span className="font-bold text-sm">Danh sách thành viên</span>} className="shadow-sm overflow-hidden border border-slate-200/50 dark:border-slate-800/50" bodyStyle={{ padding: 0 }}>
+                <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Danh sách thành viên</span>} className="shadow-sm overflow-hidden border border-[var(--border)]" bodyStyle={{ padding: 0 }}>
                   <Table
                     dataSource={members}
                     columns={isProjectLeader ? memberColumns : memberColumns.filter((col) => col.key !== 'action')}
@@ -390,7 +382,7 @@ export const ProjectDetail: React.FC = () => {
               </span>
             ),
             children: (
-              <Card title={<span className="font-bold text-sm">Cấu hình thông tin dự án</span>} className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+              <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Cấu hình thông tin dự án</span>} className="shadow-sm border border-[var(--border)]">
                 <Form
                   form={settingsForm}
                   layout="vertical"
@@ -427,11 +419,11 @@ export const ProjectDetail: React.FC = () => {
 
                 {isOwner && (
                   <>
-                    <div className="border-t border-slate-200 dark:border-slate-800 mt-8 pt-6">
+                    <div className="border-t border-[var(--border)] mt-8 pt-6">
                       <h4 className="text-red-500 dark:text-red-400 font-extrabold text-sm mb-2 flex items-center gap-1.5">
                         <ExclamationCircleOutlined /> Danger Zone (Vùng nguy hiểm)
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                      <p className="text-xs text-[var(--text-secondary)] mb-4">
                         Khi xóa dự án, toàn bộ dữ liệu công việc, bình luận và lịch sử liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục.
                       </p>
 

@@ -49,3 +49,11 @@ Record important architectural, design, or implementation choices here so future
 - Disable changing task status dropdown unless the user is the project leader/admin OR the task assignee.
 - Block drag-and-drop column transitions unless the user is the project leader/admin OR the task assignee.
 **Why:** Improves UX by hiding options that users don't have access to execute, preventing "permission denied" error popups and enhancing security and interface cleanliness.
+
+### D-004: Kanban DragOverlay and Backend Permissions Synchronization
+
+**Date:** 2026-05-23
+**Context:** Dragging task cards inside overflow-y scrollable columns caused visual clipping and hiding of the active card. In addition, the backend `/reorder` endpoint lacked permission checks for column status changes, leaving a security mismatch between frontend and backend.
+**Decision:** Refactored the Kanban board to use a visual-only `<TaskCard>` rendering inside `@dnd-kit`'s `<DragOverlay>` (mounted to viewport body), escaping container clipping. Synchronized backend permissions inside the `reorderTasks` controller to deny status changes (column transitions) unless the caller is a Project Leader, Owner, Admin, or the task assignee.
+**Why:** Fixes the UI clipping bug natively while maintaining a clean, floaty feel. Resolves the security gap between frontend client-side validation and backend API enforcement.
+

@@ -30,7 +30,10 @@ const corsOrigin = (origin: string | undefined, callback: (err: Error | null, al
   if (
     allowedOrigins.includes(origin) ||
     /^http:\/\/localhost:\d+$/.test(origin) ||
-    /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)
+    /^http:\/\/127\.0\.0\.1:\d+$/.test(origin) ||
+    /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:\d+$/.test(origin) ||
+    /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/.test(origin) ||
+    /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}:\d+$/.test(origin)
   ) {
     callback(null, true);
   } else {

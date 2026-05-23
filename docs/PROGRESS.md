@@ -27,6 +27,27 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 17 | Tạo thanh bộ lọc cố định (sticky top) trên trang Công việc, Dự án và bảng Kanban | 2026-05-23 | Đã thêm lớp CSS sticky top-0 z-10 cho Projects.tsx/MyTasks.tsx và top-[54px] z-10 cho TaskBoard.tsx (đã thu hồi và chuyển sang non-sticky) |
 | 18 | Khắc phục lỗi hiển thị Kanban (bị bể và lệch), chỉ giữ tab dự án cố định | 2026-05-23 | Loại bỏ sticky khỏi thanh bộ lọc ở cả 3 trang, đổi Kanban columns từ Row/Col Antd sang flexbox shrink-0, tsc thành công |
 | 19 | Sửa lỗi lộ nội dung cuộn bên dưới thanh tab sticky | 2026-05-23 | Sử dụng background: var(--bg) !important trong index.css, áp dụng kỹ thuật lề âm/đệm dương để phủ tràn viền ngang |
+| 20 | Hỗ trợ cấu hình LAN chạy trên 2 máy cùng mạng | 2026-05-23 | Cấu hình server.host: true trong vite.config.ts, dynamic CORS cho LAN IPs trong index.ts, và tạo template cho frontend/.env |
+| 21 | Cải tiến giao diện theo thiết kế Stitch | 2026-05-23 | Cập nhật CSS variables, antd tokens (borders, border-radius, active sidebar) và đồng bộ qua layout |
+| 22 | Tinh chỉnh độ bo góc & palette obsidian | 2026-05-23 | Loại bỏ các class rounded-2xl thô cứng, tinh chỉnh antd tokens sang 8px/6px và chuyển đổi sang palette màu obsidian thẳm |
+| 23 | Cải thiện bảng màu chủ đề & độ tương phản | 2026-05-23 | Điều chỉnh ConfigProvider tokens sang Zinc/Slate, đồng bộ hóa index.css và thay thế mã màu cứng |
+| 24 | Sửa lỗi highlight active menu Sidebar | 2026-05-23 | Tính toán selectedKeys trong DashboardLayout.tsx dựa trên tiền tố tuyến đường /projects |
+| 25 | Thiết kế lại giao diện dự án dạng Grid | 2026-05-23 | Thay thế giao diện card cũ trong Projects.tsx bằng khối thống kê hiện đại, hover co giãn nút vào dự án |
+| 26 | Đồng bộ hóa nhãn trạng thái dự án | 2026-05-23 | Thống nhất nhãn văn bản sang "Đang hoạt động" / "Đã lưu trữ" ở cả header breadcrumbs và grid card |
+| 27 | Tích hợp DragOverlay trong Kanban | 2026-05-23 | Dùng DragOverlay trong TaskBoard.tsx kéo thả mượt mà không bị méo, giật hoặc che khuất bởi cột cuộn |
+| 28 | Phân quyền thay đổi trạng thái Backend | 2026-05-23 | Ràng buộc quyền thay đổi cột trạng thái trong reorderTasks tại taskController.ts |
+| 29 | Cải thiện độ hiển thị văn bản (Typography) | 2026-05-23 | Tăng cỡ chữ tag trạng thái, ID, nhãn mô tả, và menu dropdown giúp chữ to rõ, đồng bộ hơn |
+| 30 | Tách biệt các component UI dùng chung | 2026-05-23 | Tạo ProjectStatusTag, PriorityTag và TaskIdBadge dưới components/common để dễ bảo trì tập trung |
+| 31 | Khắc phục màu sắc Tag & Dọn dẹp Card Kanban | 2026-05-23 | Dùng !important cho Tag để giữ màu, ẩn Task ID khỏi Kanban card và Việt hóa nhãn chi tiết |
+| 32 | Cập nhật quy tắc phản hồi trong AGENTS.md | 2026-05-23 | Thêm quy định trả lời ngắn gọn "Đã xong" và chỉ ra ngày của file log khi hoàn tất sửa chữa |
+
+
+
+
+
+
+
+
 
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".

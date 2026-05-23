@@ -15,6 +15,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useProjects } from '../hooks/useProjects';
 import { formatDate } from '../utils/helpers';
 import type { Project } from '../types';
+import { ProjectStatusTag } from '../components/common/ProjectStatusTag';
 
 export const Projects: React.FC = () => {
   const navigate = useNavigate();
@@ -56,10 +57,10 @@ export const Projects: React.FC = () => {
       key: 'name',
       render: (text: string, record: Project) => (
         <Space direction="vertical" size={2}>
-          <a onClick={() => navigate(`/projects/${record.id}`)} className="font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">
+          <a onClick={() => navigate(`/projects/${record.id}`)} className="font-semibold text-[var(--accent)] hover:text-[var(--accent)]/95 cursor-pointer">
             {text}
           </a>
-          <span className="text-xs text-slate-400 line-clamp-1">{record.description || 'Không có mô tả'}</span>
+          <span className="text-xs text-[var(--text-tertiary)] line-clamp-1">{record.description || 'Không có mô tả'}</span>
         </Space>
       ),
     },
@@ -67,11 +68,7 @@ export const Projects: React.FC = () => {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'ACTIVE' ? 'success' : 'default'}>
-          {status === 'ACTIVE' ? 'Đang hoạt động' : 'Đã lưu trữ'}
-        </Tag>
-      ),
+      render: (status: string) => <ProjectStatusTag status={status} />,
     },
     {
       title: 'Chủ sở hữu',
@@ -116,10 +113,10 @@ export const Projects: React.FC = () => {
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-            <ProjectOutlined className="text-indigo-600 dark:text-indigo-400" /> Danh sách dự án
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-h)] flex items-center gap-2.5">
+            <ProjectOutlined className="text-[var(--accent)]" /> Danh sách dự án
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-sm">Quản lý và xem tiến độ các dự án trong hệ thống.</p>
+          <p className="text-[var(--text-secondary)] mt-1.5 text-sm">Quản lý và xem tiến độ các dự án trong hệ thống.</p>
         </div>
 
         {isLeaderOrAdmin && (
@@ -136,12 +133,12 @@ export const Projects: React.FC = () => {
       </div>
 
       {/* Filter and View toggles */}
-      <Card className="mb-10 shadow-sm border border-slate-200/50 dark:border-slate-800/50 notebook-card">
+      <Card className="mb-10 shadow-sm border border-[var(--border)] notebook-card">
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
             <Input
               placeholder="Tìm kiếm dự án..."
-              prefix={<SearchOutlined className="text-slate-400" />}
+              prefix={<SearchOutlined className="text-[var(--text-tertiary)]" />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="w-full sm:max-w-xs"
@@ -177,7 +174,7 @@ export const Projects: React.FC = () => {
       {isLoading ? (
         <div className="flex justify-center items-center p-12 min-h-[250px]"><Spin size="large" /></div>
       ) : filteredProjects.length === 0 ? (
-        <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+        <Card className="shadow-sm border border-[var(--border)]">
           <Empty description="Không tìm thấy dự án nào" />
         </Card>
       ) : viewMode === 'grid' ? (
@@ -185,71 +182,72 @@ export const Projects: React.FC = () => {
           {filteredProjects.map((project: Project) => (
             <Col xs={24} sm={12} lg={8} key={project.id}>
               <Card
-                className="premium-card shadow-sm notebook-card rounded-2xl flex flex-col justify-between"
-                bodyStyle={{ padding: '24px 24px 16px 24px' }}
-                actions={[
-                  <button
-                    key="action-view"
-                    className="w-full text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold py-1 text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-none bg-transparent"
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                  >
-                    Vào dự án <ArrowRightOutlined className="text-[10px]" />
-                  </button>
-                ]}
+                className="premium-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 notebook-card rounded-lg flex flex-col justify-between border border-[var(--border)] overflow-hidden"
+                bodyStyle={{ padding: '24px' }}
               >
-                <div>
-                  <div className="flex items-start justify-between mb-3.5">
-                    <h3
-                      onClick={() => navigate(`/projects/${project.id}`)}
-                      className="text-base font-bold text-slate-800 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer line-clamp-1 flex-1 mr-2 transition-colors"
-                    >
-                      {project.name}
-                    </h3>
-                    <Tag
-                      bordered={false}
-                      className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${project.status === 'ACTIVE'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/50'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                        }`}
-                    >
-                      {project.status === 'ACTIVE' ? 'Hoạt động' : 'Lưu trữ'}
-                    </Tag>
-                  </div>
+                <div className="flex flex-col h-full justify-between">
+                  <div>
+                    {/* Header: Title & Status */}
+                    <div className="flex items-start justify-between mb-3.5">
+                      <h3
+                        onClick={() => navigate(`/projects/${project.id}`)}
+                        className="text-lg font-bold text-[var(--text-h)] hover:text-[var(--accent)] cursor-pointer line-clamp-1 flex-1 mr-3 transition-colors"
+                      >
+                        {project.name}
+                      </h3>
+                      <ProjectStatusTag status={project.status} />
+                    </div>
 
-                  <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 h-9 mb-5 leading-relaxed">
-                    {project.description || 'Không có mô tả chi tiết cho dự án này.'}
-                  </p>
+                    {/* Description */}
+                    <p className="text-[var(--text-secondary)] text-sm line-clamp-2 h-10 mb-5 leading-relaxed">
+                      {project.description || 'Không có mô tả chi tiết cho dự án này.'}
+                    </p>
 
-                  <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4.5 mb-2">
-                    <Row gutter={12} className="mb-4.5">
-                      <Col span={12}>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1 font-bold uppercase tracking-wider">Thành viên</span>
-                        <Space size={6}>
-                          <Avatar icon={<UserOutlined />} size="small" className="bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 dark:text-indigo-400 border border-indigo-100/20 dark:border-indigo-900/30" />
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {/* Metrics Box */}
+                    <div className="grid grid-cols-2 gap-3 mb-5 bg-[var(--bg)]/40 p-3 rounded-lg border border-[var(--border)]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-md bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/10 shrink-0">
+                          <UserOutlined className="text-sm" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[11px] text-[var(--text-tertiary)] block font-semibold uppercase tracking-wider leading-none mb-1">Thành viên</span>
+                          <span className="text-sm font-bold text-[var(--text-h)] leading-none">
                             {project._count?.members || 0}
                           </span>
-                        </Space>
-                      </Col>
-                      <Col span={12}>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1 font-bold uppercase tracking-wider">Công việc</span>
-                        <Space size={6}>
-                          <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 border border-slate-200/20 dark:border-slate-700/30">
-                            <ProjectOutlined className="text-xs" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-md bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/10 shrink-0">
+                          <ProjectOutlined className="text-sm" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[11px] text-[var(--text-tertiary)] block font-semibold uppercase tracking-wider leading-none mb-1">Công việc</span>
+                          <span className="text-sm font-bold text-[var(--text-h)] leading-none">
                             {project._count?.tasks || 0}
                           </span>
-                        </Space>
-                      </Col>
-                    </Row>
-
-                    <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                      <span className="flex items-center gap-1.5">
-                        <CalendarOutlined className="text-xs" /> {formatDate(project.createdAt).split(' ')[0]}
-                      </span>
-                      <span className="truncate max-w-[120px]">Chủ: <span className="font-semibold text-slate-600 dark:text-slate-400">{project.owner?.name || 'N/A'}</span></span>
+                        </div>
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Footer & CTA */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-xs text-[var(--text-tertiary)] font-medium pt-2 border-t border-[var(--border)]/60">
+                      <span className="flex items-center gap-1.5">
+                        <CalendarOutlined className="text-sm" /> {formatDate(project.createdAt).split(' ')[0]}
+                      </span>
+                      <span className="truncate max-w-[140px]">
+                        Chủ: <span className="font-semibold text-[var(--text-secondary)]">{project.owner?.name || 'N/A'}</span>
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => navigate(`/projects/${project.id}`)}
+                      className="group w-full py-2.5 px-4 bg-[var(--bg)] hover:bg-[var(--accent-bg)] border border-[var(--border)] hover:border-[var(--accent-border)] rounded-md text-[var(--text-secondary)] hover:text-[var(--accent)] font-bold text-sm flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer shadow-xs"
+                    >
+                      <span>Vào dự án</span>
+                      <ArrowRightOutlined className="text-xs transform group-hover:translate-x-1 transition-transform" />
+                    </button>
                   </div>
                 </div>
               </Card>
@@ -258,7 +256,7 @@ export const Projects: React.FC = () => {
         </Row>
       ) : (
         <div className="mt-6">
-          <Card className="shadow-sm overflow-hidden border border-slate-200/50 dark:border-slate-800/50" bodyStyle={{ padding: 0 }}>
+          <Card className="shadow-sm overflow-hidden border border-[var(--border)]" bodyStyle={{ padding: 0 }}>
             <Table
               dataSource={filteredProjects}
               columns={columns}
@@ -271,7 +269,7 @@ export const Projects: React.FC = () => {
 
       {/* Create Project Modal */}
       <Modal
-        title={<span className="text-lg font-bold text-slate-800 dark:text-slate-100">Tạo dự án mới</span>}
+        title={<span className="text-lg font-bold text-[var(--text-h)]">Tạo dự án mới</span>}
         open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);

@@ -14,6 +14,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { useProjectDetail, useProjectMembers } from '../../hooks/useProjects';
 import { formatDate, getPriorityColor, getStatusColor } from '../../utils/helpers';
 import { TaskFormModal } from './TaskFormModal';
+import { PriorityTag } from '../common/PriorityTag';
+import { TaskStatusTag } from '../common/TaskStatusTag';
 
 interface TaskDetailModalProps {
   taskId: string;
@@ -108,7 +110,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         width={850}
         title={
           <div className="flex justify-between items-center pr-6">
-            <span className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <span className="text-xl font-bold text-[var(--text-h)] flex items-center gap-2">
               Chi tiết công việc
             </span>
             {computedIsProjectLeader && (
@@ -147,30 +149,32 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           {/* Left Area (Title, Description, Comments) */}
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{task.title}</h2>
-              <div className="flex flex-wrap gap-2 mt-2">
-                <Tag color={getPriorityColor(task.priority)}>Độ ưu tiên: {task.priority}</Tag>
-                <Tag color={getStatusColor(task.status)}>{task.status}</Tag>
+              <h2 className="text-xl font-bold text-[var(--text-h)]">{task.title}</h2>
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                <span className="text-xs text-[var(--text-secondary)] font-medium">Độ ưu tiên:</span>
+                <PriorityTag priority={task.priority} />
+                <span className="text-xs text-[var(--text-secondary)] font-medium ml-2">Trạng thái:</span>
+                <TaskStatusTag status={task.status} />
               </div>
             </div>
 
             <div>
-              <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">MÔ TẢ CÔNG VIỆC</h3>
-              <div className="bg-slate-50/50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/60 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap min-h-24 shadow-inner">
+              <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">MÔ TẢ CÔNG VIỆC</h3>
+              <div className="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--border)] text-sm text-[var(--text)] whitespace-pre-wrap min-h-24 shadow-inner">
                 {task.description || 'Không có mô tả chi tiết cho công việc này.'}
               </div>
             </div>
 
-            <Divider className="my-2 border-slate-100 dark:border-slate-800" />
+            <Divider className="my-2 border-[var(--border)]" />
 
             {/* Comments Section */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-4 flex items-center gap-2">
                 <CommentOutlined /> BÌNH LUẬN ({comments.length})
               </h3>
 
               <div className="flex gap-3 mb-6">
-                <Avatar src={currentUser?.avatar} className="bg-indigo-600 text-white font-semibold">
+                <Avatar src={currentUser?.avatar} className="bg-[var(--accent)] text-white font-semibold">
                   {currentUser?.name ? currentUser.name[0] : 'U'}
                 </Avatar>
                 <div className="flex-1 space-y-2">
@@ -195,19 +199,19 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
               <List
                 dataSource={comments}
-                locale={{ emptyText: <span className="text-xs text-slate-400">Chưa có bình luận nào</span> }}
+                locale={{ emptyText: <span className="text-xs text-[var(--text-tertiary)]">Chưa có bình luận nào</span> }}
                 renderItem={(item) => (
-                  <div className="flex gap-3 p-3.5 mb-3 bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100/80 dark:border-slate-800/50 rounded-2xl hover:shadow-xs transition-shadow">
-                    <Avatar src={item.user?.avatar} className="bg-indigo-100 text-indigo-700 font-semibold mt-0.5">
+                  <div className="flex gap-3 p-3.5 mb-3 bg-[var(--bg)]/40 border border-[var(--border)] rounded-lg hover:shadow-xs transition-shadow">
+                    <Avatar src={item.user?.avatar} className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold mt-0.5">
                       {item.user?.name ? item.user.name[0] : 'U'}
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex justify-between items-center">
-                        <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                        <div className="text-xs font-semibold text-[var(--text-h)]">
                           {item.user?.name}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-slate-400">{formatDate(item.createdAt)}</span>
+                          <span className="text-[10px] text-[var(--text-tertiary)]">{formatDate(item.createdAt)}</span>
                           {(currentUser?.id === item.userId || computedIsProjectLeader) && (
                             <Tooltip title="Xóa bình luận">
                               <Button
@@ -222,7 +226,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           )}
                         </div>
                       </div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                      <div className="text-xs text-[var(--text-secondary)] mt-1">
                         {item.content}
                       </div>
                     </div>
@@ -233,10 +237,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           </div>
 
           {/* Right Area (Metadata details, History logs) */}
-          <div className="space-y-6 lg:border-l lg:border-slate-100/80 lg:dark:border-slate-800/80 lg:pl-6">
-            <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800/60 rounded-2xl p-4.5 space-y-4">
+          <div className="space-y-6 lg:border-l lg:border-[var(--border)] lg:pl-6">
+            <div className="bg-[var(--bg)]/30 border border-[var(--border)] rounded-lg p-4.5 space-y-4">
               <div>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1.5 uppercase font-bold tracking-wider">TRẠNG THÁI</span>
+                <span className="text-[10px] text-[var(--text-tertiary)] block mb-1.5 uppercase font-bold tracking-wider">TRẠNG THÁI</span>
                 <Select
                   value={task.status}
                   onChange={handleStatusChange}
@@ -252,18 +256,18 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               </div>
 
               <div>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1 uppercase font-bold tracking-wider">NGƯỜI THỰC HIỆN</span>
+                <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">NGƯỜI THỰC HIỆN</span>
                 <Space size={6} className="mt-1.5">
-                  <Avatar src={task.assignee?.avatar} icon={<UserOutlined />} size="small" className="bg-indigo-100 text-indigo-700 font-semibold" />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <Avatar src={task.assignee?.avatar} icon={<UserOutlined />} size="small" className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold" />
+                  <span className="text-sm font-medium text-[var(--text)]">
                     {task.assignee?.name || 'Chưa gán'}
                   </span>
                 </Space>
               </div>
 
               <div>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1 uppercase font-bold tracking-wider">HẠN CHÓT</span>
-                <Space size={6} className="mt-1.5 text-slate-600 dark:text-slate-400">
+                <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">HẠN CHÓT</span>
+                <Space size={6} className="mt-1.5 text-[var(--text-secondary)]">
                   <CalendarOutlined className="text-xs" />
                   <span className="text-sm font-medium">
                     {task.deadline ? formatDate(task.deadline) : 'Không có'}
@@ -272,10 +276,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               </div>
 
               <div>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 block mb-1 uppercase font-bold tracking-wider">NGƯỜI TẠO</span>
+                <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">NGƯỜI TẠO</span>
                 <Space size={6} className="mt-1.5">
-                  <Avatar src={task.creator?.avatar} icon={<UserOutlined />} size="small" className="bg-slate-100 text-slate-700 font-semibold" />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <Avatar src={task.creator?.avatar} icon={<UserOutlined />} size="small" className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold" />
+                  <span className="text-sm font-medium text-[var(--text)]">
                     {task.creator?.name || 'N/A'}
                   </span>
                 </Space>
@@ -286,7 +290,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
             {/* Task History logs */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-3 flex items-center gap-1.5">
                 <HistoryOutlined /> Lịch sử thay đổi
               </h3>
               {task.history && task.history.length > 0 ? (
@@ -302,10 +306,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     }
 
                     return (
-                      <div key={log.id} className="text-[11px] leading-relaxed border-b border-slate-100 dark:border-slate-800 pb-2 last:border-0">
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">{log.user?.name} </span>
-                        <span className="text-slate-500">{logText}</span>
-                        <div className="text-[9px] text-slate-400 flex items-center gap-1 mt-0.5">
+                      <div key={log.id} className="text-[11px] leading-relaxed border-b border-[var(--border)] pb-2 last:border-0">
+                        <span className="font-semibold text-[var(--text)]">{log.user?.name} </span>
+                        <span className="text-[var(--text-secondary)]">{logText}</span>
+                        <div className="text-[9px] text-[var(--text-tertiary)] flex items-center gap-1 mt-0.5">
                           <ClockCircleOutlined /> {formatDate(log.createdAt)}
                         </div>
                       </div>
@@ -313,7 +317,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   })}
                 </div>
               ) : (
-                <span className="text-xs text-slate-400">Chưa có lịch sử thay đổi</span>
+                <span className="text-xs text-[var(--text-tertiary)]">Chưa có lịch sử thay đổi</span>
               )}
             </div>
           </div>

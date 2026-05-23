@@ -395,6 +395,34 @@ export async function reorderTasks(req: Request, res: Response, next: NextFuncti
     const projectId = taskToMove.projectId;
     const oldStatus = taskToMove.status;
 
+    // Check permissions if changing columns (status change)
+    if (oldStatus !== status) {
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { ownerId: true },
+      });
+
+      if (!project) {
+        return next(new AppError(404, 'NOT_FOUND', 'Project not found'));
+      }
+
+      const member = await prisma.projectMember.findUnique({
+        where: {
+          projectId_userId: {
+            projectId,
+            userId: req.user.id,
+          },
+        },
+      });
+
+      const isLeaderOrAdmin = member?.role === 'LEADER' || req.user.role === 'ADMIN' || project.ownerId === req.user.id;
+      const isAssignee = taskToMove.assigneeId === req.user.id;
+
+      if (!isAssignee && !isLeaderOrAdmin) {
+        return next(new AppError(403, 'FORBIDDEN', 'Only the assignee or project leader can change task status'));
+      }
+    }
+
     // Transaction for reordering
     await prisma.$transaction(async (tx) => {
       if (oldStatus === status) {

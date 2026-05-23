@@ -22,7 +22,7 @@ For every task:
 4. Do the work.
 5. Update `PLAN.md`, `PROGRESS.md`, or `DECISIONS.md` if anything changed.
 6. If the work involved UI/styling/config fixes, update `docs/changelogs/YYYY-MM-DD.md`.
-7. Say what you did and what you didn't attempt.
+7. Say "Đã xong" and reference the changelog file date for fixes, or outline what was done/skipped for new features.
 
 ## Development Rules
 
@@ -76,4 +76,9 @@ A task is done when:
 
 - The requested work is completed or the blocker is documented.
 - `PLAN.md` and `PROGRESS.md` are up to date.
-- You said what changed and what was skipped.
+- You confirmed completion (For fixes, say "Đã xong" and reference the changelog file date).
+
+## Communication Rules
+
+- **Conciseness on Done**: When replying to the user after completing repair, UI, styling, or configuration fixes, simply state "Đã xong" (Done) and reference the specific changelog date (e.g. `docs/changelogs/YYYY-MM-DD.md`). Do NOT write long summaries of what was modified.
+- **Exceptions**: This brevity rule does NOT apply when asking the user questions, seeking clarification, or design approval.

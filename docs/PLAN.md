@@ -117,7 +117,19 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Chuyển đổi toàn bộ UI sang phong cách sách ghi chú (Notebook Theme), dính sidebar (sticky top), xóa glassmorphism, và tăng kích thước typography/khoảng cách (2026-05-22)
 - [x] Cố định Sidebar, sửa lỗi Header xuyên thấu, đồng bộ hóa màu nền và cải thiện việc đổi chế độ sáng/tối (2026-05-23)
 - [x] Khắc phục lỗi hiển thị Kanban (bị bể và lệch), chỉ giữ tab dự án cố định, bỏ các bộ lọc cố định khác và sửa lỗi lộ nội dung cuộn bên dưới thanh tab sticky (2026-05-23)
-📁 Chi tiết: [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) (Xem thêm [`docs/changelogs/2026-05-22.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-22.md) và [`docs/changelogs/2026-05-21.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-21.md) cho các thay đổi trước đó)
+- [x] Hỗ trợ cấu hình chạy trên 2 máy cùng mạng LAN (CORS & Vite Host) (2026-05-23)
+- [x] Cải tiến giao diện Premium (TaskFlow Premium) dựa trên thiết kế của Stitch (2026-05-23)
+- [x] Loại bỏ góc bo tròn thô cứng và tối ưu hóa hệ màu obsidian (Executive Obsidian Workspace) (2026-05-23)
+- [x] Cải thiện độ tương phản giao diện và bảng màu chủ đề Zinc & Slate bằng Ant Design Tokens (2026-05-23)
+- [x] Sửa lỗi highlight active sidebar, thiết kế lại card dự án, thống nhất nhãn trạng thái và thêm Drag/Drop Overlay (2026-05-23)
+- [x] Tinh chỉnh cỡ chữ, tăng kích thước nhãn/tag và cân đối độ hiển thị văn bản đồng đều hệ thống (2026-05-23)
+- [x] Tách biệt và module hóa các component dùng chung (ProjectStatusTag, PriorityTag, TaskIdBadge) (2026-05-23)
+- [x] Tăng cường màu sắc Tag nổi bật, loại bỏ hiển thị task ID trên card Kanban và Việt hóa nhãn chi tiết (2026-05-23)
+- [x] Cập nhật quy tắc phản hồi ngắn gọn cho Agent trong AGENTS.md (2026-05-23)
+📁 Chi tiết: [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) (Xem thêm [`docs/changelogs/2026-05-22.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-22.md) and [`docs/changelogs/2026-05-21.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-21.md) cho các thay đổi trước đó)
+
+
+
 
 ---
 

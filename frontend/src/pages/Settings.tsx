@@ -37,10 +37,10 @@ export const Settings: React.FC = () => {
     <div className="pt-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-          <SettingOutlined className="text-indigo-600" /> Cấu hình tài khoản
+        <h1 className="text-2xl font-bold text-[var(--text-h)] flex items-center gap-2">
+          <SettingOutlined className="text-[var(--accent)]" /> Cấu hình tài khoản
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-[var(--text-secondary)] mt-1">
           Quản lý thông tin cá nhân và cài đặt bảo mật của bạn.
         </p>
       </div>
@@ -50,23 +50,23 @@ export const Settings: React.FC = () => {
         <Col xs={24} lg={12}>
           <Card
             title={
-              <span className="font-bold text-slate-800 dark:text-slate-100">
+              <span className="font-bold text-[var(--text-h)]">
                 Thông tin cá nhân
               </span>
             }
-            className="shadow-sm"
+            className="shadow-sm border border-[var(--border)]"
           >
             <div className="flex flex-col items-center mb-6">
               <Avatar
                 src={user?.avatar}
                 size={80}
                 icon={<UserOutlined />}
-                className="bg-indigo-600 shadow border-2 border-indigo-100"
+                className="bg-[var(--accent)] shadow border-2 border-[var(--border)]"
               />
-              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mt-3">
+              <h3 className="text-lg font-bold text-[var(--text-h)] mt-3">
                 {user?.name}
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">{user?.email}</p>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{user?.email}</p>
               <Tag color="purple" className="mt-2 uppercase font-semibold">
                 {user?.role}
               </Tag>
@@ -87,7 +87,7 @@ export const Settings: React.FC = () => {
                   { min: 2, message: 'Tên phải chứa ít nhất 2 ký tự!' },
                 ]}
               >
-                <Input prefix={<UserOutlined className="text-slate-400" />} />
+                <Input prefix={<UserOutlined className="text-[var(--text-tertiary)]" />} />
               </Form.Item>
 
               <Form.Item
@@ -116,11 +116,11 @@ export const Settings: React.FC = () => {
         <Col xs={24} lg={12}>
           <Card
             title={
-              <span className="font-bold text-slate-800 dark:text-slate-100">
+              <span className="font-bold text-[var(--text-h)]">
                 Bảo mật & Đổi mật khẩu
               </span>
             }
-            className="shadow-sm"
+            className="shadow-sm border border-[var(--border)]"
           >
             <Form
               form={passwordForm}
@@ -132,7 +132,7 @@ export const Settings: React.FC = () => {
                 name="oldPassword"
                 rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
               >
-                <Input.Password prefix={<LockOutlined className="text-slate-400" />} />
+                <Input.Password prefix={<LockOutlined className="text-[var(--text-tertiary)]" />} />
               </Form.Item>
 
               <Form.Item
@@ -143,7 +143,7 @@ export const Settings: React.FC = () => {
                   { min: 6, message: 'Mật khẩu mới phải từ 6 ký tự trở lên!' },
                 ]}
               >
-                <Input.Password prefix={<LockOutlined className="text-slate-400" />} />
+                <Input.Password prefix={<LockOutlined className="text-[var(--text-tertiary)]" />} />
               </Form.Item>
 
               <Form.Item
@@ -162,7 +162,7 @@ export const Settings: React.FC = () => {
                   }),
                 ]}
               >
-                <Input.Password prefix={<LockOutlined className="text-slate-400" />} />
+                <Input.Password prefix={<LockOutlined className="text-[var(--text-tertiary)]" />} />
               </Form.Item>
 
               <Form.Item className="mb-0 mt-6">
@@ -190,8 +190,8 @@ const Tag = ({ children, color, className }: any) => {
     <span
       className={`inline-block text-[10px] px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider ${
         isPurple
-          ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400'
-          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+          ? 'bg-[var(--accent-bg)] text-[var(--accent)]'
+          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800/80'
       } ${className}`}
     >
       {children}

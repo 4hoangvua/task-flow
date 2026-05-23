@@ -12,6 +12,7 @@ import {
   useSensors,
   PointerSensor,
   useDroppable,
+  DragOverlay,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -25,6 +26,8 @@ import { useAuth } from '../../hooks/useAuth';
 import type { Task, TaskStatus } from '../../types';
 import { TaskDetailModal } from './TaskDetailModal';
 import { TaskFormModal } from './TaskFormModal';
+import { PriorityTag } from '../common/PriorityTag';
+import { TaskIdBadge } from '../common/TaskIdBadge';
 
 interface TaskBoardProps {
   projectId: string;
@@ -32,13 +35,67 @@ interface TaskBoardProps {
 }
 
 const COLUMNS: { id: TaskStatus; title: string; color: string; border: string; dot: string }[] = [
-  { id: 'TODO', title: 'Cần làm', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-slate-400' },
-  { id: 'IN_PROGRESS', title: 'Đang thực hiện', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-indigo-500' },
-  { id: 'REVIEW', title: 'Chờ đánh giá', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-amber-500' },
-  { id: 'DONE', title: 'Hoàn thành', color: 'board-column-solid', border: 'border-slate-200/50 dark:border-slate-800/30', dot: 'bg-emerald-500' },
+  { id: 'TODO', title: 'Cần làm', color: 'board-column-solid', border: 'border-[var(--border)]', dot: 'bg-slate-400' },
+  { id: 'IN_PROGRESS', title: 'Đang thực hiện', color: 'board-column-solid', border: 'border-[var(--border)]', dot: 'bg-indigo-500' },
+  { id: 'REVIEW', title: 'Chờ đánh giá', color: 'board-column-solid', border: 'border-[var(--border)]', dot: 'bg-amber-500' },
+  { id: 'DONE', title: 'Hoàn thành', color: 'board-column-solid', border: 'border-[var(--border)]', dot: 'bg-emerald-500' },
 ];
 
-// Draggable Task Card
+// Pure Visual Task Card
+const TaskCard = React.forwardRef<HTMLDivElement, {
+  task: Task;
+  onClick?: () => void;
+  style?: React.CSSProperties;
+  isDragging?: boolean;
+  isOverlay?: boolean;
+  dragProps?: any;
+}>(({ task, onClick, style, isDragging, isOverlay, dragProps }, ref) => {
+  const isOverdue = task.deadline && new Date(task.deadline) < new Date() && task.status !== 'DONE';
+
+  return (
+    <div
+      ref={ref}
+      style={style}
+      onClick={onClick}
+      {...(dragProps || {})}
+      className={`p-4 mb-3.5 bg-[var(--bg-card)] border rounded-lg shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing premium-card select-none ${isOverdue
+        ? 'border-rose-200 dark:border-rose-950/40 bg-rose-50/5 dark:bg-rose-950/5'
+        : 'border-[var(--border)]'
+        } ${isOverlay ? 'shadow-2xl rotate-2 border-indigo-500 dark:border-indigo-600 scale-[1.03] cursor-grabbing active:cursor-grabbing opacity-95 z-[9999]' : ''}`}
+    >
+      <div className="flex justify-between items-center gap-2 mb-3">
+        <PriorityTag priority={task.priority} />
+        {task.deadline && (
+          <span className={`text-xs flex items-center gap-1 font-semibold ${isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-tertiary)]'}`}>
+            <CalendarOutlined className="text-sm" /> {new Date(task.deadline).toLocaleDateString('vi-VN')}
+          </span>
+        )}
+      </div>
+
+      <h4 className="text-base font-bold text-[var(--text-h)] line-clamp-2 mb-4 leading-relaxed">
+        {task.title}
+      </h4>
+
+      <div className="flex justify-end items-center border-t border-[var(--border)] pt-3 mt-3">
+        <Space size={6}>
+          {task.assignee ? (
+            <Tooltip title={`Người thực hiện: ${task.assignee.name}`}>
+              <Avatar src={task.assignee.avatar} size={24} className="bg-[var(--accent)] border border-[var(--border)] shadow-sm text-[11px] font-semibold">
+                {task.assignee.name[0].toUpperCase()}
+              </Avatar>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Chưa gán người thực hiện">
+              <Avatar size={24} icon={<UserOutlined />} className="bg-[var(--bg)] text-[var(--text-secondary)] border border-[var(--border)] shadow-xs" />
+            </Tooltip>
+          )}
+        </Space>
+      </div>
+    </div>
+  );
+});
+
+// Draggable Task Card Wrapper
 const SortableTaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
   const {
     attributes,
@@ -52,64 +109,18 @@ const SortableTaskCard = ({ task, onClick }: { task: Task; onClick: () => void }
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.4 : 1,
-    zIndex: isDragging ? 999 : undefined,
+    opacity: isDragging ? 0.35 : 1,
   };
 
-  const isOverdue = task.deadline && new Date(task.deadline) < new Date() && task.status !== 'DONE';
-
   return (
-    <div
+    <TaskCard
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
+      task={task}
       onClick={onClick}
-      className={`p-4 mb-3.5 bg-[var(--bg-card)] border rounded-2xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing premium-card select-none ${isOverdue
-        ? 'border-rose-200 dark:border-rose-950/40 bg-rose-50/5 dark:bg-rose-950/5'
-        : 'border-slate-200/50 dark:border-slate-800/80'
-        }`}
-    >
-      <div className="flex justify-between items-center gap-2 mb-3">
-        <Tag
-          bordered={false}
-          className={`m-0 text-[10px] font-extrabold uppercase tracking-wider py-0.5 px-2.5 rounded-full ${task.priority === 'HIGH' || task.priority === 'URGENT'
-            ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
-            : task.priority === 'MEDIUM'
-              ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-            }`}
-        >
-          {task.priority === 'LOW' ? 'Thấp' : task.priority === 'MEDIUM' ? 'Trung bình' : task.priority === 'HIGH' ? 'Cao' : 'Khẩn cấp'}
-        </Tag>
-        {task.deadline && (
-          <span className={`text-[11px] flex items-center gap-1 font-semibold ${isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
-            <CalendarOutlined className="text-xs" /> {new Date(task.deadline).toLocaleDateString('vi-VN')}
-          </span>
-        )}
-      </div>
-
-      <h4 className="text-[14px] font-bold text-slate-800 dark:text-slate-200 line-clamp-2 mb-4 leading-relaxed">
-        {task.title}
-      </h4>
-
-      <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800/80 pt-3 mt-3">
-        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono tracking-wider">#{task.id.substring(0, 8).toUpperCase()}</span>
-        <Space size={6}>
-          {task.assignee ? (
-            <Tooltip title={`Người thực hiện: ${task.assignee.name}`}>
-              <Avatar src={task.assignee.avatar} size={24} className="bg-indigo-600 border border-indigo-100 dark:border-slate-800 shadow-sm text-[11px] font-semibold">
-                {task.assignee.name[0].toUpperCase()}
-              </Avatar>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Chưa gán người thực hiện">
-              <Avatar size={24} icon={<UserOutlined />} className="bg-slate-50 dark:bg-slate-800 text-slate-400 border border-slate-200/50 dark:border-slate-700/50 shadow-xs" />
-            </Tooltip>
-          )}
-        </Space>
-      </div>
-    </div>
+      isDragging={isDragging}
+      dragProps={{ ...attributes, ...listeners }}
+    />
   );
 };
 
@@ -132,15 +143,15 @@ const DroppableColumn = ({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col h-full rounded-2xl border ${column.border} ${column.color} p-4 min-h-[500px]`}
+      className={`flex flex-col h-full rounded-lg border ${column.border} ${column.color} p-4 min-h-[500px]`}
     >
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <span className={`w-2.5 h-2.5 rounded-full ${column.dot}`} />
-          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 uppercase tracking-wide">
+          <h3 className="font-bold text-sm text-[var(--text-h)] uppercase tracking-wide">
             {column.title}
           </h3>
-          <span className="bg-slate-200/60 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-xs font-semibold px-2 py-0.5 rounded-full">
+          <span className="bg-zinc-200/60 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400 text-sm font-semibold px-2.5 py-0.5 rounded-full">
             {tasks.length}
           </span>
         </div>
@@ -151,7 +162,7 @@ const DroppableColumn = ({
             icon={<PlusOutlined />}
             size="small"
             onClick={onAddTaskClick}
-            className="text-indigo-600 dark:text-indigo-400 hover:bg-slate-200/40"
+            className="text-[var(--accent)] hover:bg-[var(--bg)]"
           />
         )}
       </div>
@@ -159,8 +170,8 @@ const DroppableColumn = ({
       <div className="flex-1 overflow-y-auto min-h-[400px]">
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-200/60 dark:border-slate-800/60 rounded-xl bg-slate-50/20 dark:bg-slate-900/10">
-              <span className="text-xs text-slate-400">Không có công việc</span>
+            <div className="flex flex-col items-center justify-center py-10 border border-dashed border-[var(--border)] rounded-lg bg-[var(--bg)]/10">
+              <span className="text-xs text-[var(--text-tertiary)]">Không có công việc</span>
             </div>
           ) : (
             tasks.map((task) => (
@@ -190,6 +201,9 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  // Drag active state
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
   // Configure DndKit Sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -199,7 +213,16 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
     })
   );
 
+  const handleDragStart = (event: any) => {
+    setActiveDragId(event.active.id as string);
+  };
+
+  const handleDragCancel = () => {
+    setActiveDragId(null);
+  };
+
   const handleDragEnd = (event: any) => {
+    setActiveDragId(null);
     const { active, over } = event;
     if (!over) return;
 
@@ -261,12 +284,12 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
   return (
     <div className="h-full">
       {/* Board Controls */}
-      <Card className="mb-10 shadow-sm border border-slate-200/50 dark:border-slate-800/50 notebook-card">
+      <Card className="mb-10 shadow-sm border border-[var(--border)] notebook-card">
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
             <Input
               placeholder="Tìm công việc..."
-              prefix={<SearchOutlined className="text-slate-400" />}
+              prefix={<SearchOutlined className="text-[var(--text-tertiary)]" />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="w-full sm:max-w-xs"
@@ -315,7 +338,12 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
       {isLoading ? (
         <div className="flex justify-center p-12"><Spin size="large" /></div>
       ) : (
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
           <div className="mt-6 flex gap-4 overflow-x-auto pb-4 w-full">
             {COLUMNS.map((column) => (
               <div key={column.id} className="flex-1 min-w-[280px] max-w-[320px] shrink-0">
@@ -332,6 +360,15 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
               </div>
             ))}
           </div>
+
+          <DragOverlay adjustScale={false}>
+            {activeDragId ? (
+              <TaskCard
+                task={tasks.find((t) => t.id === activeDragId)!}
+                isOverlay
+              />
+            ) : null}
+          </DragOverlay>
         </DndContext>
       )}
 

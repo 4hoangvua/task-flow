@@ -7,6 +7,8 @@ import { useTasks } from '../hooks/useTasks';
 import { formatDate } from '../utils/helpers';
 import type { Task, TaskStatus } from '../types';
 import { TaskDetailModal } from '../components/task/TaskDetailModal';
+import { PriorityTag } from '../components/common/PriorityTag';
+import { TaskIdBadge } from '../components/common/TaskIdBadge';
 
 export const MyTasks: React.FC = () => {
   const { user: currentUser } = useAuth();
@@ -57,7 +59,7 @@ export const MyTasks: React.FC = () => {
       title: 'Mã công việc',
       dataIndex: 'id',
       key: 'id',
-      render: (id: string) => <span className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800/60 px-2 py-1 rounded text-slate-500 dark:text-slate-400">#{id.substring(0, 8).toUpperCase()}</span>,
+      render: (id: string) => <TaskIdBadge id={id} />,
       width: 120,
     },
     {
@@ -70,7 +72,7 @@ export const MyTasks: React.FC = () => {
             setSelectedTaskId(record.id);
             setIsDetailOpen(true);
           }}
-          className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 cursor-pointer transition-colors"
+          className="font-semibold text-[var(--accent)] hover:text-[var(--accent)]/95 cursor-pointer transition-colors"
         >
           {title}
         </span>
@@ -80,19 +82,7 @@ export const MyTasks: React.FC = () => {
       title: 'Độ ưu tiên',
       dataIndex: 'priority',
       key: 'priority',
-      render: (priority: string) => (
-        <Tag
-          bordered={false}
-          className={`m-0 text-[10px] font-extrabold uppercase tracking-wider py-0.5 px-2.5 rounded-full ${priority === 'HIGH' || priority === 'URGENT'
-            ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
-            : priority === 'MEDIUM'
-              ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-            }`}
-        >
-          {priority === 'LOW' ? 'Thấp' : priority === 'MEDIUM' ? 'Trung bình' : priority === 'HIGH' ? 'Cao' : 'Khẩn cấp'}
-        </Tag>
-      ),
+      render: (priority: string) => <PriorityTag priority={priority} />,
       width: 120,
     },
     {
@@ -119,10 +109,10 @@ export const MyTasks: React.FC = () => {
       dataIndex: 'deadline',
       key: 'deadline',
       render: (deadline: string) => {
-        if (!deadline) return <span className="text-slate-400 text-xs">Không có</span>;
+        if (!deadline) return <span className="text-[var(--text-tertiary)] text-xs">Không có</span>;
         const isOverdue = new Date(deadline) < new Date();
         return (
-          <Space className={`text-xs ${isOverdue ? 'text-rose-500 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>
+          <Space className={`text-xs ${isOverdue ? 'text-rose-500 font-bold' : 'text-[var(--text-secondary)] font-medium'}`}>
             <CalendarOutlined className="text-xs" />
             <span>{formatDate(deadline)}</span>
           </Space>
@@ -156,10 +146,10 @@ export const MyTasks: React.FC = () => {
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-            <CheckSquareOutlined className="text-indigo-600 dark:text-indigo-400" /> Công việc của tôi
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-h)] flex items-center gap-2.5">
+            <CheckSquareOutlined className="text-[var(--accent)]" /> Công việc của tôi
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-sm">
+          <p className="text-[var(--text-secondary)] mt-1.5 text-sm">
             Theo dõi và cập nhật trạng thái các công việc được giao cho cá nhân bạn.
           </p>
         </div>
@@ -168,19 +158,19 @@ export const MyTasks: React.FC = () => {
       {isLoadingProjects ? (
         <div className="flex justify-center p-12"><Spin size="large" /></div>
       ) : projects.length === 0 ? (
-        <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+        <Card className="shadow-sm border border-[var(--border)]">
           <Empty description="Bạn chưa tham gia dự án nào. Vui lòng liên hệ Trưởng nhóm để được thêm vào dự án!" />
         </Card>
       ) : (
         <div className="space-y-8">
           {/* Filter Card */}
-          <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 notebook-card">
+          <Card className="shadow-sm border border-[var(--border)] notebook-card">
             <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
               <div className="flex flex-1 flex-col sm:flex-row flex-wrap gap-3.5">
                 {/* Project Selector */}
                 {projects.length > 0 && (
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Dự án:</span>
+                    <span className="text-xs font-semibold text-[var(--text-secondary)]">Dự án:</span>
                     <Select
                       value={selectedProjectId}
                       onChange={setSelectedProjectId}
@@ -194,7 +184,7 @@ export const MyTasks: React.FC = () => {
                 {/* Search input */}
                 <Input
                   placeholder="Tìm kiếm công việc..."
-                  prefix={<SearchOutlined className="text-slate-400" />}
+                  prefix={<SearchOutlined className="text-[var(--text-tertiary)]" />}
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   className="w-full sm:max-w-xs"
@@ -237,15 +227,15 @@ export const MyTasks: React.FC = () => {
             <Alert message="Vui lòng chọn một dự án để xem danh sách công việc của bạn." type="info" showIcon />
           ) : (
             <div className='mt-10'>
-              <Card className="shadow-sm border border-slate-200/50 dark:border-slate-800/50 overflow-hidden notebook-card" styles={{ body: { padding: 0 } }}>
+              <Card className="shadow-sm border border-[var(--border)] overflow-hidden notebook-card" styles={{ body: { padding: 0 } }}>
                 {isLoadingTasks ? (
                   <div className="flex justify-center p-12"><Spin size="large" /></div>
                 ) : filteredMyTasks.length === 0 ? (
                   <div className="p-12">
                     <Empty
-                      image={<ProjectOutlined className="text-5xl text-indigo-200 dark:text-slate-800" />}
+                      image={<ProjectOutlined className="text-5xl text-[var(--text-tertiary)]" />}
                       description={
-                        <div className="text-slate-500 dark:text-slate-400 mt-3 text-sm">
+                        <div className="text-[var(--text-secondary)] mt-3 text-sm">
                           Không tìm thấy công việc nào phù hợp với bộ lọc trong dự án này.
                         </div>
                       }
