@@ -23,14 +23,21 @@ jobs:
             cd /var/www/task-flow
             git pull origin main
             rm -f AGENTS.md task-flow.md
-            # Example: cd frontend && npm install && npm run build
+            cd frontend
+            npm install
+            npm run build
 
             # 2. Deploy Backend to /home/task-flow-backend
             echo "Deploying Backend..."
             cd /home/task-flow-backend
             git pull origin main
             rm -f AGENTS.md task-flow.md
-            # Example: cd backend && npm install && pm2 restart all
+            cd backend
+            npm install
+            npx prisma generate
+            npm run build
+            pm2 restart task-flow-backend || pm2 start dist/index.js --name "task-flow-backend"
+
 
 
   # ALTERNATIVE METHOD: If you prefer to push files from GitHub Actions to the server (SCP)
