@@ -1,0 +1,80 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main # Change to your target branch (e.g., main, master, or dev)
+
+jobs:
+  deploy-ssh-pull:
+    name: Deploy via SSH Pull (Recommended)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute remote SSH commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            # 1. Deploy Frontend to /var/www/task-flow
+            echo "Deploying Frontend..."
+            cd /var/www/task-flow
+            git pull origin main
+            # Example: cd frontend && npm install && npm run build
+
+            # 2. Deploy Backend to /home/task-flow-backend
+            echo "Deploying Backend..."
+            cd /home/task-flow-backend
+            git pull origin main
+            # Example: cd backend && npm install && pm2 restart all
+
+  # ALTERNATIVE METHOD: If you prefer to push files from GitHub Actions to the server (SCP)
+  # deploy-scp-push:
+  #   name: Deploy via SCP Push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Remove docs folder before uploading
+  #       run: rm -rf docs
+  #
+  #     - name: Copy files to server via SCP
+  #       uses: appleboy/scp-action@v0.1.7
+  #       with:
+  #         host: ${{ secrets.SERVER_HOST }}
+  #         username: ${{ secrets.SERVER_USER }}
+  #         key: ${{ secrets.SERVER_SSH_KEY }}
+  #         port: ${{ secrets.SERVER_PORT || 22 }}
+  #         source: "."
+  #         target: ${{ secrets.SERVER_PROJECT_PATH }}
+
+# ==============================================================================
+# HOW TO SET UP SPARSE CHECKOUT ON YOUR SERVER FOR THE 2 DIFFERENT DIRECTORIES:
+# ==============================================================================
+# 
+# A. For Frontend (in /var/www/task-flow):
+#    1. Navigate to directory and clone the repo without checking out:
+#       cd /var/www
+#       git clone --no-checkout <your-repo-url> task-flow
+#       cd task-flow
+#    2. Enable sparse-checkout and specify the frontend folder:
+#       git sparse-checkout init --cone
+#       git sparse-checkout set frontend
+#    3. Checkout main branch:
+#       git checkout main
+#
+# B. For Backend (in /home/task-flow-backend):
+#    1. Navigate to directory and clone the repo without checking out:
+#       cd /home
+#       git clone --no-checkout <your-repo-url> task-flow-backend
+#       cd task-flow-backend
+#    2. Enable sparse-checkout and specify the backend folder:
+#       git sparse-checkout init --cone
+#       git sparse-checkout set backend
+#    3. Checkout main branch:
+#       git checkout main
+# ==============================================================================
+
