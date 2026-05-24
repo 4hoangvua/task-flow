@@ -128,7 +128,7 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Cập nhật quy tắc phản hồi ngắn gọn cho Agent trong AGENTS.md (2026-05-23)
 - [x] Khắc phục cảnh báo Ant Design, sửa chữ mờ ở hai chế độ sáng/tối và tối ưu responsive mobile cho toàn bộ các trang (2026-05-24)
 - [x] Tích hợp tính năng tìm kiếm và gợi ý email thành viên tự động (AutoComplete) cho Leader khi mời thành viên mới vào dự án (2026-05-24)
-- [x] Cấu hình địa chỉ IP AWS mới cho backend, frontend và Nginx (2026-05-24)
+- [x] Cấu hình địa chỉ IP AWS mới cho backend, frontend, Nginx và sửa lỗi CORS/Production build trên server (2026-05-24)
 - [x] Chuyển đổi công cụ Tìm kiếm sang AutoComplete gợi ý và tạo component dùng chung (2026-05-24)
 📁 Chi tiết: [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) (Xem thêm [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) và các log trước đó)
 
