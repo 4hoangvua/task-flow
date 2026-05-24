@@ -52,10 +52,4 @@ Tài liệu này định nghĩa quy trình tự động hóa hoạt động phá
 2. **Tự Học qua mỗi lần làm việc:**
    - Nếu quá trình code phát hiện ra các bẫy lập trình (gotchas), lỗi cấu hình đặc thù, cách sửa lỗi CORS hay responsive cụ thể... hãy cập nhật trực tiếp kinh nghiệm đó vào mục thích hợp trong [AGENTS.md](file:///c:/project/task-flow/AGENTS.md) hoặc [.agents/rules/main.md](file:///c:/project/task-flow/.agents/rules/main.md). Điều này giúp Agent không lặp lại sai lầm cũ ở các phiên làm việc tiếp theo.
 
-### Bước 6: Commit & Push lên GitHub (Git Delivery)
-1. Kiểm tra trạng thái git bằng `git status`.
-2. Chỉ thực hiện khi toàn bộ mã nguồn nghiên cứu, kiểm thử và cập nhật tài liệu đã hoàn tất 100%. Gom toàn bộ thay đổi vào **1 commit duy nhất**, không chia nhỏ commit hoặc push lẻ tẻ nhiều lần làm loãng lịch sử Git.
-3. Thêm các file thay đổi vào staging: `git add .`.
-4. Tạo commit với thông điệp rõ ràng theo chuẩn Semantic Commits (ví dụ: `feat: ...`, `fix: ...`, `docs: ...`).
-5. Đẩy mã nguồn lên GitHub: `git push origin main` để hoàn tất bàn giao và kích hoạt CI/CD Deploy lên server AWS.
 

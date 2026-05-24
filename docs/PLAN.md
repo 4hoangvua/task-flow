@@ -132,6 +132,7 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Chuyển đổi công cụ Tìm kiếm sang AutoComplete gợi ý và tạo component dùng chung (2026-05-24)
 - [x] Thiết lập dịch vụ chạy ngầm tự động kiểm tra và gửi thông báo khi công việc sắp đến hạn chót (DEADLINE_APPROACHING) (2026-05-24)
 - [x] Thiết lập Docker containerization và cấu hình Docker Compose điều phối dịch vụ cho toàn dự án (2026-05-24)
+- [x] Tích hợp đồng bộ hóa cộng tác thời gian thực (WebSocket room sync) và tab Nhật ký Hoạt động (Timeline) trong chi tiết dự án (2026-05-24)
 📁 Chi tiết: [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) (Xem thêm [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) và các log trước đó)
 
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Tabs, Card, Row, Col, Progress, Tag, Avatar, Table, Form, Input, Select, Button, Space, Popconfirm, Spin, Empty, AutoComplete } from 'antd';
+import { Tabs, Card, Row, Col, Progress, Tag, Avatar, Table, Form, Input, Select, Button, Space, Popconfirm, Spin, Empty, AutoComplete, Timeline, Tooltip } from 'antd';
 import { authApi } from '../api/authApi';
 import {
   ProjectOutlined,
@@ -13,6 +13,13 @@ import {
   UserOutlined,
   MailOutlined,
   ExclamationCircleOutlined,
+  HistoryOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  PlusCircleOutlined,
+  SwapOutlined,
+  AlertOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useProjectDetail, useProjectMembers } from '../hooks/useProjects';
@@ -21,12 +28,30 @@ import { TaskBoard } from '../components/task/TaskBoard';
 import { formatDate, getRoleColor } from '../utils/helpers';
 import type { ProjectMember, User } from '../types';
 import { ProjectStatusTag } from '../components/common/ProjectStatusTag';
+import { useSocket } from '../providers/SocketProvider';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { statsApi } from '../api/statsApi';
+import { TaskDetailModal } from '../components/task/TaskDetailModal';
 
 export const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+
+  const { socket } = useSocket();
+  const queryClient = useQueryClient();
+
+  // Task details modal state (for timeline actions)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  // Project statistics / history query
+  const projectStatsQuery = useQuery({
+    queryKey: ['projectStats', id],
+    queryFn: () => statsApi.getProjectStats(id || ''),
+    enabled: !!id,
+  });
 
   // API hooks
   const { project, isLoading: isLoadingProject, updateProject, deleteProject } = useProjectDetail(id || '');
@@ -74,6 +99,54 @@ export const ProjectDetail: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [project, activeTab, settingsForm]);
+
+  // Real-time synchronization via Socket.io
+  useEffect(() => {
+    if (!socket || !id) return;
+
+    // Join project room
+    socket.emit('join-project', { projectId: id });
+
+    const handleTaskEvent = () => {
+      // Invalidate queries to fetch fresh tasks, stats
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['projectStats', id] });
+    };
+
+    const handleMemberEvent = () => {
+      queryClient.invalidateQueries({ queryKey: ['members', id] });
+      queryClient.invalidateQueries({ queryKey: ['projectStats', id] });
+    };
+
+    const handleProjectEvent = () => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] });
+    };
+
+    // Register listeners
+    socket.on('task:created', handleTaskEvent);
+    socket.on('task:updated', handleTaskEvent);
+    socket.on('task:deleted', handleTaskEvent);
+    socket.on('task:status-changed', handleTaskEvent);
+    socket.on('task:reordered', handleTaskEvent);
+    socket.on('comment:added', handleTaskEvent);
+    socket.on('member:added', handleMemberEvent);
+    socket.on('member:removed', handleMemberEvent);
+    socket.on('project:updated', handleProjectEvent);
+
+    return () => {
+      // Clean up
+      socket.off('task:created', handleTaskEvent);
+      socket.off('task:updated', handleTaskEvent);
+      socket.off('task:deleted', handleTaskEvent);
+      socket.off('task:status-changed', handleTaskEvent);
+      socket.off('task:reordered', handleTaskEvent);
+      socket.off('comment:added', handleTaskEvent);
+      socket.off('member:added', handleMemberEvent);
+      socket.off('member:removed', handleMemberEvent);
+      socket.off('project:updated', handleProjectEvent);
+      socket.emit('leave-project', { projectId: id });
+    };
+  }, [socket, id, queryClient]);
 
   if (!id) {
     return <Card><Empty description="Không tìm thấy ID dự án" /></Card>;
@@ -475,6 +548,169 @@ export const ProjectDetail: React.FC = () => {
               </Space>
             ),
           },
+          {
+            key: 'activity',
+            label: (
+              <span className="flex items-center gap-2">
+                <HistoryOutlined /> Nhật ký hoạt động
+              </span>
+            ),
+            children: (
+              <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Nhật ký hoạt động gần đây</span>} className="shadow-sm border border-[var(--border)] notebook-card">
+                {projectStatsQuery.isLoading ? (
+                  <div className="flex justify-center p-8"><Spin /></div>
+                ) : !projectStatsQuery.data?.recentActivity || projectStatsQuery.data.recentActivity.length === 0 ? (
+                  <Empty description="Không có hoạt động nào gần đây" />
+                ) : (
+                  <Timeline
+                    className="mt-4 pt-2"
+                    mode="left"
+                    items={projectStatsQuery.data.recentActivity.map((item: any) => {
+                      let desc: React.ReactNode = '';
+                      let dotIcon: React.ReactNode = <EditOutlined className="text-xs text-slate-500" />;
+                      let color = 'gray';
+
+                      const formatStatus = (status: string) => {
+                        switch (status) {
+                          case 'TODO': return 'Cần làm';
+                          case 'IN_PROGRESS': return 'Đang thực hiện';
+                          case 'REVIEW': return 'Chờ đánh giá';
+                          case 'DONE': return 'Hoàn thành';
+                          default: return status;
+                        }
+                      };
+
+                      const formatPriority = (prio: string) => {
+                        switch (prio) {
+                          case 'LOW': return 'Thấp';
+                          case 'MEDIUM': return 'Trung bình';
+                          case 'HIGH': return 'Cao';
+                          case 'URGENT': return 'Khẩn cấp';
+                          default: return prio;
+                        }
+                      };
+
+                      if (item.field === 'status') {
+                        if (!item.oldValue) {
+                          desc = (
+                            <span>
+                              đã tạo nhiệm vụ mới và đặt trạng thái là{' '}
+                              <Tag color="blue" className="text-[10px] uppercase font-bold py-0.5 px-1.5">{formatStatus(item.newValue)}</Tag>
+                            </span>
+                          );
+                          dotIcon = <PlusCircleOutlined className="text-xs text-blue-500" />;
+                          color = 'blue';
+                        } else {
+                          const isDone = item.newValue === 'DONE';
+                          desc = (
+                            <span className="flex items-center flex-wrap gap-1">
+                              đã chuyển trạng thái từ
+                              <Tag className="text-[10px] font-bold py-0.5 px-1.5">{formatStatus(item.oldValue)}</Tag>
+                              <SwapOutlined className="text-[var(--text-tertiary)] text-[10px]" />
+                              <Tag color={isDone ? 'emerald' : 'blue'} className="text-[10px] font-bold py-0.5 px-1.5">{formatStatus(item.newValue)}</Tag>
+                            </span>
+                          );
+                          dotIcon = isDone 
+                            ? <CheckCircleOutlined className="text-xs text-emerald-500" />
+                            : <SwapOutlined className="text-xs text-indigo-500" />;
+                          color = isDone ? 'green' : 'blue';
+                        }
+                      } else if (item.field === 'priority') {
+                        desc = (
+                          <span className="flex items-center flex-wrap gap-1">
+                            đã thay đổi độ ưu tiên từ
+                            <Tag className="text-[10px] font-bold py-0.5 px-1.5">{formatPriority(item.oldValue)}</Tag>
+                            <SwapOutlined className="text-[var(--text-tertiary)] text-[10px]" />
+                            <Tag color="red" className="text-[10px] font-bold py-0.5 px-1.5">{formatPriority(item.newValue)}</Tag>
+                          </span>
+                        );
+                        dotIcon = <AlertOutlined className="text-xs text-amber-500" />;
+                        color = 'orange';
+                      } else if (item.field === 'deadline') {
+                        const hasOld = item.oldValue && item.oldValue !== 'None';
+                        const hasNew = item.newValue && item.newValue !== 'None';
+                        if (!hasNew) {
+                          desc = <span>đã xóa hạn chót nhiệm vụ</span>;
+                        } else {
+                          desc = (
+                            <span>
+                              đã đặt hạn chót thành{' '}
+                              <span className="font-semibold text-[var(--text)]">
+                                {new Date(item.newValue).toLocaleDateString('vi-VN')}
+                              </span>
+                            </span>
+                          );
+                        }
+                        dotIcon = <ClockCircleOutlined className="text-xs text-rose-500" />;
+                        color = 'red';
+                      } else if (item.field === 'assigneeId') {
+                        const isUnassigned = item.newValue === 'None';
+                        desc = (
+                          <span>
+                            {isUnassigned 
+                              ? 'đã gỡ người thực hiện' 
+                              : 'đã thay đổi người chịu trách nhiệm thực hiện'}
+                          </span>
+                        );
+                        dotIcon = <UserOutlined className="text-xs text-purple-500" />;
+                        color = 'purple';
+                      } else if (item.field === 'title') {
+                        desc = (
+                          <span>
+                            đã đổi tiêu đề nhiệm vụ thành{' '}
+                            <span className="font-semibold text-[var(--text-h)]">"{item.newValue}"</span>
+                          </span>
+                        );
+                        dotIcon = <EditOutlined className="text-xs text-slate-500" />;
+                        color = 'gray';
+                      } else if (item.field === 'description') {
+                        desc = <span>đã cập nhật mô tả chi tiết nhiệm vụ</span>;
+                        dotIcon = <EditOutlined className="text-xs text-slate-500" />;
+                        color = 'gray';
+                      } else {
+                        desc = <span>đã cập nhật trường {item.field} thành "{item.newValue}"</span>;
+                        dotIcon = <EditOutlined className="text-xs text-slate-500" />;
+                        color = 'gray';
+                      }
+
+                      return {
+                        color: color,
+                        dot: dotIcon,
+                        children: (
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 -mt-1 pb-3 text-xs">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <Avatar size={20} src={item.user?.avatar} icon={<UserOutlined />} className="bg-[var(--accent)] text-[10px] shrink-0" />
+                                <span className="font-bold text-[var(--text-h)]">{item.user?.name}</span>
+                                <span className="text-[var(--text-secondary)]">{desc}</span>
+                              </div>
+                              <div className="pl-7">
+                                <span className="text-[var(--text-tertiary)] font-medium">Trên task: </span>
+                                <button
+                                  onClick={() => {
+                                    setSelectedTaskId(item.task.id);
+                                    setIsDetailOpen(true);
+                                  }}
+                                  className="text-[var(--accent)] hover:underline font-bold text-left cursor-pointer transition-all"
+                                >
+                                  "{item.task.title}"
+                                </button>
+                              </div>
+                            </div>
+                            <div className="sm:text-right shrink-0 pl-7 sm:pl-0">
+                              <span className="text-[10px] text-[var(--text-tertiary)] font-semibold bg-[var(--bg)] border border-[var(--border)] rounded px-1.5 py-0.5">
+                                {formatDate(item.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      };
+                    })}
+                  />
+                )}
+              </Card>
+            ),
+          },
           isProjectLeader ? {
             key: 'settings',
             label: (
@@ -548,6 +784,19 @@ export const ProjectDetail: React.FC = () => {
           } : null,
         ].filter(Boolean) as any}
       />
+
+      {selectedTaskId && isDetailOpen && (
+        <TaskDetailModal
+          taskId={selectedTaskId}
+          projectId={id}
+          open={isDetailOpen}
+          isProjectLeader={isProjectLeader}
+          onCancel={() => {
+            setIsDetailOpen(false);
+            setSelectedTaskId(null);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -1,6 +1,8 @@
-- [x] Khởi tạo tệp cấu hình Dockerfile cho backend (`backend/Dockerfile`)
-- [x] Khởi tạo tệp cấu hình Nginx cho frontend (`frontend/nginx.conf`)
-- [x] Khởi tạo tệp cấu hình Dockerfile cho frontend (`frontend/Dockerfile`)
-- [x] Khởi tạo tệp cấu hình điều phối Docker Compose (`docker-compose.yml` ở root)
-- [x] Tự động chạy thử nghiệm biên dịch kiểm tra lỗi TypeScript (tsc check)
+- [x] Thiết lập kết nối join-project và leave-project trong `ProjectDetail.tsx`
+- [x] Đăng ký lắng nghe các sự kiện socket.io (`task:created`, `task:updated`, v.v.) và tự động invalidate cache trong `ProjectDetail.tsx`
+- [x] Tải dữ liệu stats và recentActivity từ API `statsApi.getProjectStats` trong `ProjectDetail.tsx`
+- [x] Thêm tab "Nhật ký hoạt động" trong Tabs component của `ProjectDetail.tsx`
+- [x] Hiển thị Timeline hoạt động chi tiết (avatar, màu sắc, quá trình chuyển đổi trạng thái)
+- [x] Tích hợp mở `TaskDetailModal` trực tiếp khi click vào tên task trên Timeline
+- [x] Chạy biên dịch kiểm tra TypeScript (tsc check) thành công 100%
 - [x] Cập nhật tài liệu tiến độ (`PLAN.md`, `PROGRESS.md`, `changelogs`)
