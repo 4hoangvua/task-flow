@@ -6,11 +6,13 @@ Copy this file to your project root as `AGENTS.md` when starting a new project.
 
 1. This file — how agents work.
 2. `task-flow.md` — complete technical spec, folder structure, libraries, known fixes & gotchas.
-3. `docs/PLAN.md` — what we're building and what's next.
-4. `docs/PROGRESS.md` — what's done and what's proven.
-5. `docs/DECISIONS.md` — why important choices were made.
-6. `docs/changelogs/` — daily logs of UI/styling/config fixes (read the latest file for recent context).
-7. The user prompt — what the human wants right now.
+3. `.agents/rules/analysis.md` — guidelines for core tech stack and libraries (antd, zustand, query, etc.) to stick to during research.
+4. `docs/PLAN.md` — what we're building and what's next.
+5. `docs/PROGRESS.md` — what's done and what's proven.
+6. `docs/DECISIONS.md` — why important choices were made.
+7. `docs/analysis/` — daily detailed research analysis files.
+8. `docs/changelogs/` — daily logs of UI/styling/config fixes (read the latest file for recent context).
+9. The user prompt — what the human wants right now.
 
 ## Task Loop
 

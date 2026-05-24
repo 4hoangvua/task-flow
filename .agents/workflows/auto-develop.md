@@ -13,10 +13,12 @@ Tài liệu này định nghĩa quy trình tự động hóa hoạt động phá
 ### Bước 1: Tự chủ Nghiên cứu & Đề xuất (Autonomous Research & Discovery)
 1. Thay vì đợi yêu cầu cụ thể từ người dùng, Agent chủ động phân tích hiện trạng dự án:
    - Đọc các tệp kế hoạch [docs/PLAN.md](file:///c:/project/task-flow/docs/PLAN.md) và lịch sử [docs/PROGRESS.md](file:///c:/project/task-flow/docs/PROGRESS.md) để tìm kiếm các tính năng planned chưa thực hiện hoặc các cải tiến tiếp theo.
+   - Đọc tệp quy chuẩn nghiên cứu [.agents/rules/analysis.md](file:///c:/project/task-flow/.agents/rules/analysis.md) để bám sát cấu trúc dự án và các thư viện cốt lõi (như Antd cho UI, Zustand, TanStack Query, v.v.).
    - Khảo sát mã nguồn để tự phát hiện các điểm có thể tối ưu hóa giao diện (UI) obsidian, trải nghiệm người dùng (UX), hoặc sửa các lỗi tiềm ẩn.
 2. Tự động đề xuất và quyết định chức năng mới hoặc phần giao diện/hiệu năng cần cải tiến trong ngày.
-3. Tìm kiếm các file liên quan bằng công cụ `grep_search` hoặc `list_dir` trong dự án.
-4. Phân tích sự phụ thuộc (dependencies), cấu trúc dữ liệu (`prisma/schema.prisma`), các API endpoints hiện có và thiết kế UI liên quan đến đề xuất tự phát triển này.
+3. **Ghi nhận ý tưởng chi tiết vào file phân tích**: Tạo tệp `/docs/analysis/YYYY-MM-DD.md` (sử dụng ngày hiện tại, ví dụ: `2026-05-24.md`) chứa phân tích hiện trạng, giải pháp đề xuất, và cấu trúc code dự kiến thay đổi.
+4. Tìm kiếm các file liên quan bằng công cụ `grep_search` hoặc `list_dir` trong dự án.
+5. Phân tích sự phụ thuộc (dependencies), cấu trúc dữ liệu (`prisma/schema.prisma`), các API endpoints hiện có và thiết kế UI liên quan đến đề xuất tự phát triển này.
 
 ### Bước 2: Lập Kế hoạch & Phân chia Task (Planning & Tracking)
 1. Tạo hoặc cập nhật tệp [task.md](file:///c:/project/task-flow/task.md) ở gốc thư mục dự án để làm bảng việc TODO cá nhân:
