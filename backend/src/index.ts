@@ -14,6 +14,7 @@ import { logger } from './utils/logger';
 import router from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 import { setupSocketIO } from './sockets/socketHandler';
+import { startDeadlineScheduler } from './utils/scheduler';
 
 const app = express();
 const httpServer = createServer(app);
@@ -67,6 +68,9 @@ app.set('io', io);
 
 // Initialize socket handler
 setupSocketIO(io);
+
+// Start background deadline checking scheduler
+startDeadlineScheduler(io);
 
 // Mount main routing
 app.use('/api', router);

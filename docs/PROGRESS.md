@@ -44,6 +44,7 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 34 | Tính năng Tìm kiếm Email & Tự động gợi ý thành viên dự án | 2026-05-24 | Đã tích hợp AutoComplete gợi ý email khi Leader click vào trường mời thành viên |
 | 35 | Cấu hình địa chỉ IP AWS mới | 2026-05-24 | Đã cập nhật IP trên server AWS (Nginx & Backend) và frontend env ở local |
 | 36 | Chuyển đổi công cụ Tìm kiếm sang AutoComplete gợi ý | 2026-05-24 | Đã tạo component chung SearchAutoComplete và tích hợp thành công trên các trang Dự án, Công việc của tôi và Kanban, tsc thành công |
+| 37 | Dịch vụ chạy ngầm kiểm tra Hạn chót công việc | 2026-05-24 | Thiết lập startDeadlineScheduler kiểm tra các task sắp hết hạn dưới 24h và tạo/bắn thông báo DEADLINE_APPROACHING qua Socket.io thành công, tsc thành công |
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 
