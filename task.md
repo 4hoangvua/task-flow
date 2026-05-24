@@ -1,0 +1,6 @@
+- [x] Khởi tạo tệp cấu hình Dockerfile cho backend (`backend/Dockerfile`)
+- [x] Khởi tạo tệp cấu hình Nginx cho frontend (`frontend/nginx.conf`)
+- [x] Khởi tạo tệp cấu hình Dockerfile cho frontend (`frontend/Dockerfile`)
+- [x] Khởi tạo tệp cấu hình điều phối Docker Compose (`docker-compose.yml` ở root)
+- [x] Tự động chạy thử nghiệm biên dịch kiểm tra lỗi TypeScript (tsc check)
+- [x] Cập nhật tài liệu tiến độ (`PLAN.md`, `PROGRESS.md`, `changelogs`)

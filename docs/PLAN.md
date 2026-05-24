@@ -92,10 +92,10 @@ Dưới đây là chi tiết phân chia công việc từ F01 đến F10 dựa t
 - [x] Tạo các custom hooks sử dụng TanStack Query v5 để quản lý cache dữ liệu từ Server.
 - [x] Tích hợp kéo thả trên Kanban board dùng `@dnd-kit/core` kết hợp cơ chế **Optimistic Updates** qua React Query.
 
-### F10. Testing & Deployment [planned]
+### F10. Testing & Deployment [in-progress]
 - [ ] Viết Unit Test cho Frontend sử dụng Vitest và React Testing Library.
 - [ ] Viết Integration Test cho các API Backend sử dụng Vitest và Supertest.
-- [ ] Thiết lập Docker cấu hình `Dockerfile` và `docker-compose.yml` để chạy ứng dụng ở môi trường local.
+- [x] Thiết lập Docker cấu hình `Dockerfile` và `docker-compose.yml` để chạy ứng dụng ở môi trường local.
 
 ---
 
@@ -131,6 +131,7 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Cấu hình địa chỉ IP AWS mới cho backend, frontend, Nginx và sửa lỗi CORS/Production build trên server (2026-05-24)
 - [x] Chuyển đổi công cụ Tìm kiếm sang AutoComplete gợi ý và tạo component dùng chung (2026-05-24)
 - [x] Thiết lập dịch vụ chạy ngầm tự động kiểm tra và gửi thông báo khi công việc sắp đến hạn chót (DEADLINE_APPROACHING) (2026-05-24)
+- [x] Thiết lập Docker containerization và cấu hình Docker Compose điều phối dịch vụ cho toàn dự án (2026-05-24)
 📁 Chi tiết: [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) (Xem thêm [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) và các log trước đó)
 
 
