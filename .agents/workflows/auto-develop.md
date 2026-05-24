@@ -54,6 +54,8 @@ Tài liệu này định nghĩa quy trình tự động hóa hoạt động phá
 
 ### Bước 6: Commit & Push lên GitHub (Git Delivery)
 1. Kiểm tra trạng thái git bằng `git status`.
-2. Thêm các file thay đổi vào staging: `git add .`.
-3. Tạo commit với thông điệp rõ ràng theo chuẩn Semantic Commits (ví dụ: `feat: ...`, `fix: ...`, `docs: ...`).
-4. Đẩy mã nguồn lên GitHub: `git push origin main` để hoàn tất bàn giao và kích hoạt CI/CD Deploy lên server AWS.
+2. Chỉ thực hiện khi toàn bộ mã nguồn nghiên cứu, kiểm thử và cập nhật tài liệu đã hoàn tất 100%. Gom toàn bộ thay đổi vào **1 commit duy nhất**, không chia nhỏ commit hoặc push lẻ tẻ nhiều lần làm loãng lịch sử Git.
+3. Thêm các file thay đổi vào staging: `git add .`.
+4. Tạo commit với thông điệp rõ ràng theo chuẩn Semantic Commits (ví dụ: `feat: ...`, `fix: ...`, `docs: ...`).
+5. Đẩy mã nguồn lên GitHub: `git push origin main` để hoàn tất bàn giao và kích hoạt CI/CD Deploy lên server AWS.
+
