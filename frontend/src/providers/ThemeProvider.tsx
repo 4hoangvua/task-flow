@@ -1,6 +1,15 @@
 import React, { useEffect } from 'react';
-import { ConfigProvider, theme as antdTheme } from 'antd';
+import { ConfigProvider, App, theme as antdTheme } from 'antd';
 import { useUiStore } from '../stores/uiStore';
+import { setAntdStatic } from '../utils/antd';
+
+const AntdStaticSetter: React.FC = () => {
+  const { message, notification, modal } = App.useApp();
+  useEffect(() => {
+    setAntdStatic(message, notification, modal);
+  }, [message, notification, modal]);
+  return null;
+};
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const themeMode = useUiStore((state) => state.theme);
@@ -131,7 +140,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         },
       }}
     >
-      {children}
+      <App>
+        <AntdStaticSetter />
+        {children}
+      </App>
     </ConfigProvider>
   );
 };

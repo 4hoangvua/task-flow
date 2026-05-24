@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '../api/authApi';
 import { useAuthStore } from '../stores/authStore';
-import { message } from 'antd';
+import { message } from '../utils/antd';
 
 export const useAuth = () => {
   const queryClient = useQueryClient();

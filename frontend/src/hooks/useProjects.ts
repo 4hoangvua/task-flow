@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectApi } from '../api/projectApi';
-import { message } from 'antd';
+import { message } from '../utils/antd';
 
 export const useProjects = (params?: { status?: string; page?: number; limit?: number }) => {
   const queryClient = useQueryClient();

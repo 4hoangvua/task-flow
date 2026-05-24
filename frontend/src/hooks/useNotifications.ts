@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { notificationApi } from '../api/notificationApi';
 import { useSocket } from '../providers/SocketProvider';
 import { useAuthStore } from '../stores/authStore';
-import { message as antdMessage } from 'antd';
+import { message as antdMessage } from '../utils/antd';
 import type { Notification } from '../types';
 
 export const useNotifications = (params?: { page?: number; limit?: number }) => {

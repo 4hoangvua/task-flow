@@ -13,6 +13,11 @@ backend/prisma/dev.db-journal
 backend/.env
 backend/.env.development
 backend/.env.production
+frontend/.env
+frontend/.env.development
+frontend/.env.production
+*.env
+*.env.*
 
 # Logs
 backend/logs/

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Col, Row, Statistic, Select, List, Avatar, Space, Empty, Spin } from 'antd';
+import { Card, Col, Row, Statistic, Select, Avatar, Space, Empty, Spin } from 'antd';
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -82,13 +82,13 @@ export const Dashboard: React.FC = () => {
           <Row gutter={[20, 20]}>
             <Col xs={24} sm={8}>
               <Card 
-                bordered={false} 
+                variant="borderless" 
                 className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
               >
                 <Statistic
                   title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Nhiệm vụ được giao</span>}
                   value={summary?.assigned || 0}
-                  valueStyle={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-h)' }}
+                  styles={{ content: { fontSize: '28px', fontWeight: 800, color: 'var(--text-h)' } }}
                   prefix={
                     <div className="w-10 h-10 rounded-lg bg-[var(--accent-bg)] flex items-center justify-center text-[var(--accent)] mr-3 border border-[var(--accent-border)]">
                       <FileTextOutlined className="text-lg" />
@@ -99,13 +99,13 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={24} sm={8}>
               <Card 
-                bordered={false} 
+                variant="borderless" 
                 className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
               >
                 <Statistic
                   title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Đã hoàn thành</span>}
                   value={summary?.completed || 0}
-                  valueStyle={{ fontSize: '28px', fontWeight: 800, color: '#10b981' }}
+                  styles={{ content: { fontSize: '28px', fontWeight: 800, color: '#10b981' } }}
                   prefix={
                     <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mr-3 border border-emerald-100/30 dark:border-emerald-900/30">
                       <CheckCircleOutlined className="text-lg" />
@@ -116,17 +116,17 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={24} sm={8}>
               <Card 
-                bordered={false} 
+                variant="borderless" 
                 className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
               >
                 <Statistic
                   title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Quá hạn</span>}
                   value={summary?.overdue || 0}
-                  valueStyle={{ 
+                  styles={{ content: { 
                     fontSize: '28px', 
                     fontWeight: 800, 
                     color: summary?.overdue && summary.overdue > 0 ? '#ef4444' : 'var(--text-h)' 
-                  }}
+                  } }}
                   prefix={
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 border transition-colors ${
                       summary?.overdue && summary.overdue > 0
@@ -207,18 +207,18 @@ export const Dashboard: React.FC = () => {
           <Empty description="Bạn chưa có dự án nào. Chuyển sang tab Dự án để tạo mới!" />
         </Card>
       ) : (
-        <Space direction="vertical" size={20} className="w-full">
+        <Space orientation="vertical" size={20} className="w-full">
           {/* KPI Section */}
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={6}>
               <Card 
-                bordered={false} 
+                variant="borderless" 
                 className="notebook-card border border-[var(--border)] shadow-sm"
               >
                 <Statistic
                   title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Tổng số task</span>}
                   value={stats?.total || 0}
-                  valueStyle={{ fontSize: '24px', fontWeight: 850, color: 'var(--text-h)' }}
+                  styles={{ content: { fontSize: '24px', fontWeight: 850, color: 'var(--text-h)' } }}
                   prefix={
                     <div className="w-9 h-9 rounded-lg bg-[var(--accent-bg)] flex items-center justify-center text-[var(--accent)] mr-2.5 border border-[var(--accent-border)]">
                       <FileTextOutlined className="text-sm" />
@@ -229,13 +229,13 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={24} sm={6}>
               <Card 
-                bordered={false} 
+                variant="borderless" 
                 className="notebook-card border border-[var(--border)] shadow-sm"
               >
                 <Statistic
                   title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Đang thực hiện</span>}
                   value={(stats?.byStatus.IN_PROGRESS || 0) + (stats?.byStatus.REVIEW || 0)}
-                  valueStyle={{ fontSize: '24px', fontWeight: 850, color: '#f59e0b' }}
+                  styles={{ content: { fontSize: '24px', fontWeight: 850, color: '#f59e0b' } }}
                   prefix={
                     <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mr-2.5 border border-amber-100/30 dark:border-amber-900/30">
                       <ClockCircleOutlined className="text-sm" />
@@ -246,13 +246,13 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={24} sm={6}>
               <Card 
-                bordered={false} 
+                variant="borderless" 
                 className="notebook-card border border-[var(--border)] shadow-sm"
               >
                 <Statistic
                   title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Đã hoàn thành</span>}
                   value={stats?.byStatus.DONE || 0}
-                  valueStyle={{ fontSize: '24px', fontWeight: 850, color: '#10b981' }}
+                  styles={{ content: { fontSize: '24px', fontWeight: 850, color: '#10b981' } }}
                   prefix={
                     <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mr-2.5 border border-emerald-100/30 dark:border-emerald-900/30">
                       <CheckCircleOutlined className="text-sm" />
@@ -263,17 +263,17 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={24} sm={6}>
               <Card 
-                bordered={false} 
+                variant="borderless" 
                 className="notebook-card border border-[var(--border)] shadow-sm"
               >
                 <Statistic
                   title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Task quá hạn</span>}
                   value={stats?.overdue || 0}
-                  valueStyle={{ 
+                  styles={{ content: { 
                     fontSize: '24px', 
                     fontWeight: 850, 
                     color: stats?.overdue && stats.overdue > 0 ? '#ef4444' : 'var(--text-h)' 
-                  }}
+                  } }}
                   prefix={
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center mr-2.5 border ${
                       stats?.overdue && stats.overdue > 0
@@ -351,27 +351,24 @@ export const Dashboard: React.FC = () => {
             title={<span className="font-bold text-sm text-[var(--text-h)]">Lịch sử hoạt động gần đây</span>} 
             className="shadow-sm border border-[var(--border)] notebook-card"
           >
-            <List
-              itemLayout="horizontal"
-              dataSource={stats?.recentActivity || []}
-              locale={{ emptyText: 'Không có hoạt động gần đây' }}
-              renderItem={(item) => {
-                let activityDesc = '';
-                if (item.field === 'status') {
-                  activityDesc = `đã chuyển trạng thái từ "${item.oldValue || 'Bắt đầu'}" sang "${item.newValue}"`;
-                } else {
-                  activityDesc = `đã cập nhật trường "${item.field}" thành "${item.newValue}"`;
-                }
+            {!stats?.recentActivity || stats.recentActivity.length === 0 ? (
+              <div className="py-8 text-center text-xs text-[var(--text-tertiary)]">Không có hoạt động gần đây</div>
+            ) : (
+              <div className="space-y-1">
+                {stats.recentActivity.map((item) => {
+                  let activityDesc = '';
+                  if (item.field === 'status') {
+                    activityDesc = `đã chuyển trạng thái từ "${item.oldValue || 'Bắt đầu'}" sang "${item.newValue}"`;
+                  } else {
+                    activityDesc = `đã cập nhật trường "${item.field}" thành "${item.newValue}"`;
+                  }
 
-                return (
-                  <List.Item className="border-b border-[var(--border)] last:border-0 py-3.5 px-1 hover:bg-[var(--bg)]/40 transition-all rounded-lg">
-                    <List.Item.Meta
-                      avatar={
-                        <Avatar src={item.user.avatar} className="border border-[var(--border)] shadow-xs" icon={<UserOutlined />}>
-                          {item.user.name[0]}
-                        </Avatar>
-                      }
-                      title={
+                  return (
+                    <div key={item.id} className="border-b border-[var(--border)] last:border-0 py-3.5 px-1 hover:bg-[var(--bg)]/40 transition-all rounded-lg flex items-start gap-3">
+                      <Avatar src={item.user.avatar} className="border border-[var(--border)] shadow-xs shrink-0" icon={<UserOutlined />}>
+                        {item.user.name[0]}
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
                         <div className="text-xs font-semibold text-[var(--text)] leading-relaxed">
                           <span className="font-bold text-[var(--text-h)]">{item.user.name} </span>
                           <span className="font-medium text-[var(--text-secondary)]">
@@ -381,13 +378,13 @@ export const Dashboard: React.FC = () => {
                             "{item.task.title}"
                           </span>
                         </div>
-                      }
-                      description={<span className="text-[10px] text-[var(--text-tertiary)] font-medium">{formatDate(item.createdAt)}</span>}
-                    />
-                  </List.Item>
-                );
-              }}
-            />
+                        <div className="text-[10px] text-[var(--text-tertiary)] font-medium mt-1">{formatDate(item.createdAt)}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </Card>
         </Space>
       )}

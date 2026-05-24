@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Card, Col, Row, Tag, Avatar, Space, Button, Input, Select, Spin, Tooltip, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Col, Row, Tag, Avatar, Space, Button, Input, Select, Spin, Tooltip, Segmented } from 'antd';
+import { message } from '../../utils/antd';
 import {
   UserOutlined,
   CalendarOutlined,
@@ -28,6 +29,7 @@ import { TaskDetailModal } from './TaskDetailModal';
 import { TaskFormModal } from './TaskFormModal';
 import { PriorityTag } from '../common/PriorityTag';
 import { TaskIdBadge } from '../common/TaskIdBadge';
+import { SearchAutoComplete } from '../common/SearchAutoComplete';
 
 interface TaskBoardProps {
   projectId: string;
@@ -193,6 +195,19 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
   const [assigneeFilter, setAssigneeFilter] = useState<string>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
 
+  // Mobile responsive states
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState<TaskStatus>('TODO');
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Tasks Query
   const { tasks, isLoading, reorderTasks } = useTasks(projectId);
 
@@ -287,12 +302,22 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
       <Card className="mb-10 shadow-sm border border-[var(--border)] notebook-card">
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
-            <Input
+            <SearchAutoComplete
               placeholder="Tìm công việc..."
-              prefix={<SearchOutlined className="text-[var(--text-tertiary)]" />}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={setSearchText}
+              dataSource={tasks}
+              searchFields={['title', 'description']}
+              primaryField="title"
               className="w-full sm:max-w-xs"
+              renderOption={(task) => (
+                <div className="flex justify-between items-center py-0.5 px-1">
+                  <span className="font-semibold text-xs text-[var(--text-h)] truncate max-w-[180px]">{task.title}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 bg-[var(--bg)] border border-[var(--border)] rounded text-[var(--text-secondary)] font-bold shrink-0 ml-3">
+                    {task.status === 'TODO' ? 'Cần làm' : task.status === 'IN_PROGRESS' ? 'Đang làm' : task.status === 'REVIEW' ? 'Đánh giá' : 'Hoàn thành'}
+                  </span>
+                </div>
+              )}
             />
             <Select
               value={assigneeFilter}
@@ -344,9 +369,28 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
         >
-          <div className="mt-6 flex gap-4 overflow-x-auto pb-4 w-full">
-            {COLUMNS.map((column) => (
-              <div key={column.id} className="flex-1 min-w-[280px] max-w-[320px] shrink-0">
+          {isMobile && (
+            <div className="mb-4">
+              <Segmented
+                block
+                value={activeMobileTab}
+                onChange={(value) => setActiveMobileTab(value as TaskStatus)}
+                options={COLUMNS.map((col) => ({
+                  label: (
+                    <span className="flex items-center justify-center gap-1.5 py-1 text-xs font-semibold">
+                      <span className={`w-1.5 h-1.5 rounded-full ${col.dot}`} />
+                      {col.title}
+                    </span>
+                  ),
+                  value: col.id,
+                }))}
+              />
+            </div>
+          )}
+
+          <div className={`mt-6 flex gap-4 pb-4 w-full ${isMobile ? 'overflow-x-hidden' : 'overflow-x-auto'}`}>
+            {COLUMNS.filter((col) => !isMobile || col.id === activeMobileTab).map((column) => (
+              <div key={column.id} className={isMobile ? "w-full" : "flex-1 min-w-0 max-w-[320px]"}>
                 <DroppableColumn
                   column={column}
                   tasks={getColumnTasks(column.id)}

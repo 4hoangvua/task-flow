@@ -17,7 +17,7 @@ export const TaskStatusTag: React.FC<TaskStatusTagProps> = ({ status, className 
 
   return (
     <Tag
-      bordered={false}
+      variant="filled"
       className={`inline-flex items-center m-0 text-xs font-bold uppercase tracking-wider py-0.5 px-2.5 rounded-full ${
         status === 'TODO'
           ? '!bg-slate-100 dark:!bg-zinc-800/60 !text-slate-500 dark:!text-slate-400 !border !border-slate-200 dark:!border-zinc-800/80'

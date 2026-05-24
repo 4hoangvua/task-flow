@@ -6,6 +6,8 @@ import { AuthLayout } from './layouts/AuthLayout';
 import { useAuthStore } from './stores/authStore';
 import { Spin } from 'antd';
 
+import { RoleGuard } from './routes/RoleGuard';
+
 // Pages
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -14,6 +16,7 @@ import { Projects } from './pages/Projects';
 import { ProjectDetail } from './pages/ProjectDetail';
 import { MyTasks } from './pages/MyTasks';
 import { Settings } from './pages/Settings';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { NotFound } from './pages/NotFound';
 
 export const App: React.FC = () => {
@@ -27,7 +30,7 @@ export const App: React.FC = () => {
   if (!isInitialized) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <Spin size="large" tip="Đang khôi phục phiên đăng nhập..." />
+        <Spin size="large" description="Đang khôi phục phiên đăng nhập..." />
       </div>
     );
   }
@@ -50,6 +53,11 @@ export const App: React.FC = () => {
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/my-tasks" element={<MyTasks />} />
           <Route path="/settings" element={<Settings />} />
+
+          {/* Admin Protected Routes */}
+          <Route element={<RoleGuard roles={['ADMIN']} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
         </Route>
       </Route>
 

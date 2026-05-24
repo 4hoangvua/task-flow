@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { taskApi } from '../api/taskApi';
 import { commentApi } from '../api/commentApi';
-import { message } from 'antd';
+import { message } from '../utils/antd';
 import type { Task } from '../types';
 
 export const useTasks = (projectId: string, filters?: { status?: string; assigneeId?: string; priority?: string }) => {

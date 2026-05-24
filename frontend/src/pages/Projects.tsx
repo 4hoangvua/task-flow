@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Col, Row, Button, Input, Select, Table, Modal, Form, Space, Tag, Empty, Avatar, Spin } from 'antd';
+import { Card, Col, Row, Button, Input, Select, Table, Modal, Form, Space, Empty, Spin } from 'antd';
 import {
   ProjectOutlined,
   PlusOutlined,
@@ -16,6 +16,7 @@ import { useProjects } from '../hooks/useProjects';
 import { formatDate } from '../utils/helpers';
 import type { Project } from '../types';
 import { ProjectStatusTag } from '../components/common/ProjectStatusTag';
+import { SearchAutoComplete } from '../components/common/SearchAutoComplete';
 
 export const Projects: React.FC = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export const Projects: React.FC = () => {
       dataIndex: 'name',
       key: 'name',
       render: (text: string, record: Project) => (
-        <Space direction="vertical" size={2}>
+        <Space orientation="vertical" size={2}>
           <a onClick={() => navigate(`/projects/${record.id}`)} className="font-semibold text-[var(--accent)] hover:text-[var(--accent)]/95 cursor-pointer">
             {text}
           </a>
@@ -136,12 +137,24 @@ export const Projects: React.FC = () => {
       <Card className="mb-10 shadow-sm border border-[var(--border)] notebook-card">
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
-            <Input
+            <SearchAutoComplete
               placeholder="Tìm kiếm dự án..."
-              prefix={<SearchOutlined className="text-[var(--text-tertiary)]" />}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={setSearchText}
+              dataSource={projects}
+              searchFields={['name', 'description']}
+              primaryField="name"
               className="w-full sm:max-w-xs"
+              renderOption={(project) => (
+                <div className="flex justify-between items-center py-0.5 px-1">
+                  <span className="font-semibold text-xs text-[var(--text-h)]">{project.name}</span>
+                  {project.description && (
+                    <span className="text-[10px] text-[var(--text-tertiary)] max-w-[150px] truncate ml-3">
+                      {project.description}
+                    </span>
+                  )}
+                </div>
+              )}
             />
             <Select
               value={statusFilter}
@@ -155,7 +168,7 @@ export const Projects: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800 md:border-none pt-3 md:pt-0">
+          <div className="hidden sm:flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800 md:border-none pt-3 md:pt-0">
             <Button
               type={viewMode === 'grid' ? 'primary' : 'default'}
               icon={<AppstoreOutlined />}
@@ -177,94 +190,100 @@ export const Projects: React.FC = () => {
         <Card className="shadow-sm border border-[var(--border)]">
           <Empty description="Không tìm thấy dự án nào" />
         </Card>
-      ) : viewMode === 'grid' ? (
-        <Row gutter={[20, 20]} className='mt-6'>
-          {filteredProjects.map((project: Project) => (
-            <Col xs={24} sm={12} lg={8} key={project.id}>
-              <Card
-                className="premium-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 notebook-card rounded-lg flex flex-col justify-between border border-[var(--border)] overflow-hidden"
-                bodyStyle={{ padding: '24px' }}
-              >
-                <div className="flex flex-col h-full justify-between">
-                  <div>
-                    {/* Header: Title & Status */}
-                    <div className="flex items-start justify-between mb-3.5">
-                      <h3
-                        onClick={() => navigate(`/projects/${project.id}`)}
-                        className="text-lg font-bold text-[var(--text-h)] hover:text-[var(--accent)] cursor-pointer line-clamp-1 flex-1 mr-3 transition-colors"
-                      >
-                        {project.name}
-                      </h3>
-                      <ProjectStatusTag status={project.status} />
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-[var(--text-secondary)] text-sm line-clamp-2 h-10 mb-5 leading-relaxed">
-                      {project.description || 'Không có mô tả chi tiết cho dự án này.'}
-                    </p>
-
-                    {/* Metrics Box */}
-                    <div className="grid grid-cols-2 gap-3 mb-5 bg-[var(--bg)]/40 p-3 rounded-lg border border-[var(--border)]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-md bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/10 shrink-0">
-                          <UserOutlined className="text-sm" />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-[11px] text-[var(--text-tertiary)] block font-semibold uppercase tracking-wider leading-none mb-1">Thành viên</span>
-                          <span className="text-sm font-bold text-[var(--text-h)] leading-none">
-                            {project._count?.members || 0}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-md bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/10 shrink-0">
-                          <ProjectOutlined className="text-sm" />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-[11px] text-[var(--text-tertiary)] block font-semibold uppercase tracking-wider leading-none mb-1">Công việc</span>
-                          <span className="text-sm font-bold text-[var(--text-h)] leading-none">
-                            {project._count?.tasks || 0}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer & CTA */}
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center text-xs text-[var(--text-tertiary)] font-medium pt-2 border-t border-[var(--border)]/60">
-                      <span className="flex items-center gap-1.5">
-                        <CalendarOutlined className="text-sm" /> {formatDate(project.createdAt).split(' ')[0]}
-                      </span>
-                      <span className="truncate max-w-[140px]">
-                        Chủ: <span className="font-semibold text-[var(--text-secondary)]">{project.owner?.name || 'N/A'}</span>
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => navigate(`/projects/${project.id}`)}
-                      className="group w-full py-2.5 px-4 bg-[var(--bg)] hover:bg-[var(--accent-bg)] border border-[var(--border)] hover:border-[var(--accent-border)] rounded-md text-[var(--text-secondary)] hover:text-[var(--accent)] font-bold text-sm flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer shadow-xs"
-                    >
-                      <span>Vào dự án</span>
-                      <ArrowRightOutlined className="text-xs transform group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
       ) : (
-        <div className="mt-6">
-          <Card className="shadow-sm overflow-hidden border border-[var(--border)]" bodyStyle={{ padding: 0 }}>
-            <Table
-              dataSource={filteredProjects}
-              columns={columns}
-              rowKey="id"
-              pagination={{ pageSize: 10 }}
-            />
-          </Card>
-        </div>
+        <>
+          {/* Chế độ Grid - Luôn hiển thị trên Mobile, toggle trên Desktop */}
+          <div className={viewMode === 'grid' ? 'block' : 'block sm:hidden'}>
+            <Row gutter={[20, 20]} className='mt-6'>
+              {filteredProjects.map((project: Project) => (
+                <Col xs={24} sm={12} lg={8} key={project.id}>
+                  <Card
+                    className="premium-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 notebook-card rounded-lg flex flex-col justify-between border border-[var(--border)] overflow-hidden"
+                    styles={{ body: { padding: '24px' } }}
+                  >
+                    <div className="flex flex-col h-full justify-between">
+                      <div>
+                        {/* Header: Title & Status */}
+                        <div className="flex items-start justify-between mb-3.5">
+                          <h3
+                            onClick={() => navigate(`/projects/${project.id}`)}
+                            className="text-lg font-bold text-[var(--text-h)] hover:text-[var(--accent)] cursor-pointer line-clamp-1 flex-1 mr-3 transition-colors"
+                          >
+                            {project.name}
+                          </h3>
+                          <ProjectStatusTag status={project.status} />
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-[var(--text-secondary)] text-sm line-clamp-2 h-10 mb-5 leading-relaxed">
+                          {project.description || 'Không có mô tả chi tiết cho dự án này.'}
+                        </p>
+
+                        {/* Metrics Box */}
+                        <div className="grid grid-cols-2 gap-3 mb-5 bg-[var(--bg)]/40 p-3 rounded-lg border border-[var(--border)]">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-md bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/10 shrink-0">
+                              <UserOutlined className="text-sm" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-[11px] text-[var(--text-tertiary)] block font-semibold uppercase tracking-wider leading-none mb-1">Thành viên</span>
+                              <span className="text-sm font-bold text-[var(--text-h)] leading-none">
+                                {project._count?.members || 0}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-md bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/10 shrink-0">
+                              <ProjectOutlined className="text-sm" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-[11px] text-[var(--text-tertiary)] block font-semibold uppercase tracking-wider leading-none mb-1">Công việc</span>
+                              <span className="text-sm font-bold text-[var(--text-h)] leading-none">
+                                {project._count?.tasks || 0}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer & CTA */}
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center text-xs text-[var(--text-tertiary)] font-medium pt-2 border-t border-[var(--border)]/60">
+                          <span className="flex items-center gap-1.5">
+                            <CalendarOutlined className="text-sm" /> {formatDate(project.createdAt).split(' ')[0]}
+                          </span>
+                          <span className="truncate max-w-[140px]">
+                            Chủ: <span className="font-semibold text-[var(--text-secondary)]">{project.owner?.name || 'N/A'}</span>
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => navigate(`/projects/${project.id}`)}
+                          className="group w-full py-2.5 px-4 bg-[var(--bg)] hover:bg-[var(--accent-bg)] border border-[var(--border)] hover:border-[var(--accent-border)] rounded-md text-[var(--text-secondary)] hover:text-[var(--accent)] font-bold text-sm flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer shadow-xs"
+                        >
+                          <span>Vào dự án</span>
+                          <ArrowRightOutlined className="text-xs transform group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      </div>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </div>
+
+          {/* Chế độ List - Chỉ hiển thị trên Desktop khi chọn */}
+          <div className={`mt-6 ${viewMode === 'list' ? 'hidden sm:block' : 'hidden'}`}>
+            <Card className="shadow-sm overflow-hidden border border-[var(--border)]" styles={{ body: { padding: 0 } }}>
+              <Table
+                dataSource={filteredProjects}
+                columns={columns}
+                rowKey="id"
+                pagination={{ pageSize: 10 }}
+              />
+            </Card>
+          </div>
+        </>
       )}
 
       {/* Create Project Modal */}

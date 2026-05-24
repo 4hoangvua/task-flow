@@ -126,7 +126,11 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Tách biệt và module hóa các component dùng chung (ProjectStatusTag, PriorityTag, TaskIdBadge) (2026-05-23)
 - [x] Tăng cường màu sắc Tag nổi bật, loại bỏ hiển thị task ID trên card Kanban và Việt hóa nhãn chi tiết (2026-05-23)
 - [x] Cập nhật quy tắc phản hồi ngắn gọn cho Agent trong AGENTS.md (2026-05-23)
-📁 Chi tiết: [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) (Xem thêm [`docs/changelogs/2026-05-22.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-22.md) and [`docs/changelogs/2026-05-21.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-21.md) cho các thay đổi trước đó)
+- [x] Khắc phục cảnh báo Ant Design, sửa chữ mờ ở hai chế độ sáng/tối và tối ưu responsive mobile cho toàn bộ các trang (2026-05-24)
+- [x] Tích hợp tính năng tìm kiếm và gợi ý email thành viên tự động (AutoComplete) cho Leader khi mời thành viên mới vào dự án (2026-05-24)
+- [x] Cấu hình địa chỉ IP AWS mới cho backend, frontend và Nginx (2026-05-24)
+- [x] Chuyển đổi công cụ Tìm kiếm sang AutoComplete gợi ý và tạo component dùng chung (2026-05-24)
+📁 Chi tiết: [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) (Xem thêm [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) và các log trước đó)
 
 
 

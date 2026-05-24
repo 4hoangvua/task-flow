@@ -40,15 +40,10 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 30 | Tách biệt các component UI dùng chung | 2026-05-23 | Tạo ProjectStatusTag, PriorityTag và TaskIdBadge dưới components/common để dễ bảo trì tập trung |
 | 31 | Khắc phục màu sắc Tag & Dọn dẹp Card Kanban | 2026-05-23 | Dùng !important cho Tag để giữ màu, ẩn Task ID khỏi Kanban card và Việt hóa nhãn chi tiết |
 | 32 | Cập nhật quy tắc phản hồi trong AGENTS.md | 2026-05-23 | Thêm quy định trả lời ngắn gọn "Đã xong" và chỉ ra ngày của file log khi hoàn tất sửa chữa |
-
-
-
-
-
-
-
-
-
+| 33 | Sửa lỗi warning Antd, chữ mờ và responsive mobile | 2026-05-24 | Đã sửa bodyStyle, thêm biến màu `--text-secondary`/`--text-tertiary`, tích hợp Drawer menu, Segmented columns và card list |
+| 34 | Tính năng Tìm kiếm Email & Tự động gợi ý thành viên dự án | 2026-05-24 | Đã tích hợp AutoComplete gợi ý email khi Leader click vào trường mời thành viên |
+| 35 | Cấu hình địa chỉ IP AWS mới | 2026-05-24 | Đã cập nhật IP trên server AWS (Nginx & Backend) và frontend env ở local |
+| 36 | Chuyển đổi công cụ Tìm kiếm sang AutoComplete gợi ý | 2026-05-24 | Đã tạo component chung SearchAutoComplete và tích hợp thành công trên các trang Dự án, Công việc của tôi và Kanban, tsc thành công |
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 

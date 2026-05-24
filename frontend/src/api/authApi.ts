@@ -31,4 +31,9 @@ export const authApi = {
     const res = await api.patch('/auth/password', data);
     return res.data;
   },
+
+  searchUsers: async (query: string) => {
+    const res = await api.get<{ success: boolean; data: User[] }>('/auth/users/search', { params: { query } });
+    return res.data.data;
+  },
 };

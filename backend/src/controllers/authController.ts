@@ -233,3 +233,35 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     next(error);
   }
 }
+
+export async function searchUsers(req: Request, res: Response, next: NextFunction) {
+  try {
+    const query = req.query.query as string || '';
+
+    const users = await prisma.user.findMany({
+      where: query ? {
+        OR: [
+          { email: { contains: query } },
+          { name: { contains: query } }
+        ],
+        isActive: true,
+      } : {
+        isActive: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+      },
+      take: 10,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

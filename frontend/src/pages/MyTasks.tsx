@@ -9,6 +9,7 @@ import type { Task, TaskStatus } from '../types';
 import { TaskDetailModal } from '../components/task/TaskDetailModal';
 import { PriorityTag } from '../components/common/PriorityTag';
 import { TaskIdBadge } from '../components/common/TaskIdBadge';
+import { SearchAutoComplete } from '../components/common/SearchAutoComplete';
 
 export const MyTasks: React.FC = () => {
   const { user: currentUser } = useAuth();
@@ -23,6 +24,18 @@ export const MyTasks: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+
+  // Mobile responsive states
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Set default project to first active project if available
   useEffect(() => {
@@ -182,13 +195,22 @@ export const MyTasks: React.FC = () => {
                 )}
 
                 {/* Search input */}
-                <Input
+                <SearchAutoComplete
                   placeholder="Tìm kiếm công việc..."
-                  prefix={<SearchOutlined className="text-[var(--text-tertiary)]" />}
                   value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
+                  onChange={setSearchText}
+                  dataSource={myTasks}
+                  searchFields={['title', 'description']}
+                  primaryField="title"
                   className="w-full sm:max-w-xs"
-                  allowClear
+                  renderOption={(task) => (
+                    <div className="flex justify-between items-center py-0.5 px-1">
+                      <span className="font-semibold text-xs text-[var(--text-h)] truncate max-w-[180px]">{task.title}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-[var(--bg)] border border-[var(--border)] rounded text-[var(--text-secondary)] font-bold shrink-0 ml-3">
+                        {task.status === 'TODO' ? 'Cần làm' : task.status === 'IN_PROGRESS' ? 'Đang làm' : task.status === 'REVIEW' ? 'Đánh giá' : 'Hoàn thành'}
+                      </span>
+                    </div>
+                  )}
                 />
 
                 {/* Status Selector */}
@@ -240,6 +262,61 @@ export const MyTasks: React.FC = () => {
                         </div>
                       }
                     />
+                  </div>
+                ) : isMobile ? (
+                  <div className="p-4 space-y-4">
+                    {filteredMyTasks.map((task) => {
+                      const isOverdue = task.deadline && new Date(task.deadline) < new Date() && task.status !== 'DONE';
+                      return (
+                        <div
+                          key={task.id}
+                          className={`p-4 bg-[var(--bg-card)] border rounded-lg shadow-sm hover:shadow-md premium-card ${
+                            isOverdue ? 'border-rose-200 dark:border-rose-950/40 bg-rose-50/5 dark:bg-rose-950/5' : 'border-[var(--border)]'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2 mb-2">
+                            <span
+                              onClick={() => {
+                                setSelectedTaskId(task.id);
+                                setIsDetailOpen(true);
+                              }}
+                              className="font-bold text-base text-[var(--accent)] hover:text-[var(--accent)]/95 cursor-pointer line-clamp-2"
+                            >
+                              {task.title}
+                            </span>
+                            <PriorityTag priority={task.priority} />
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] mt-3 pt-3 border-t border-[var(--border)]/60">
+                            <div>
+                              <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">TRẠNG THÁI</span>
+                              <Select
+                                value={task.status}
+                                onChange={(val) => handleStatusChange(task.id, val)}
+                                size="small"
+                                className="w-28 text-xs"
+                                options={[
+                                  { value: 'TODO', label: 'Cần làm' },
+                                  { value: 'IN_PROGRESS', label: 'Đang làm' },
+                                  { value: 'REVIEW', label: 'Đánh giá' },
+                                  { value: 'DONE', label: 'Hoàn thành' },
+                                ]}
+                              />
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">HẠN CHÓT</span>
+                              {task.deadline ? (
+                                <span className={`font-semibold ${isOverdue ? 'text-rose-500 font-bold' : ''}`}>
+                                  {new Date(task.deadline).toLocaleDateString('vi-VN')}
+                                </span>
+                              ) : (
+                                <span className="text-[var(--text-tertiary)]">Không có</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <Table

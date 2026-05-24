@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Tag, Avatar, Space, Button, Input, List, Divider, Select, Spin, Tooltip, Popconfirm } from 'antd';
+import { Modal, Tag, Avatar, Space, Button, Input, Divider, Select, Spin, Tooltip, Popconfirm } from 'antd';
 import {
   UserOutlined,
   CalendarOutlined,
@@ -197,42 +197,44 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </div>
               </div>
 
-              <List
-                dataSource={comments}
-                locale={{ emptyText: <span className="text-xs text-[var(--text-tertiary)]">Chưa có bình luận nào</span> }}
-                renderItem={(item) => (
-                  <div className="flex gap-3 p-3.5 mb-3 bg-[var(--bg)]/40 border border-[var(--border)] rounded-lg hover:shadow-xs transition-shadow">
-                    <Avatar src={item.user?.avatar} className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold mt-0.5">
-                      {item.user?.name ? item.user.name[0] : 'U'}
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center">
-                        <div className="text-xs font-semibold text-[var(--text-h)]">
-                          {item.user?.name}
+              {comments.length === 0 ? (
+                <div className="py-4 text-center text-xs text-[var(--text-tertiary)]">Chưa có bình luận nào</div>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                  {comments.map((item) => (
+                    <div key={item.id} className="flex gap-3 p-3.5 bg-[var(--bg)]/40 border border-[var(--border)] rounded-lg hover:shadow-xs transition-shadow">
+                      <Avatar src={item.user?.avatar} className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold mt-0.5">
+                        {item.user?.name ? item.user.name[0] : 'U'}
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <div className="text-xs font-semibold text-[var(--text-h)]">
+                            {item.user?.name}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-[var(--text-tertiary)]">{formatDate(item.createdAt)}</span>
+                            {(currentUser?.id === item.userId || computedIsProjectLeader) && (
+                              <Tooltip title="Xóa bình luận">
+                                <Button
+                                  type="text"
+                                  danger
+                                  icon={<DeleteOutlined className="text-xs" />}
+                                  size="small"
+                                  className="h-6 w-6 flex items-center justify-center p-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                  onClick={() => handleDeleteComment(item.id)}
+                                />
+                              </Tooltip>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-[var(--text-tertiary)]">{formatDate(item.createdAt)}</span>
-                          {(currentUser?.id === item.userId || computedIsProjectLeader) && (
-                            <Tooltip title="Xóa bình luận">
-                              <Button
-                                type="text"
-                                danger
-                                icon={<DeleteOutlined className="text-xs" />}
-                                size="small"
-                                className="h-6 w-6 flex items-center justify-center p-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-                                onClick={() => handleDeleteComment(item.id)}
-                              />
-                            </Tooltip>
-                          )}
+                        <div className="text-xs text-[var(--text-secondary)] mt-1">
+                          {item.content}
                         </div>
-                      </div>
-                      <div className="text-xs text-[var(--text-secondary)] mt-1">
-                        {item.content}
                       </div>
                     </div>
-                  </div>
-                )}
-              />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Tabs, Card, Row, Col, Progress, Tag, Avatar, Table, Form, Input, Select, Button, Space, Popconfirm, Spin, Empty } from 'antd';
+import { Tabs, Card, Row, Col, Progress, Tag, Avatar, Table, Form, Input, Select, Button, Space, Popconfirm, Spin, Empty, AutoComplete } from 'antd';
+import { authApi } from '../api/authApi';
 import {
   ProjectOutlined,
   InfoCircleOutlined,
@@ -18,7 +19,7 @@ import { useProjectDetail, useProjectMembers } from '../hooks/useProjects';
 import { useTasks } from '../hooks/useTasks';
 import { TaskBoard } from '../components/task/TaskBoard';
 import { formatDate, getRoleColor } from '../utils/helpers';
-import type { ProjectMember } from '../types';
+import type { ProjectMember, User } from '../types';
 import { ProjectStatusTag } from '../components/common/ProjectStatusTag';
 
 export const ProjectDetail: React.FC = () => {
@@ -32,20 +33,47 @@ export const ProjectDetail: React.FC = () => {
   const { members, isLoading: isLoadingMembers, addMember, updateMemberRole, deleteMember } = useProjectMembers(id || '');
   const { tasks } = useTasks(id || '');
 
-  // Forms
   const [inviteForm] = Form.useForm();
   const [settingsForm] = Form.useForm();
 
+  // Invite Member Search Autocomplete
+  const [inviteSearchOptions, setInviteSearchOptions] = useState<{ value: string; label: React.ReactNode }[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+
+  const handleSearchUser = async (value: string) => {
+    setIsSearchingUsers(true);
+    try {
+      const data = await authApi.searchUsers(value || '');
+      const options = data.map((u: User) => ({
+        value: u.email,
+        label: (
+          <div className="flex justify-between items-center py-1">
+            <span className="font-semibold text-xs text-[var(--text-h)]">{u.name}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] ml-2">{u.email}</span>
+          </div>
+        ),
+      }));
+      setInviteSearchOptions(options);
+    } catch (err) {
+      // Quiet fail or silent error handling
+    } finally {
+      setIsSearchingUsers(false);
+    }
+  };
+
   // Initialize Settings Form when project loads
   useEffect(() => {
-    if (project) {
-      settingsForm.setFieldsValue({
-        name: project.name,
-        description: project.description,
-        status: project.status,
-      });
+    if (project && activeTab === 'settings') {
+      const timer = setTimeout(() => {
+        settingsForm.setFieldsValue({
+          name: project.name,
+          description: project.description,
+          status: project.status,
+        });
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [project, settingsForm]);
+  }, [project, activeTab, settingsForm]);
 
   if (!id) {
     return <Card><Empty description="Không tìm thấy ID dự án" /></Card>;
@@ -233,7 +261,7 @@ export const ProjectDetail: React.FC = () => {
               </span>
             ),
             children: (
-              <Space direction="vertical" size={20} className="w-full">
+              <Space orientation="vertical" size={20} className="w-full">
                 <Row gutter={[20, 20]}>
                   {/* Overview Stats */}
                   <Col xs={24} lg={16}>
@@ -244,7 +272,7 @@ export const ProjectDetail: React.FC = () => {
                             type="circle"
                             percent={progressPercent}
                             strokeColor={{ '0%': 'var(--accent)', '100%': '#10b981' }}
-                            width={132}
+                            size={132}
                             strokeWidth={8}
                           />
                         </Col>
@@ -322,7 +350,7 @@ export const ProjectDetail: React.FC = () => {
               </span>
             ),
             children: (
-              <Space direction="vertical" size={20} className="w-full">
+              <Space orientation="vertical" size={20} className="w-full">
                 {/* Invite Member Card */}
                 {isProjectLeader && (
                   <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Mời thành viên mới</span>} className="shadow-sm border border-[var(--border)]">
@@ -336,7 +364,16 @@ export const ProjectDetail: React.FC = () => {
                         className="flex-1"
                         style={{ minWidth: 260 }}
                       >
-                        <Input prefix={<MailOutlined className="text-[var(--text-tertiary)]" />} placeholder="Nhập email thành viên cần mời..." />
+                        <AutoComplete
+                          options={inviteSearchOptions}
+                          onSearch={handleSearchUser}
+                          onFocus={() => handleSearchUser(inviteForm.getFieldValue('email') || '')}
+                          className="w-full animate-in fade-in duration-200"
+                          notFoundContent={isSearchingUsers ? <Spin size="small" className="flex justify-center p-2" /> : undefined}
+                          filterOption={false}
+                        >
+                          <Input prefix={<MailOutlined className="text-[var(--text-tertiary)]" />} placeholder="Nhập hoặc tìm kiếm email thành viên..." />
+                        </AutoComplete>
                       </Form.Item>
 
                       <Form.Item
@@ -362,14 +399,78 @@ export const ProjectDetail: React.FC = () => {
                 )}
 
                 {/* Members list table */}
-                <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Danh sách thành viên</span>} className="shadow-sm overflow-hidden border border-[var(--border)]" bodyStyle={{ padding: 0 }}>
-                  <Table
-                    dataSource={members}
-                    columns={isProjectLeader ? memberColumns : memberColumns.filter((col) => col.key !== 'action')}
-                    rowKey="id"
-                    loading={isLoadingMembers}
-                    pagination={{ pageSize: 10 }}
-                  />
+                <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Danh sách thành viên</span>} className="shadow-sm overflow-hidden border border-[var(--border)]" styles={{ body: { padding: 0 } }}>
+                  {/* Desktop Table View */}
+                  <div className="hidden sm:block">
+                    <Table
+                      dataSource={members}
+                      columns={isProjectLeader ? memberColumns : memberColumns.filter((col) => col.key !== 'action')}
+                      rowKey="id"
+                      loading={isLoadingMembers}
+                      pagination={{ pageSize: 10 }}
+                    />
+                  </div>
+
+                  {/* Mobile Card List View */}
+                  <div className="block sm:hidden p-4">
+                    {isLoadingMembers ? (
+                      <div className="flex justify-center p-6"><Spin /></div>
+                    ) : members.length === 0 ? (
+                      <Empty description="Chưa có thành viên" />
+                    ) : (
+                      <div className="space-y-4">
+                        {members.map((record) => {
+                          const isSelf = record.userId === currentUser?.id;
+                          const isTargetOwner = record.userId === project.ownerId;
+                          return (
+                            <div key={record.id} className="p-3 bg-[var(--bg)]/40 border border-[var(--border)] rounded-lg flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Avatar src={record.user?.avatar} icon={<UserOutlined />} className="bg-[var(--accent)]" />
+                                <div className="flex flex-col">
+                                  <span className="font-semibold text-sm text-[var(--text-h)]">
+                                    {record.user?.name || 'N/A'}
+                                    {project.ownerId === record.userId && (
+                                      <Tag color="red" className="ml-1 text-[9px] inline-block">Chủ</Tag>
+                                    )}
+                                  </span>
+                                  <span className="text-xs text-[var(--text-tertiary)] break-all">{record.user?.email}</span>
+                                  <div className="mt-1">
+                                    {isProjectLeader && !isTargetOwner && !isSelf ? (
+                                      <Select
+                                        value={record.role}
+                                        onChange={(val) => handleUpdateRole(record.userId, val)}
+                                        size="small"
+                                        className="w-28 text-xs"
+                                        options={[
+                                          { value: 'LEADER', label: 'Leader' },
+                                          { value: 'MEMBER', label: 'Member' },
+                                        ]}
+                                      />
+                                    ) : (
+                                      <Tag color={getRoleColor(record.role)} className="text-[10px] m-0">{record.role}</Tag>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {isProjectLeader && !isTargetOwner && !isSelf && (
+                                <Popconfirm
+                                  title="Xóa thành viên"
+                                  description="Bạn có chắc chắn muốn xóa thành viên này?"
+                                  onConfirm={() => handleDeleteMember(record.userId)}
+                                  okText="Xóa"
+                                  cancelText="Hủy"
+                                  okButtonProps={{ danger: true }}
+                                >
+                                  <Button type="text" danger icon={<DeleteOutlined />} size="small" />
+                                </Popconfirm>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </Card>
               </Space>
             ),

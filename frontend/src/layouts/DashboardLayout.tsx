@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation, useParams, Link } from 'react-router-dom';
-import { Layout, Menu, Button, Dropdown, Badge, Avatar, Space, List } from 'antd';
+import { Layout, Menu, Button, Dropdown, Badge, Avatar, Space, Drawer } from 'antd';
 import {
   DashboardOutlined,
   ProjectOutlined,
@@ -19,6 +19,8 @@ import {
   EditOutlined,
   MessageOutlined,
   ClockCircleOutlined,
+  MenuOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { useUiStore } from '../stores/uiStore';
 import { useNotifications } from '../hooks/useNotifications';
@@ -41,6 +43,26 @@ export const DashboardLayout: React.FC = () => {
   const { project } = useProjectDetail(projectId || '');
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications({ limit: 5 });
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint is 1024px
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleToggleSidebar = () => {
+    if (isMobile) {
+      setDrawerOpen(!drawerOpen);
+    } else {
+      toggleSidebar();
+    }
+  };
+
   const menuItems = [
     {
       key: '/dashboard',
@@ -62,6 +84,11 @@ export const DashboardLayout: React.FC = () => {
       icon: <SettingOutlined />,
       label: 'Cấu hình',
     },
+    ...(user?.role === 'ADMIN' ? [{
+      key: '/admin',
+      icon: <SafetyCertificateOutlined />,
+      label: 'Quản trị hệ thống',
+    }] : []),
   ];
 
   // User Profile Dropdown Card (Custom dropdownRender)
@@ -156,36 +183,39 @@ export const DashboardLayout: React.FC = () => {
         )}
       </div>
       <div className="max-h-72 overflow-y-auto">
-        <List
-          dataSource={notifications}
-          locale={{ emptyText: <div className="py-8 text-center text-[var(--text-tertiary)] text-sm">Không có thông báo mới</div> }}
-          renderItem={(item) => (
-            <List.Item
-              onClick={() => {
-                if (!item.isRead) markAsRead(item.id);
-                if (item.projectId) navigate(`/projects/${item.projectId}`);
-              }}
-              className={`p-3 cursor-pointer transition-colors duration-200 hover:bg-[var(--bg)]/80 border-b border-[var(--border)] last:border-0 ${
-                !item.isRead ? 'bg-[var(--accent-bg)]' : ''
-              }`}
-            >
-              <div className="flex gap-3 w-full items-start">
-                {getNotificationIcon(item.type)}
-                <div className="flex-grow min-w-0">
-                  <div className="flex justify-between items-center text-sm font-semibold text-[var(--text)]">
-                    <span className="truncate pr-1">{item.title}</span>
-                    <span className="text-xs text-[var(--text-tertiary)] font-normal shrink-0">
-                      {new Date(item.createdAt).toLocaleDateString('vi-VN')}
-                    </span>
+        {notifications.length === 0 ? (
+          <div className="py-8 text-center text-[var(--text-tertiary)] text-sm">Không có thông báo mới</div>
+        ) : (
+          <div className="flex flex-col">
+            {notifications.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  if (!item.isRead) markAsRead(item.id);
+                  if (item.projectId) navigate(`/projects/${item.projectId}`);
+                }}
+                className={`p-3 cursor-pointer transition-colors duration-200 hover:bg-[var(--bg)]/80 border-b border-[var(--border)] last:border-0 ${
+                  !item.isRead ? 'bg-[var(--accent-bg)]' : ''
+                }`}
+              >
+                <div className="flex gap-3 w-full items-start">
+                  {getNotificationIcon(item.type)}
+                  <div className="flex-grow min-w-0">
+                    <div className="flex justify-between items-center text-sm font-semibold text-[var(--text)]">
+                      <span className="truncate pr-1">{item.title}</span>
+                      <span className="text-xs text-[var(--text-tertiary)] font-normal shrink-0">
+                        {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                    <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2 leading-relaxed">
+                      {item.message}
+                    </p>
                   </div>
-                  <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2 leading-relaxed">
-                    {item.message}
-                  </p>
                 </div>
               </div>
-            </List.Item>
-          )}
-        />
+            ))}
+          </div>
+        )}
       </div>
       <div className="p-2 border-t border-[var(--border)] text-center bg-[var(--bg)]/30">
         <span className="text-xs text-[var(--text-tertiary)]">Xem tất cả các thông báo trong dự án</span>
@@ -270,41 +300,43 @@ export const DashboardLayout: React.FC = () => {
 
   return (
     <Layout className="h-screen overflow-hidden">
-      {/* Sider (Sidebar) */}
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={sidebarCollapsed}
-        theme={themeMode}
-        className="shadow-md border-r border-slate-200/50 dark:border-slate-800/50 h-full overflow-y-auto z-50 notebook-card"
-        style={{
-          background: 'var(--bg-card)',
-        }}
-      >
-        <div className="h-16 flex items-center justify-center border-b border-slate-200/40 dark:border-slate-800/40 px-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-sm">TF</span>
-            </div>
-            {!sidebarCollapsed && (
-              <span className="font-bold text-lg tracking-wide bg-gradient-to-r from-slate-900 to-indigo-600 dark:from-slate-100 dark:to-indigo-400 bg-clip-text text-transparent">
-                TaskFlow
-              </span>
-            )}
-          </div>
-        </div>
-
-        <Menu
-          mode="inline"
-          selectedKeys={[location.pathname.startsWith('/projects') ? '/projects' : location.pathname]}
-          onClick={({ key }) => navigate(key)}
-          items={menuItems}
-          className="mt-4 border-none"
+      {/* Sider (Sidebar) - Desktop Only */}
+      {!isMobile && (
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={sidebarCollapsed}
+          theme={themeMode}
+          className="shadow-md border-r border-slate-200/50 dark:border-slate-800/50 h-full overflow-y-auto z-50 notebook-card"
           style={{
-            background: 'transparent',
+            background: 'var(--bg-card)',
           }}
-        />
-      </Sider>
+        >
+          <div className="h-16 flex items-center justify-center border-b border-slate-200/40 dark:border-slate-800/40 px-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-sm">TF</span>
+              </div>
+              {!sidebarCollapsed && (
+                <span className="font-bold text-lg tracking-wide bg-gradient-to-r from-slate-900 to-indigo-600 dark:from-slate-100 dark:to-indigo-400 bg-clip-text text-transparent">
+                  TaskFlow
+                </span>
+              )}
+            </div>
+          </div>
+
+          <Menu
+            mode="inline"
+            selectedKeys={[location.pathname.startsWith('/projects') ? '/projects' : location.pathname]}
+            onClick={({ key }) => navigate(key)}
+            items={menuItems}
+            className="mt-4 border-none"
+            style={{
+              background: 'transparent',
+            }}
+          />
+        </Sider>
+      )}
 
       {/* Main Layout */}
       <Layout className="h-screen flex flex-col overflow-hidden">
@@ -320,8 +352,8 @@ export const DashboardLayout: React.FC = () => {
           <div className="flex items-center">
             <Button
               type="text"
-              icon={sidebarCollapsed ? <MenuUnfoldOutlined className="text-[var(--accent)]" /> : <MenuFoldOutlined className="text-[var(--accent)]" />}
-              onClick={toggleSidebar}
+              icon={isMobile ? <MenuOutlined className="text-[var(--accent)]" /> : sidebarCollapsed ? <MenuUnfoldOutlined className="text-[var(--accent)]" /> : <MenuFoldOutlined className="text-[var(--accent)]" />}
+              onClick={handleToggleSidebar}
               className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[var(--bg)] transition-all duration-200 cursor-pointer"
             />
             {renderBreadcrumbs()}
@@ -345,7 +377,7 @@ export const DashboardLayout: React.FC = () => {
             </button>
 
             {/* Notification Bell */}
-            <Dropdown dropdownRender={() => notificationMenu()} trigger={['click']} placement="bottomRight">
+            <Dropdown popupRender={() => notificationMenu()} trigger={['click']} placement="bottomRight">
               <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--border)] hover:bg-[var(--bg)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-xs bg-[var(--bg-card)] relative">
                 <Badge count={unreadCount} overflowCount={99} size="small" offset={[2, -2]} className="z-10">
                   <BellOutlined className={`text-lg text-slate-600 dark:text-slate-300 transition-colors ${unreadCount > 0 ? 'animate-bounce' : ''}`} style={{ animationDuration: '2s' }} />
@@ -354,7 +386,7 @@ export const DashboardLayout: React.FC = () => {
             </Dropdown>
 
             {/* User Dropdown */}
-            <Dropdown dropdownRender={() => userMenuCard()} trigger={['click']} placement="bottomRight">
+            <Dropdown popupRender={() => userMenuCard()} trigger={['click']} placement="bottomRight">
               <button className="w-9 md:w-auto h-9 flex items-center justify-center md:justify-start gap-2 p-0 md:p-1.5 md:px-2.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg)] text-[var(--text-secondary)] transition-all duration-200 cursor-pointer shadow-sm bg-[var(--bg-card)] outline-none text-left select-none shrink-0 leading-none">
                 <Avatar
                   src={user?.avatar || undefined}
@@ -377,6 +409,43 @@ export const DashboardLayout: React.FC = () => {
           <Outlet />
         </Content>
       </Layout>
+
+      {/* Mobile Drawer Navigation */}
+      <Drawer
+        title={
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-sm">TF</span>
+            </div>
+            <span className="font-bold text-lg tracking-wide bg-gradient-to-r from-slate-900 to-indigo-600 dark:from-slate-100 dark:to-indigo-400 bg-clip-text text-transparent">
+              TaskFlow
+            </span>
+          </div>
+        }
+        placement="left"
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        size={280}
+        styles={{ body: { padding: 0 } }}
+        className="dark:bg-[#18181b] dark:text-white"
+        style={{
+          background: 'var(--bg-card)',
+        }}
+      >
+        <Menu
+          mode="inline"
+          selectedKeys={[location.pathname.startsWith('/projects') ? '/projects' : location.pathname]}
+          onClick={({ key }) => {
+            navigate(key);
+            setDrawerOpen(false);
+          }}
+          items={menuItems}
+          className="mt-4 border-none"
+          style={{
+            background: 'transparent',
+          }}
+        />
+      </Drawer>
     </Layout>
   );
 };

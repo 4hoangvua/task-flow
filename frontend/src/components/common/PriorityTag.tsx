@@ -20,7 +20,7 @@ export const PriorityTag: React.FC<PriorityTagProps> = ({ priority, className = 
 
   return (
     <Tag
-      bordered={false}
+      variant="filled"
       className={`inline-flex items-center m-0 text-xs font-bold uppercase tracking-wider py-0.5 px-2.5 rounded-full ${
         isHighOrUrgent
           ? '!bg-rose-500/15 !text-rose-400 !border !border-rose-500/30'

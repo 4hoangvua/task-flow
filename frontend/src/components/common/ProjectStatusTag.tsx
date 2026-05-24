@@ -11,7 +11,7 @@ export const ProjectStatusTag: React.FC<ProjectStatusTagProps> = ({ status, clas
 
   return (
     <Tag
-      bordered={false}
+      variant="filled"
       className={`inline-flex items-center text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
         isActive
           ? '!bg-emerald-500/15 !text-emerald-400 !border !border-emerald-500/30'
