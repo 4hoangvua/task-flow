@@ -45,6 +45,7 @@ export const DashboardLayout: React.FC = () => {
 
   const [isMobile, setIsMobile] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -377,13 +378,24 @@ export const DashboardLayout: React.FC = () => {
             </button>
 
             {/* Notification Bell */}
-            <Dropdown popupRender={() => notificationMenu()} trigger={['click']} placement="bottomRight">
-              <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--border)] hover:bg-[var(--bg)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-xs bg-[var(--bg-card)] relative">
+            {isMobile ? (
+              <button
+                onClick={() => setNotificationDrawerOpen(true)}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--border)] hover:bg-[var(--bg)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-xs bg-[var(--bg-card)] relative"
+              >
                 <Badge count={unreadCount} overflowCount={99} size="small" offset={[2, -2]} className="z-10">
                   <BellOutlined className={`text-lg text-slate-600 dark:text-slate-300 transition-colors ${unreadCount > 0 ? 'animate-bounce' : ''}`} style={{ animationDuration: '2s' }} />
                 </Badge>
               </button>
-            </Dropdown>
+            ) : (
+              <Dropdown popupRender={() => notificationMenu()} trigger={['click']} placement="bottomRight">
+                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--border)] hover:bg-[var(--bg)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-xs bg-[var(--bg-card)] relative">
+                  <Badge count={unreadCount} overflowCount={99} size="small" offset={[2, -2]} className="z-10">
+                    <BellOutlined className={`text-lg text-slate-600 dark:text-slate-300 transition-colors ${unreadCount > 0 ? 'animate-bounce' : ''}`} style={{ animationDuration: '2s' }} />
+                  </Badge>
+                </button>
+              </Dropdown>
+            )}
 
             {/* User Dropdown */}
             <Dropdown popupRender={() => userMenuCard()} trigger={['click']} placement="bottomRight">
@@ -405,7 +417,7 @@ export const DashboardLayout: React.FC = () => {
         </Header>
 
         {/* Content Area */}
-        <Content className="flex-1 overflow-y-auto px-6 pb-6 pt-0 transition-colors duration-300" style={{ background: 'var(--bg)' }}>
+        <Content className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 sm:pb-8 pt-0 transition-colors duration-300" style={{ background: 'var(--bg)' }}>
           <Outlet />
         </Content>
       </Layout>
@@ -445,6 +457,71 @@ export const DashboardLayout: React.FC = () => {
             background: 'transparent',
           }}
         />
+      </Drawer>
+
+      {/* Mobile Notification Drawer */}
+      <Drawer
+        title={
+          <div className="flex justify-between items-center w-full pr-4">
+            <span className="font-semibold text-base text-[var(--text-h)]">Thông báo</span>
+            {unreadCount > 0 && (
+              <Button type="link" size="small" className="p-0 text-sm text-[var(--accent)] hover:text-[var(--accent)]/90 font-medium" onClick={() => markAllAsRead()}>
+                Đọc tất cả
+              </Button>
+            )}
+          </div>
+        }
+        placement="right"
+        onClose={() => setNotificationDrawerOpen(false)}
+        open={notificationDrawerOpen}
+        width={320}
+        styles={{ body: { padding: 0 } }}
+        className="dark:bg-[#18181b] dark:text-white"
+        style={{
+          background: 'var(--bg-card)',
+        }}
+      >
+        <div className="h-full flex flex-col justify-between">
+          <div className="flex-1 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <div className="py-12 text-center text-[var(--text-tertiary)] text-sm">Không có thông báo mới</div>
+            ) : (
+              <div className="flex flex-col">
+                {notifications.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      if (!item.isRead) markAsRead(item.id);
+                      if (item.projectId) navigate(`/projects/${item.projectId}`);
+                      setNotificationDrawerOpen(false);
+                    }}
+                    className={`p-4 cursor-pointer transition-colors duration-200 hover:bg-[var(--bg)]/80 border-b border-[var(--border)] last:border-0 ${
+                      !item.isRead ? 'bg-[var(--accent-bg)]' : ''
+                    }`}
+                  >
+                    <div className="flex gap-3 w-full items-start">
+                      {getNotificationIcon(item.type)}
+                      <div className="flex-grow min-w-0">
+                        <div className="flex justify-between items-center text-sm font-semibold text-[var(--text)]">
+                          <span className="truncate pr-1">{item.title}</span>
+                          <span className="text-xs text-[var(--text-tertiary)] font-normal shrink-0">
+                            {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+                        <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2 leading-relaxed">
+                          {item.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="p-4 border-t border-[var(--border)] text-center bg-[var(--bg)]/30 shrink-0">
+            <span className="text-xs text-[var(--text-tertiary)]">Xem tất cả các thông báo trong dự án</span>
+          </div>
+        </div>
       </Drawer>
     </Layout>
   );

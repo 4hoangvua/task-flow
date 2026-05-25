@@ -68,7 +68,7 @@ export const Settings: React.FC = () => {
               </h3>
               <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{user?.email}</p>
               <Tag color="purple" className="mt-2 uppercase font-semibold">
-                {user?.role}
+                {user?.role === 'ADMIN' ? 'Quản trị viên' : user?.role === 'LEADER' ? 'Trưởng nhóm' : 'Thành viên'}
               </Tag>
             </div>
 

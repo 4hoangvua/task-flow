@@ -112,8 +112,8 @@ export async function createTask(req: Request, res: Response, next: NextFunction
           data: {
             userId: data.assigneeId,
             type: 'TASK_ASSIGNED',
-            title: 'Task Assigned',
-            message: `You have been assigned to task: "${task.title}"`,
+            title: 'Nhiệm vụ được giao',
+            message: `Bạn đã được giao nhiệm vụ: "${task.title}"`,
             taskId: task.id,
             projectId: data.projectId,
           },
@@ -263,8 +263,8 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
           data: {
             userId: data.assigneeId,
             type: 'TASK_ASSIGNED',
-            title: 'Task Reassigned',
-            message: `You have been assigned to task: "${updatedTask.title}"`,
+            title: 'Giao lại nhiệm vụ',
+            message: `Bạn đã được giao lại nhiệm vụ: "${updatedTask.title}"`,
             taskId: updatedTask.id,
             projectId: updatedTask.projectId,
           },
@@ -373,12 +373,14 @@ export async function updateTaskStatus(req: Request, res: Response, next: NextFu
 
       // Send notification to task creator if updated by assignee
       if (isAssignee && task.creatorId !== req.user.id) {
+        const statusText = data.status === 'TODO' ? 'Cần làm' : data.status === 'IN_PROGRESS' ? 'Đang thực hiện' : data.status === 'REVIEW' ? 'Chờ đánh giá' : 'Hoàn thành';
+        const roleText = req.user.role === 'ADMIN' ? 'Quản trị viên' : req.user.role === 'LEADER' ? 'Trưởng nhóm' : 'Thành viên';
         const notification = await prisma.notification.create({
           data: {
             userId: task.creatorId,
             type: 'TASK_UPDATED',
-            title: 'Task Status Updated',
-            message: `"${updatedTask.title}" has been moved to ${data.status} by ${req.user.role}`,
+            title: 'Cập nhật trạng thái công việc',
+            message: `Nhiệm vụ "${updatedTask.title}" đã được chuyển sang trạng thái "${statusText}" bởi ${roleText}`,
             taskId,
             projectId: task.projectId,
           },

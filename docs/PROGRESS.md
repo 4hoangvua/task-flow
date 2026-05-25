@@ -51,6 +51,10 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 41 | Rà soát & Tối ưu hóa tương thích di động (Mobile compatibility) | 2026-05-25 | Khắc phục width Drawer, layout title TaskDetailModal và triển khai card list trên mobile cho AdminDashboard, tsc compile thành công |
 | 42 | Triển khai Subtasks, Custom Labels, & CSV Export | 2026-05-25 | Hoàn thiện APIs và UI ở cả Frontend & Backend, biên dịch tsc thành công 100% không lỗi |
 | 43 | Thiết lập quy trình & Nhật ký Kiểm thử chức năng | 2026-05-25 | Cập nhật auto-develop.md/AGENTS.md và tạo docs/testing/2026-05-25.md kiểm thử thành công 5 kịch bản |
+| 44 | Khắc phục giao diện di động & Cuộn trang | 2026-05-25 | Dùng ngăn kéo thông báo di động, sửa lỗi che lấp/lệch tabs ProjectDetail, bỏ cuộn lồng nhau ở Kanban, tsc thành công |
+| 45 | Việt hóa & Chuẩn hóa Ngôn ngữ Ứng dụng | 2026-05-25 | Việt hóa các loại thông báo hệ thống trên Backend/seed và dịch vai trò người dùng/HEALTHY ở Frontend |
+
+
 
 
 

@@ -137,6 +137,8 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Rà soát tương thích mobile và tối ưu hóa các trang Dashboard, Modals, Admin Dashboard và Drawer sidebar (2026-05-25)
 - [x] Triển khai 3 tính năng mới: Quản lý công việc con (Subtasks), Nhãn tùy chỉnh (Custom Labels), và Xuất báo cáo dữ liệu dự án ra CSV (Project Data Export) ở cả Frontend và Backend (2026-05-25)
 - [x] Thiết lập quy trình kiểm thử bắt buộc và tạo nhật ký kiểm thử functional test log (2026-05-25)
+- [x] Khắc phục giao diện di động (thanh cuộn ngang tab công việc, ngăn kéo thông báo di động, và sửa lỗi kẹt cuộn/che lấp tab) (2026-05-25)
+- [x] Việt hóa & Chuẩn hóa toàn bộ ngôn ngữ thông báo (Notifications) và vai trò người dùng trong hệ thống (2026-05-25)
 📁 Chi tiết: [`docs/changelogs/2026-05-25.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-25.md) (Xem thêm [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) và các log trước đó)
 
 

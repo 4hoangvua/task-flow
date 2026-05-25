@@ -164,9 +164,23 @@
   z-index: 30;
   background: var(--bg) !important;
   margin-top: 0 !important;
-  margin-left: -1.5rem !important;
-  margin-right: -1.5rem !important;
-  padding: 4px 1.5rem !important;
-  width: calc(100% + 3rem) !important;
   transition: background-color 0.3s;
+}
+
+@media (min-width: 640px) {
+  .custom-tabs > .ant-tabs-nav {
+    margin-left: -1.5rem !important;
+    margin-right: -1.5rem !important;
+    padding: 4px 1.5rem !important;
+    width: calc(100% + 3rem) !important;
+  }
+}
+
+/* Hide scrollbars but keep functionality */
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+}
+.scrollbar-none {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }

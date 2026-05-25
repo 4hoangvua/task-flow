@@ -81,8 +81,8 @@ const TaskCard = React.forwardRef<HTMLDivElement, {
       {task.labels && task.labels.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
           {task.labels.map((lbl) => (
-            <span 
-              key={lbl.id} 
+            <span
+              key={lbl.id}
               className="text-[10px] px-1.5 py-0.5 rounded font-medium text-white truncate max-w-[100px]"
               style={{ backgroundColor: lbl.color }}
             >
@@ -147,19 +147,22 @@ const DroppableColumn = ({
   onTaskClick,
   onAddTaskClick,
   isProjectLeader = false,
+  isMobile = false,
 }: {
   column: typeof COLUMNS[0];
   tasks: Task[];
   onTaskClick: (taskId: string) => void;
   onAddTaskClick: () => void;
   isProjectLeader?: boolean;
+  isMobile?: boolean;
 }) => {
   const { setNodeRef } = useDroppable({ id: column.id });
 
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col h-full rounded-lg border ${column.border} ${column.color} p-4 min-h-[500px]`}
+      className={`flex flex-col rounded-lg border ${column.border} ${column.color} p-4 ${isMobile ? 'h-auto min-h-0' : 'h-full min-h-[500px]'
+        }`}
     >
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
@@ -183,7 +186,7 @@ const DroppableColumn = ({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-[400px]">
+      <div className={isMobile ? 'flex-grow' : 'flex-1 overflow-y-auto min-h-[400px]'}>
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 border border-dashed border-[var(--border)] rounded-lg bg-[var(--bg)]/10">
@@ -384,21 +387,30 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
           onDragCancel={handleDragCancel}
         >
           {isMobile && (
-            <div className="mb-4">
-              <Segmented
-                block
-                value={activeMobileTab}
-                onChange={(value) => setActiveMobileTab(value as TaskStatus)}
-                options={COLUMNS.map((col) => ({
-                  label: (
-                    <span className="flex items-center justify-center gap-1.5 py-1 text-xs font-semibold">
-                      <span className={`w-1.5 h-1.5 rounded-full ${col.dot}`} />
-                      {col.title}
+            <div className="my-6 overflow-x-auto flex gap-2 pb-2 scrollbar-none -mx-4 px-4">
+              {COLUMNS.map((col) => {
+                const isActive = activeMobileTab === col.id;
+                const count = getColumnTasks(col.id).length;
+                return (
+                  <button
+                    key={col.id}
+                    onClick={() => setActiveMobileTab(col.id)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer shadow-xs border ${isActive
+                      ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                      : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:bg-[var(--bg)]'
+                      }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : col.dot}`} />
+                    <span>{col.title}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] ${isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-zinc-200/60 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400'
+                      }`}>
+                      {count}
                     </span>
-                  ),
-                  value: col.id,
-                }))}
-              />
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -414,6 +426,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
                   }}
                   onAddTaskClick={() => setIsFormOpen(true)}
                   isProjectLeader={isProjectLeader}
+                  isMobile={isMobile}
                 />
               </div>
             ))}

@@ -259,13 +259,19 @@ export async function addProjectMember(req: Request, res: Response, next: NextFu
     if (io) {
       io.to(projectId).emit('member:added', { projectId, member });
       
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { name: true },
+      });
+      const projectName = project?.name || 'Dự án';
+      
       // Also send notification directly to the invited user
       const notification = await prisma.notification.create({
         data: {
           userId: userToInvite.id,
           type: 'TASK_UPDATED', // using fallback notification type
-          title: 'Project Invitation',
-          message: `You have been added as a member to project: "${projectId}"`,
+          title: 'Lời mời vào dự án',
+          message: `Bạn đã được thêm làm thành viên vào dự án: "${projectName}"`,
           projectId,
         },
       });

@@ -110,8 +110,8 @@ export async function createComment(req: Request, res: Response, next: NextFunct
           data: {
             userId,
             type: 'COMMENT_ADDED',
-            title: 'New Comment Added',
-            message: `"${comment.user.name}" commented on: "${task.title}"`,
+            title: 'Bình luận mới',
+            message: `"${comment.user.name}" đã bình luận trên công việc: "${task.title}"`,
             taskId: task.id,
             projectId: task.projectId,
           },

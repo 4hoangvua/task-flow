@@ -349,7 +349,7 @@ export const ProjectDetail: React.FC = () => {
           );
         }
 
-        return <Tag color={getRoleColor(record.role)}>{record.role}</Tag>;
+        return <Tag color={getRoleColor(record.role)}>{record.role === 'LEADER' ? 'Quản trị (Leader)' : 'Thành viên (Member)'}</Tag>;
       },
     },
     {
@@ -608,12 +608,12 @@ export const ProjectDetail: React.FC = () => {
                                         size="small"
                                         className="w-28 text-xs"
                                         options={[
-                                          { value: 'LEADER', label: 'Leader' },
-                                          { value: 'MEMBER', label: 'Member' },
+                                          { value: 'LEADER', label: 'Quản trị' },
+                                          { value: 'MEMBER', label: 'Thành viên' },
                                         ]}
                                       />
                                     ) : (
-                                      <Tag color={getRoleColor(record.role)} className="text-[10px] m-0">{record.role}</Tag>
+                                      <Tag color={getRoleColor(record.role)} className="text-[10px] m-0">{record.role === 'LEADER' ? 'Quản trị' : 'Thành viên'}</Tag>
                                     )}
                                   </div>
                                 </div>

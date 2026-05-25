@@ -226,8 +226,8 @@ async function main() {
     data: {
       userId: member.id,
       type: 'TASK_ASSIGNED',
-      title: 'New Task Assigned',
-      message: `You have been assigned to task: "${task2.title}"`,
+      title: 'Nhiệm vụ mới được giao',
+      message: `Bạn đã được giao nhiệm vụ mới: "${task2.title}"`,
       taskId: task2.id,
       projectId: project1.id,
     },

@@ -232,7 +232,7 @@ export const AdminDashboard: React.FC = () => {
                 </span>
                 <span className="text-lg font-extrabold text-[var(--text-h)] flex items-center gap-1.5 mt-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
-                  HEALTHY
+                  HOẠT ĐỘNG TỐT
                 </span>
               </div>
               <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center border border-blue-100 dark:border-blue-900/50">
