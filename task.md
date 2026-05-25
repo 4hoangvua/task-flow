@@ -1,13 +1,14 @@
-- [x] Cập nhật Prisma Schema (`schema.prisma`) thêm model Subtask và Label
-- [x] Chạy migration cập nhật cơ sở dữ liệu (`prisma db push`)
-- [x] Triển khai các API controllers & routes cho Subtask và Label ở Backend
-- [x] Tích hợp API xuất dữ liệu dự án ra CSV trong `projectController.ts`
-- [x] Cập nhật TypeScript types (`types/index.ts`) ở Frontend
-- [x] Xây dựng các hàm gọi API (`labelApi.ts`, `taskApi.ts`) ở Frontend
-- [x] Cập nhật hook `useTaskDetail` hỗ trợ các mutations quản lý Subtask
-- [x] Cập nhật giao diện `TaskDetailModal.tsx` để hiển thị Checklist/Subtasks và Tags/Labels
-- [x] Cập nhật giao diện `TaskFormModal.tsx` cho phép chọn Labels cho Task
-- [x] Hiển thị Labels trên Kanban card (`TaskBoard.tsx`)
-- [x] Tạo giao diện Quản lý nhãn (Label Manager) và nút Xuất CSV trong `ProjectDetail.tsx`
-- [x] Chạy tsc biên dịch kiểm tra kiểu dữ liệu ở cả Frontend & Backend
-- [x] Cập nhật tiến trình và tài liệu (`PLAN.md`, `PROGRESS.md`, `changelogs`)
+- [x] Chuẩn bị & Cập nhật Cơ sở dữ liệu
+  - [x] Cập nhật Prisma Schema (`schema.prisma`) thêm các trường RACI vào Task
+  - [x] Chạy lệnh `prisma db push` cập nhật cơ sở dữ liệu
+- [x] Triển khai Backend
+  - [x] Cập nhật Zod validation schemas (`validation.ts`)
+  - [x] Cập nhật controllers (`taskController.ts`) để lưu và lấy dữ liệu RACI
+- [x] Triển khai Frontend
+  - [x] Cập nhật TypeScript types (`types/index.ts`)
+  - [x] Cập nhật form tạo/sửa (`TaskFormModal.tsx`) hỗ trợ cấu hình RACI
+  - [x] Cập nhật giao diện chi tiết (`TaskDetailModal.tsx`) hiển thị/chỉnh sửa trực tiếp ma trận RACI
+- [x] Kiểm thử & Hoàn thiện
+  - [x] Biên dịch TypeScript (tsc) ở cả Frontend & Backend
+  - [x] Thực hiện kiểm thử chức năng các kịch bản RACI
+  - [x] Cập nhật tài liệu (`PLAN.md`, `PROGRESS.md`, `changelogs`, `testing log`)

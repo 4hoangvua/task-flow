@@ -440,21 +440,11 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               </div>
 
               <div>
-                <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">NGƯỜI THỰC HIỆN</span>
-                <Space size={6} className="mt-1.5">
-                  <Avatar src={task.assignee?.avatar} icon={<UserOutlined />} size="small" className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold" />
-                  <span className="text-sm font-medium text-[var(--text)]">
-                    {task.assignee?.name || 'Chưa gán'}
-                  </span>
-                </Space>
-              </div>
-
-              <div>
                 <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">HẠN CHÓT</span>
                 <Space size={6} className="mt-1.5 text-[var(--text-secondary)]">
                   <CalendarOutlined className="text-xs" />
                   <span className="text-sm font-medium">
-                    {task.deadline ? formatDate(task.deadline) : 'Không có'}
+                    {task.deadline ? formatDate(task.deadline).split(' ')[0] : 'Không có'}
                   </span>
                 </Space>
               </div>
@@ -469,6 +459,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </Space>
               </div>
             </div>
+
 
             <Divider className="my-2" />
 

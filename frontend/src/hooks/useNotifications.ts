@@ -1,15 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
 import { notificationApi } from '../api/notificationApi';
 import { useSocket } from '../providers/SocketProvider';
 import { useAuthStore } from '../stores/authStore';
-import { message as antdMessage } from '../utils/antd';
 import type { Notification } from '../types';
 
 export const useNotifications = (params?: { page?: number; limit?: number }) => {
   const queryClient = useQueryClient();
   const { socket } = useSocket();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { message: antdMessage, notification: antdNotification } = App.useApp();
 
   const notificationsQuery = useQuery({
     queryKey: ['notifications', params],
@@ -41,11 +42,11 @@ export const useNotifications = (params?: { page?: number; limit?: number }) => 
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
       // Trigger user-facing browser alert/toast
-      antdMessage.info({
+      antdNotification.info({
         message: notification.title,
         description: notification.message,
         duration: 4.5,
-      } as any);
+      });
     };
 
     socket.on('notification', handleNewNotification);

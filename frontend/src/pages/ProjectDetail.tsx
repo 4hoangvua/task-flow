@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Tabs, Card, Row, Col, Progress, Tag, Avatar, Table, Form, Input, Select, Button, Space, Popconfirm, Spin, Empty, AutoComplete, Timeline, Tooltip } from 'antd';
+import { Tabs, Card, Row, Col, Progress, Tag, Avatar, Table, Form, Input, Select, Button, Space, Popconfirm, Spin, Empty, AutoComplete, Timeline, Tooltip, Checkbox, TimePicker } from 'antd';
 import { authApi } from '../api/authApi';
 import {
   ProjectOutlined,
@@ -21,6 +21,7 @@ import {
   AlertOutlined,
   EditOutlined,
   DownloadOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useProjectDetail, useProjectMembers } from '../hooks/useProjects';
@@ -36,6 +37,8 @@ import { TaskDetailModal } from '../components/task/TaskDetailModal';
 import { labelApi } from '../api/labelApi';
 import { api } from '../config/axios';
 import { message } from '../utils/antd';
+import { useCharter } from '../hooks/useCharter';
+import dayjs from 'dayjs';
 
 export const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +64,9 @@ export const ProjectDetail: React.FC = () => {
   const { project, isLoading: isLoadingProject, updateProject, deleteProject } = useProjectDetail(id || '');
   const { members, isLoading: isLoadingMembers, addMember, updateMemberRole, deleteMember } = useProjectMembers(id || '');
   const { tasks } = useTasks(id || '');
+  const { charter, isLoading: isLoadingCharter, updateCharter: updateCharterApi, isUpdating: isUpdatingCharter } = useCharter(id || '');
+
+  const [charterForm] = Form.useForm();
 
   const [inviteForm] = Form.useForm();
   const [settingsForm] = Form.useForm();
@@ -800,6 +806,208 @@ export const ProjectDetail: React.FC = () => {
                       };
                     })}
                   />
+                )}
+              </Card>
+            ),
+          },
+          {
+            key: 'charter',
+            label: (
+              <span className="flex items-center gap-2">
+                <FileTextOutlined /> Quy tắc nhóm
+              </span>
+            ),
+            children: (
+              <Card
+                title={<span className="font-bold text-sm text-[var(--text-h)]">📜 Quy tắc làm việc nhóm (Team Charter)</span>}
+                className="shadow-sm border border-[var(--border)]"
+                extra={!isProjectLeader && <Tag color="default" className="text-[10px]">Chỉ Leader mới có quyền chỉnh sửa</Tag>}
+              >
+                {isLoadingCharter ? (
+                  <div className="flex justify-center p-8"><Spin /></div>
+                ) : isProjectLeader ? (
+                  /* === Leader Editable View === */
+                  <Form
+                    form={charterForm}
+                    layout="vertical"
+                    initialValues={{
+                      workingTimeStart: charter?.workingTimeStart ? dayjs(charter.workingTimeStart, 'HH:mm') : null,
+                      workingTimeEnd: charter?.workingTimeEnd ? dayjs(charter.workingTimeEnd, 'HH:mm') : null,
+                      workingDays: charter?.workingDays ? charter.workingDays.split(',') : [],
+                      workingLocation: charter?.workingLocation || '',
+                      communicationRules: charter?.communicationRules || '',
+                      rewardRules: charter?.rewardRules || '',
+                      disciplineRules: charter?.disciplineRules || '',
+                      rolesDescription: charter?.rolesDescription || '',
+                    }}
+                    onFinish={async (values) => {
+                      await updateCharterApi({
+                        workingTimeStart: values.workingTimeStart ? dayjs(values.workingTimeStart).format('HH:mm') : null,
+                        workingTimeEnd: values.workingTimeEnd ? dayjs(values.workingTimeEnd).format('HH:mm') : null,
+                        workingDays: values.workingDays?.length > 0 ? values.workingDays.join(',') : null,
+                        workingLocation: values.workingLocation || null,
+                        communicationRules: values.communicationRules || null,
+                        rewardRules: values.rewardRules || null,
+                        disciplineRules: values.disciplineRules || null,
+                        rolesDescription: values.rolesDescription || null,
+                      });
+                    }}
+                    className="max-w-2xl"
+                    key={charter?.updatedAt}
+                  >
+                    <div className="mb-6">
+                      <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">⏰ Thời gian & Địa điểm</h4>
+                      <Row gutter={16}>
+                        <Col xs={24} sm={12}>
+                          <Form.Item label="Giờ bắt đầu" name="workingTimeStart">
+                            <TimePicker format="HH:mm" className="w-full" placeholder="Chọn giờ bắt đầu" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Form.Item label="Giờ kết thúc" name="workingTimeEnd">
+                            <TimePicker format="HH:mm" className="w-full" placeholder="Chọn giờ kết thúc" />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Form.Item label="Ngày làm việc" name="workingDays">
+                        <Checkbox.Group
+                          options={[
+                            { label: 'Thứ 2', value: 'Mon' },
+                            { label: 'Thứ 3', value: 'Tue' },
+                            { label: 'Thứ 4', value: 'Wed' },
+                            { label: 'Thứ 5', value: 'Thu' },
+                            { label: 'Thứ 6', value: 'Fri' },
+                            { label: 'Thứ 7', value: 'Sat' },
+                            { label: 'Chủ nhật', value: 'Sun' },
+                          ]}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Địa điểm làm việc" name="workingLocation">
+                        <Input placeholder="VD: Phòng họp A3, Tầng 2 hoặc Online qua Google Meet" maxLength={500} />
+                      </Form.Item>
+                    </div>
+
+                    <div className="mb-6">
+                      <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">💬 Quy luật trao đổi thông tin (Nói và Nghe)</h4>
+                      <Form.Item name="communicationRules">
+                        <Input.TextArea
+                          rows={4}
+                          placeholder="VD: Giới hạn phát biểu 3 phút/lượt. Ý kiến mang tính xây dựng, hòa nhã. Đặt lợi ích tập thể lên trên."
+                          maxLength={2000}
+                          showCount
+                        />
+                      </Form.Item>
+                    </div>
+
+                    <Row gutter={16}>
+                      <Col xs={24} md={12}>
+                        <div className="mb-6">
+                          <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">🏆 Quy định Khen thưởng</h4>
+                          <Form.Item name="rewardRules">
+                            <Input.TextArea rows={4} placeholder="VD: Hoàn thành sớm được cộng điểm thưởng..." maxLength={2000} showCount />
+                          </Form.Item>
+                        </div>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <div className="mb-6">
+                          <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">⚠️ Quy định Kỷ luật</h4>
+                          <Form.Item name="disciplineRules">
+                            <Input.TextArea rows={4} placeholder="VD: Trễ deadline trừ điểm đánh giá cá nhân..." maxLength={2000} showCount />
+                          </Form.Item>
+                        </div>
+                      </Col>
+                    </Row>
+
+                    <div className="mb-6">
+                      <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">👥 Chức năng & Quyền hạn</h4>
+                      <Form.Item name="rolesDescription">
+                        <Input.TextArea
+                          rows={4}
+                          placeholder="VD: Trưởng nhóm - phân công và giám sát tiến độ. Thành viên - thực hiện và báo cáo kết quả."
+                          maxLength={2000}
+                          showCount
+                        />
+                      </Form.Item>
+                    </div>
+
+                    <Form.Item>
+                      <Button type="primary" htmlType="submit" loading={isUpdatingCharter} className="font-semibold">
+                        Lưu quy tắc nhóm
+                      </Button>
+                    </Form.Item>
+                  </Form>
+                ) : (
+                  /* === Member Read-Only View === */
+                  <div className="space-y-6 max-w-2xl">
+                    <div>
+                      <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">⏰ Thời gian & Địa điểm</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-3 rounded-lg">
+                          <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider block">Giờ làm việc</span>
+                          <span className="text-sm font-semibold text-[var(--text)] mt-1 block">
+                            {charter?.workingTimeStart && charter?.workingTimeEnd
+                              ? `${charter.workingTimeStart} - ${charter.workingTimeEnd}`
+                              : 'Chưa thiết lập'}
+                          </span>
+                        </div>
+                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-3 rounded-lg">
+                          <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider block">Địa điểm</span>
+                          <span className="text-sm font-semibold text-[var(--text)] mt-1 block">
+                            {charter?.workingLocation || 'Chưa thiết lập'}
+                          </span>
+                        </div>
+                      </div>
+                      {charter?.workingDays && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {charter.workingDays.split(',').map((day) => {
+                            const dayMap: Record<string, string> = { Mon: 'T2', Tue: 'T3', Wed: 'T4', Thu: 'T5', Fri: 'T6', Sat: 'T7', Sun: 'CN' };
+                            return <Tag key={day} color="blue" className="text-[10px] font-bold">{dayMap[day] || day}</Tag>;
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {charter?.communicationRules && (
+                      <div>
+                        <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">💬 Quy luật trao đổi thông tin</h4>
+                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-4 rounded-lg text-sm text-[var(--text)] whitespace-pre-wrap">
+                          {charter.communicationRules}
+                        </div>
+                      </div>
+                    )}
+
+                    <Row gutter={16}>
+                      {charter?.rewardRules && (
+                        <Col xs={24} md={12}>
+                          <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">🏆 Khen thưởng</h4>
+                          <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-4 rounded-lg text-sm text-[var(--text)] whitespace-pre-wrap">
+                            {charter.rewardRules}
+                          </div>
+                        </Col>
+                      )}
+                      {charter?.disciplineRules && (
+                        <Col xs={24} md={12}>
+                          <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">⚠️ Kỷ luật</h4>
+                          <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-4 rounded-lg text-sm text-[var(--text)] whitespace-pre-wrap">
+                            {charter.disciplineRules}
+                          </div>
+                        </Col>
+                      )}
+                    </Row>
+
+                    {charter?.rolesDescription && (
+                      <div>
+                        <h4 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">👥 Chức năng & Quyền hạn</h4>
+                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] p-4 rounded-lg text-sm text-[var(--text)] whitespace-pre-wrap">
+                          {charter.rolesDescription}
+                        </div>
+                      </div>
+                    )}
+
+                    {!charter?.communicationRules && !charter?.rewardRules && !charter?.disciplineRules && !charter?.rolesDescription && !charter?.workingLocation && (
+                      <Empty description="Leader chưa thiết lập quy tắc nhóm cho dự án này." />
+                    )}
+                  </div>
                 )}
               </Card>
             ),

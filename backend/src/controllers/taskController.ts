@@ -29,6 +29,7 @@ export async function getTasks(req: Request, res: Response, next: NextFunction) 
         include: {
           assignee: { select: { id: true, name: true, email: true, avatar: true } },
           creator: { select: { id: true, name: true, email: true, avatar: true } },
+
           labels: { select: { id: true, name: true, color: true } },
           subtasks: true,
         },
@@ -82,10 +83,12 @@ export async function createTask(req: Request, res: Response, next: NextFunction
         labels: data.labelIds ? {
           connect: data.labelIds.map((id) => ({ id })),
         } : undefined,
+
       },
       include: {
         assignee: { select: { id: true, name: true, email: true, avatar: true } },
         creator: { select: { id: true, name: true, email: true, avatar: true } },
+
         labels: { select: { id: true, name: true, color: true } },
         subtasks: true,
       },
@@ -120,6 +123,8 @@ export async function createTask(req: Request, res: Response, next: NextFunction
         });
         io.to(`user:${data.assigneeId}`).emit('notification', notification);
       }
+
+
     }
 
     res.status(201).json({
@@ -138,6 +143,7 @@ export async function getTaskById(req: Request, res: Response, next: NextFunctio
       include: {
         assignee: { select: { id: true, name: true, email: true, avatar: true } },
         creator: { select: { id: true, name: true, email: true, avatar: true } },
+
         labels: { select: { id: true, name: true, color: true } },
         subtasks: {
           orderBy: { createdAt: 'asc' },
@@ -229,6 +235,7 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
       }));
     }
 
+
     if (data.labelIds !== undefined) {
       updates.labels = {
         set: data.labelIds.map((id) => ({ id })),
@@ -245,6 +252,7 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
       include: {
         assignee: { select: { id: true, name: true, email: true, avatar: true } },
         creator: { select: { id: true, name: true, email: true, avatar: true } },
+
         labels: { select: { id: true, name: true, color: true } },
         subtasks: true,
       },
@@ -271,6 +279,8 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
         });
         io.to(`user:${data.assigneeId}`).emit('notification', notification);
       }
+
+
     }
 
     res.status(200).json({

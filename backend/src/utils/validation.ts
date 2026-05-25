@@ -49,6 +49,7 @@ export const createTaskSchema = z.object({
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   deadline: z.string().datetime().nullable().optional(),
   labelIds: z.array(z.string().uuid()).optional(),
+
 });
 
 export const updateTaskSchema = z.object({
@@ -93,3 +94,13 @@ export const updateLabelSchema = z.object({
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid HEX color code').optional(),
 });
 
+export const updateCharterSchema = z.object({
+  workingTimeStart: z.string().max(10).optional().nullable(),
+  workingTimeEnd: z.string().max(10).optional().nullable(),
+  workingDays: z.string().max(100).optional().nullable(),
+  workingLocation: z.string().max(500).optional().nullable(),
+  communicationRules: z.string().max(2000).optional().nullable(),
+  rewardRules: z.string().max(2000).optional().nullable(),
+  disciplineRules: z.string().max(2000).optional().nullable(),
+  rolesDescription: z.string().max(2000).optional().nullable(),
+});

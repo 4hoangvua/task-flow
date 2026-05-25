@@ -37,6 +37,16 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
 
   // Set form fields when task changes or modal opens
   useEffect(() => {
+    const parseIds = (val: any) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      try {
+        return JSON.parse(val);
+      } catch (e) {
+        return [];
+      }
+    };
+
     if (open) {
       if (task) {
         form.setFieldsValue({
@@ -46,12 +56,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
           assigneeId: task.assigneeId || undefined,
           deadline: task.deadline ? dayjs(task.deadline) : null,
           labelIds: task.labels ? task.labels.map((l) => l.id) : [],
+
         });
       } else {
         form.resetFields();
         form.setFieldsValue({
           priority: 'MEDIUM',
           labelIds: [],
+
         });
       }
     }
@@ -63,6 +75,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
       const payload = {
         ...values,
         assigneeId: values.assigneeId || null,
+
         deadline: values.deadline ? values.deadline.toISOString() : null,
       };
 
@@ -134,7 +147,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
           />
         </Form.Item>
 
-        <Form.Item label="Người thực hiện" name="assigneeId">
+        <Form.Item label="Người thực hiện (Responsible - R)" name="assigneeId">
           <Select
             placeholder="Chọn thành viên thực hiện..."
             loading={isLoadingMembers}
@@ -145,6 +158,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
             }))}
           />
         </Form.Item>
+
+
 
         <Form.Item label="Nhãn công việc" name="labelIds">
           <Select

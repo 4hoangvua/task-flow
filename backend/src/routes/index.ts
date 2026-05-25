@@ -8,11 +8,13 @@ import statsRoutes from './statsRoutes';
 import adminRoutes from './adminRoutes';
 import subtaskRoutes from './subtaskRoutes';
 import labelRoutes from './labelRoutes';
+import charterRoutes from './charterRoutes';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/projects', projectRoutes);
+router.use('/projects', charterRoutes);
 router.use('/tasks', taskRoutes);
 router.use('/', commentRoutes);
 router.use('/notifications', notificationRoutes);

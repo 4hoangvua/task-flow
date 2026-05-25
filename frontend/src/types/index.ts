@@ -96,6 +96,7 @@ export interface Task {
   creatorId: string;
   assignee?: User | null;
   creator?: User;
+
   comments?: Comment[];
   history?: TaskHistory[];
   subtasks?: Subtask[];
@@ -114,4 +115,19 @@ export interface Notification {
   projectId: string | null;
   isRead: boolean;
   createdAt: string;
+}
+
+export interface TeamCharter {
+  id: string;
+  projectId: string;
+  workingTimeStart: string | null;
+  workingTimeEnd: string | null;
+  workingDays: string | null;
+  workingLocation: string | null;
+  communicationRules: string | null;
+  rewardRules: string | null;
+  disciplineRules: string | null;
+  rolesDescription: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -54,11 +54,9 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 44 | Khắc phục giao diện di động & Cuộn trang | 2026-05-25 | Dùng ngăn kéo thông báo di động, sửa lỗi che lấp/lệch tabs ProjectDetail, bỏ cuộn lồng nhau ở Kanban, tsc thành công |
 | 45 | Việt hóa & Chuẩn hóa Ngôn ngữ Ứng dụng | 2026-05-25 | Việt hóa các loại thông báo hệ thống trên Backend/seed và dịch vai trò người dùng/HEALTHY ở Frontend |
 | 46 | Đồng bộ hóa Database qua CI/CD Deploy | 2026-05-25 | Tích hợp npx prisma db push vào deploy.yml giúp đồng bộ schema SQLite trên server tự động |
-
-
-
-
-
+| 47 | Sửa lỗi crash khi nhận thông báo Real-time | 2026-05-25 | Sử dụng App.useApp() trực tiếp trong [useNotifications.ts](file:///c:/project/task-flow/frontend/src/hooks/useNotifications.ts), tsc biên dịch thành công |
+| 48 | Xóa bỏ Hệ thống RACI Matrix (không phù hợp) | 2026-05-25 | Xóa toàn bộ code RACI khỏi backend/frontend, biên dịch tsc thành công 100% |
+| 49 | Triển khai Quy tắc Nhóm (Team Charter) | 2026-05-25 | Model DB, API GET/PUT, tab UI (Leader editable, Member read-only), API test 4/4 PASS, tsc thành công 100% |
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 

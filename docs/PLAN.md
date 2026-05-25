@@ -140,6 +140,9 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Khắc phục giao diện di động (thanh cuộn ngang tab công việc, ngăn kéo thông báo di động, và sửa lỗi kẹt cuộn/che lấp tab) (2026-05-25)
 - [x] Việt hóa & Chuẩn hóa toàn bộ ngôn ngữ thông báo (Notifications) và vai trò người dùng trong hệ thống (2026-05-25)
 - [x] Tích hợp tự động đẩy và đồng bộ cơ sở dữ liệu (`prisma db push`) vào pipeline deploy-CI/CD trên server (2026-05-25)
+- [x] Khắc phục triệt để lỗi crash React child khi nhận thông báo real-time bằng cách sử dụng App.useApp() trực tiếp trong [useNotifications.ts](file:///c:/project/task-flow/frontend/src/hooks/useNotifications.ts) (2026-05-25)
+- [x] Xóa bỏ hoàn toàn Hệ thống RACI Matrix (không phù hợp với quy mô ứng dụng) (2026-05-25)
+- [x] Triển khai tính năng Quy tắc Nhóm (Team Charter) dựa trên Tài liệu C2 — model DB, API, tab UI cho Leader/Member (2026-05-25)
 📁 Chi tiết: [`docs/changelogs/2026-05-25.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-25.md) (Xem thêm [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) và các log trước đó)
 
 
