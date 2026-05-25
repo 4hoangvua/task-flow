@@ -29,6 +29,8 @@ export async function getTasks(req: Request, res: Response, next: NextFunction) 
         include: {
           assignee: { select: { id: true, name: true, email: true, avatar: true } },
           creator: { select: { id: true, name: true, email: true, avatar: true } },
+          labels: { select: { id: true, name: true, color: true } },
+          subtasks: true,
         },
         orderBy: [
           { status: 'asc' },
@@ -77,10 +79,15 @@ export async function createTask(req: Request, res: Response, next: NextFunction
         projectId: data.projectId,
         assigneeId: data.assigneeId,
         creatorId: req.user.id,
+        labels: data.labelIds ? {
+          connect: data.labelIds.map((id) => ({ id })),
+        } : undefined,
       },
       include: {
         assignee: { select: { id: true, name: true, email: true, avatar: true } },
         creator: { select: { id: true, name: true, email: true, avatar: true } },
+        labels: { select: { id: true, name: true, color: true } },
+        subtasks: true,
       },
     });
 
@@ -131,6 +138,10 @@ export async function getTaskById(req: Request, res: Response, next: NextFunctio
       include: {
         assignee: { select: { id: true, name: true, email: true, avatar: true } },
         creator: { select: { id: true, name: true, email: true, avatar: true } },
+        labels: { select: { id: true, name: true, color: true } },
+        subtasks: {
+          orderBy: { createdAt: 'asc' },
+        },
         comments: {
           include: {
             user: { select: { id: true, name: true, email: true, avatar: true } },
@@ -218,6 +229,12 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
       }));
     }
 
+    if (data.labelIds !== undefined) {
+      updates.labels = {
+        set: data.labelIds.map((id) => ({ id })),
+      };
+    }
+
     if (Object.keys(updates).length === 0) {
       return res.status(200).json({ success: true, data: oldTask });
     }
@@ -228,6 +245,8 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
       include: {
         assignee: { select: { id: true, name: true, email: true, avatar: true } },
         creator: { select: { id: true, name: true, email: true, avatar: true } },
+        labels: { select: { id: true, name: true, color: true } },
+        subtasks: true,
       },
     });
 

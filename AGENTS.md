@@ -12,7 +12,8 @@ Copy this file to your project root as `AGENTS.md` when starting a new project.
 6. `docs/DECISIONS.md` — why important choices were made.
 7. `docs/analysis/` — daily detailed research analysis files.
 8. `docs/changelogs/` — daily logs of UI/styling/config fixes (read the latest file for recent context).
-9. The user prompt — what the human wants right now.
+9. `docs/testing/` — daily functional testing logs to confirm no runtime issues.
+10. The user prompt — what the human wants right now.
 
 ## Task Loop
 
@@ -45,6 +46,16 @@ When fixing UI, styling, responsive layout, RBAC display, CORS, or any configura
    - Avoid verbose explanations. Focus on technical clarity, listing modified files with absolute paths in the markdown link format (e.g. `[filename](file:///path/to/file)`).
 3. **Update `docs/PLAN.md` section 3.1** with only a summary line (done/in-progress). Do NOT put detailed logs in PLAN.md.
 4. This keeps PLAN.md clean and changelogs technical, readable for both developers and future AI agents.
+
+## Testing Rules
+
+For all new features or significant changes:
+
+1. **Perform functional testing**: Test functional logic, API endpoints, permissions, and runtime code behaviors to ensure no API crashes, database errors, runtime logic bugs, or React Hook rule violations.
+   - *Note*: Do NOT write code/script tests for the UI layout/visuals (giao diện) since using API call scripts to test visual UI is illogical. Automated testing code must only target APIs, business rules, and backend/frontend data integration logic.
+2. **Create or update** `docs/testing/YYYY-MM-DD.md`.
+3. Document each test case, expected results, actual results, and status (PASS/FAIL).
+4. If testing fails, debug, fix, compile, and re-test until all cases pass 100%.
 
 
 ## Size Rules

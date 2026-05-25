@@ -20,6 +20,7 @@ import {
   SwapOutlined,
   AlertOutlined,
   EditOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useProjectDetail, useProjectMembers } from '../hooks/useProjects';
@@ -32,6 +33,9 @@ import { useSocket } from '../providers/SocketProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { statsApi } from '../api/statsApi';
 import { TaskDetailModal } from '../components/task/TaskDetailModal';
+import { labelApi } from '../api/labelApi';
+import { api } from '../config/axios';
+import { message } from '../utils/antd';
 
 export const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -64,6 +68,20 @@ export const ProjectDetail: React.FC = () => {
   // Invite Member Search Autocomplete
   const [inviteSearchOptions, setInviteSearchOptions] = useState<{ value: string; label: React.ReactNode }[]>([]);
   const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+
+  // CSV Export Handler
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Custom Labels Management
+  const { data: labels = [] } = useQuery({
+    queryKey: ['labels', id],
+    queryFn: () => labelApi.getLabels(id || ''),
+    enabled: !!id,
+  });
+
+  const [labelName, setLabelName] = useState('');
+  const [labelColor, setLabelColor] = useState('#3b82f6');
+  const [isCreatingLabel, setIsCreatingLabel] = useState(false);
 
   const handleSearchUser = async (value: string) => {
     setIsSearchingUsers(true);
@@ -224,6 +242,69 @@ export const ProjectDetail: React.FC = () => {
     }
   };
 
+  const handleExportCSV = async () => {
+    setIsExporting(true);
+    try {
+      const response = await api.get(`/projects/${id}/export`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `du-an-${project.name || 'export'}_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      message.success('Xuất báo cáo CSV thành công!');
+    } catch (err: any) {
+      console.error('Export CSV failed:', err);
+      message.error('Xuất báo cáo CSV thất bại!');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const PRESET_COLORS = [
+    { name: 'Đỏ (Bug)', hex: '#ef4444' },
+    { name: 'Xanh dương (Feature)', hex: '#3b82f6' },
+    { name: 'Vàng (Refactor)', hex: '#f59e0b' },
+    { name: 'Tím (Docs)', hex: '#8b5cf6' },
+    { name: 'Hồng (Design)', hex: '#ec4899' },
+    { name: 'Xanh lá (Release)', hex: '#10b981' },
+    { name: 'Xanh đậm (Tech Debt)', hex: '#1e3a8a' },
+    { name: 'Xanh ngọc (UI/UX)', hex: '#14b8a6' },
+  ];
+
+  const handleCreateLabel = async () => {
+    if (!labelName.trim()) {
+      message.error('Vui lòng nhập tên nhãn!');
+      return;
+    }
+    setIsCreatingLabel(true);
+    try {
+      await labelApi.createLabel(id!, { name: labelName.trim(), color: labelColor });
+      setLabelName('');
+      queryClient.invalidateQueries({ queryKey: ['labels', id] });
+      message.success('Tạo nhãn thành công!');
+    } catch (err: any) {
+      message.error(err.response?.data?.error || 'Tạo nhãn thất bại!');
+    } finally {
+      setIsCreatingLabel(false);
+    }
+  };
+
+  const handleDeleteLabel = async (labelId: string) => {
+    try {
+      await labelApi.deleteLabel(labelId);
+      queryClient.invalidateQueries({ queryKey: ['labels', id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      message.success('Xóa nhãn thành công!');
+    } catch (err: any) {
+      message.error(err.response?.data?.error || 'Xóa nhãn thất bại!');
+    }
+  };
+
   // Columns for Members list
   const memberColumns = [
     {
@@ -313,10 +394,22 @@ export const ProjectDetail: React.FC = () => {
               <ProjectOutlined className="text-[var(--accent)]" /> {project.name}
             </h1>
             <p className="text-[var(--text-secondary)] mt-2 text-sm flex items-center gap-2">
-              <span>Trạng thái:</span>
+               <span>Trạng thái:</span>
               <ProjectStatusTag status={project.status} />
             </p>
           </div>
+          {isProjectLeader && (
+            <Button
+              type="primary"
+              ghost
+              icon={<DownloadOutlined />}
+              onClick={handleExportCSV}
+              loading={isExporting}
+              className="font-semibold shadow-xs"
+            >
+              Xuất báo cáo CSV
+            </Button>
+          )}
         </div>
       </div>
 
@@ -719,67 +812,143 @@ export const ProjectDetail: React.FC = () => {
               </span>
             ),
             children: (
-              <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Cấu hình thông tin dự án</span>} className="shadow-sm border border-[var(--border)]">
-                <Form
-                  form={settingsForm}
-                  layout="vertical"
-                  onFinish={handleUpdateProjectSettings}
-                  className="max-w-xl"
-                >
-                  <Form.Item
-                    label="Tên dự án"
-                    name="name"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
+              <div className="space-y-6">
+                <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Cấu hình thông tin dự án</span>} className="shadow-sm border border-[var(--border)]">
+                  <Form
+                    form={settingsForm}
+                    layout="vertical"
+                    onFinish={handleUpdateProjectSettings}
+                    className="max-w-xl"
                   >
-                    <Input />
-                  </Form.Item>
+                    <Form.Item
+                      label="Tên dự án"
+                      name="name"
+                      rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
+                    >
+                      <Input />
+                    </Form.Item>
 
-                  <Form.Item label="Mô tả dự án" name="description">
-                    <Input.TextArea rows={4} />
-                  </Form.Item>
+                    <Form.Item label="Mô tả dự án" name="description">
+                      <Input.TextArea rows={4} />
+                    </Form.Item>
 
-                  <Form.Item label="Trạng thái" name="status">
-                    <Select
-                      options={[
-                        { value: 'ACTIVE', label: 'Đang hoạt động' },
-                        { value: 'ARCHIVED', label: 'Đã lưu trữ (Lưu trữ sẽ ẩn dự án)' },
-                      ]}
-                    />
-                  </Form.Item>
+                    <Form.Item label="Trạng thái" name="status">
+                      <Select
+                        options={[
+                          { value: 'ACTIVE', label: 'Đang hoạt động' },
+                          { value: 'ARCHIVED', label: 'Đã lưu trữ (Lưu trữ sẽ ẩn dự án)' },
+                        ]}
+                      />
+                    </Form.Item>
 
-                  <Form.Item>
-                    <Button type="primary" htmlType="submit" className="font-semibold">
-                      Lưu thay đổi
-                    </Button>
-                  </Form.Item>
-                </Form>
+                    <Form.Item>
+                      <Button type="primary" htmlType="submit" className="font-semibold">
+                        Lưu thay đổi
+                      </Button>
+                    </Form.Item>
+                  </Form>
 
-                {isOwner && (
-                  <>
-                    <div className="border-t border-[var(--border)] mt-8 pt-6">
-                      <h4 className="text-red-500 dark:text-red-400 font-extrabold text-sm mb-2 flex items-center gap-1.5">
-                        <ExclamationCircleOutlined /> Danger Zone (Vùng nguy hiểm)
+                  {isOwner && (
+                    <>
+                      <div className="border-t border-[var(--border)] mt-8 pt-6">
+                        <h4 className="text-red-500 dark:text-red-400 font-extrabold text-sm mb-2 flex items-center gap-1.5">
+                          <ExclamationCircleOutlined /> Danger Zone (Vùng nguy hiểm)
+                        </h4>
+                        <p className="text-xs text-[var(--text-secondary)] mb-4">
+                          Khi xóa dự án, toàn bộ dữ liệu công việc, bình luận và lịch sử liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục.
+                        </p>
+
+                        <Popconfirm
+                          title="Xóa vĩnh viễn dự án?"
+                          description="Bạn có chắc chắn muốn xóa toàn bộ dự án này cùng tất cả dữ liệu liên quan?"
+                          onConfirm={handleDeleteProject}
+                          okText="Xóa vĩnh viễn"
+                          cancelText="Hủy"
+                          okButtonProps={{ danger: true, size: 'large' }}
+                        >
+                          <Button type="primary" danger className="font-semibold">
+                            Xóa dự án này
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </>
+                  )}
+                </Card>
+
+                <Card title={<span className="font-bold text-sm text-[var(--text-h)]">Quản lý nhãn công việc (Custom Labels)</span>} className="shadow-sm border border-[var(--border)]">
+                  <div>
+                    <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">
+                      CÁC NHÃN HIỆN CÓ
+                    </h4>
+                    {labels.length === 0 ? (
+                      <p className="text-xs text-[var(--text-tertiary)] mb-4">Dự án này chưa cấu hình nhãn công việc nào.</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {labels.map((lbl) => (
+                          <Tag
+                            key={lbl.id}
+                            color={lbl.color}
+                            closable
+                            onClose={(e) => {
+                              e.preventDefault();
+                              handleDeleteLabel(lbl.id);
+                            }}
+                            style={{ border: 'none', padding: '4px 8px', fontSize: '12px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', fontWeight: 500 }}
+                          >
+                            {lbl.name}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="border-t border-[var(--border)] pt-4 mt-4 max-w-md">
+                      <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">
+                        TẠO NHÃN MỚI
                       </h4>
-                      <p className="text-xs text-[var(--text-secondary)] mb-4">
-                        Khi xóa dự án, toàn bộ dữ liệu công việc, bình luận và lịch sử liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục.
-                      </p>
-
-                      <Popconfirm
-                        title="Xóa vĩnh viễn dự án?"
-                        description="Bạn có chắc chắn muốn xóa toàn bộ dự án này cùng tất cả dữ liệu liên quan?"
-                        onConfirm={handleDeleteProject}
-                        okText="Xóa vĩnh viễn"
-                        cancelText="Hủy"
-                        okButtonProps={{ danger: true, size: 'large' }}
-                      >
-                        <Button type="primary" danger className="font-semibold">
-                          Xóa dự án này
+                      <Space direction="vertical" className="w-full" size={12}>
+                        <div>
+                          <label className="text-xs font-medium text-[var(--text-secondary)] block mb-1">Tên nhãn</label>
+                          <Input
+                            placeholder="Nhập tên nhãn (ví dụ: Bug, Feature...)"
+                            value={labelName}
+                            onChange={(e) => setLabelName(e.target.value)}
+                            maxLength={30}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-[var(--text-secondary)] block mb-1">Màu sắc đại diện</label>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {PRESET_COLORS.map((c) => (
+                              <Tooltip key={c.hex} title={c.name}>
+                                <button
+                                  type="button"
+                                  className={`w-7 h-7 rounded-full cursor-pointer border-2 transition-all ${
+                                    labelColor === c.hex 
+                                      ? 'border-slate-800 dark:border-white scale-110 shadow-md' 
+                                      : 'border-transparent hover:scale-105'
+                                  }`}
+                                  style={{ backgroundColor: c.hex }}
+                                  onClick={() => setLabelColor(c.hex)}
+                                />
+                              </Tooltip>
+                            ))}
+                          </div>
+                        </div>
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={handleCreateLabel}
+                          loading={isCreatingLabel}
+                          disabled={!labelName.trim()}
+                          className="mt-2"
+                        >
+                          Tạo nhãn mới
                         </Button>
-                      </Popconfirm>
+                      </Space>
                     </div>
-                  </>
-                )}
-              </Card>
+                  </div>
+                </Card>
+              </div>
             ),
           } : null,
         ].filter(Boolean) as any}

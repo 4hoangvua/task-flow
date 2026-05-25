@@ -6,6 +6,8 @@ import commentRoutes from './commentRoutes';
 import notificationRoutes from './notificationRoutes';
 import statsRoutes from './statsRoutes';
 import adminRoutes from './adminRoutes';
+import subtaskRoutes from './subtaskRoutes';
+import labelRoutes from './labelRoutes';
 
 const router = Router();
 
@@ -16,5 +18,7 @@ router.use('/', commentRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/stats', statsRoutes);
 router.use('/admin', adminRoutes);
+router.use('/subtasks', subtaskRoutes);
+router.use('/labels', labelRoutes);
 
 export default router;

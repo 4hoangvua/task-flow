@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Select, DatePicker, Button } from 'antd';
+import { useQuery } from '@tanstack/react-query';
 import { useProjectMembers } from '../../hooks/useProjects';
 import { useTasks, useTaskDetail } from '../../hooks/useTasks';
+import { labelApi } from '../../api/labelApi';
 import type { Task } from '../../types';
 import dayjs from 'dayjs';
 
@@ -26,6 +28,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
 
   const isEditMode = !!task;
 
+  // Query labels of this project
+  const { data: labels = [], isLoading: isLoadingLabels } = useQuery({
+    queryKey: ['labels', projectId],
+    queryFn: () => labelApi.getLabels(projectId),
+    enabled: !!projectId && open,
+  });
+
   // Set form fields when task changes or modal opens
   useEffect(() => {
     if (open) {
@@ -36,11 +45,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
           priority: task.priority,
           assigneeId: task.assigneeId || undefined,
           deadline: task.deadline ? dayjs(task.deadline) : null,
+          labelIds: task.labels ? task.labels.map((l) => l.id) : [],
         });
       } else {
         form.resetFields();
         form.setFieldsValue({
           priority: 'MEDIUM',
+          labelIds: [],
         });
       }
     }
@@ -131,6 +142,27 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
             options={members.map((member) => ({
               value: member.user?.id,
               label: member.user?.name || member.user?.email,
+            }))}
+          />
+        </Form.Item>
+
+        <Form.Item label="Nhãn công việc" name="labelIds">
+          <Select
+            mode="multiple"
+            placeholder="Chọn nhãn công việc..."
+            loading={isLoadingLabels}
+            allowClear
+            options={labels.map((lbl) => ({
+              value: lbl.id,
+              label: (
+                <span className="flex items-center gap-2">
+                  <span 
+                    className="w-2.5 h-2.5 rounded-full inline-block" 
+                    style={{ backgroundColor: lbl.color }} 
+                  />
+                  {lbl.name}
+                </span>
+              ),
             }))}
           />
         </Form.Item>

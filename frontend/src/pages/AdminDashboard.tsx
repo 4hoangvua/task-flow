@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
-import { Card, Col, Row, Input, Select, Table, Space, Spin, Switch, Avatar, Tag, Button } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Col, Row, Input, Select, Table, Space, Spin, Switch, Avatar, Tag, Button, Pagination, Empty } from 'antd';
 import {
   UserOutlined,
   SearchOutlined,
@@ -22,6 +22,16 @@ export const AdminDashboard: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // API Query Hooks
   const { data: stats, isLoading: isLoadingStats, refetch: refetchStats } = useAdminStats();
@@ -271,20 +281,92 @@ export const AdminDashboard: React.FC = () => {
           />
         </div>
 
-        {/* Data Table */}
-        <Table
-          dataSource={usersData?.data || []}
-          columns={columns}
-          rowKey="id"
-          loading={isLoadingUsers}
-          pagination={{
-            current: page,
-            pageSize: 10,
-            total: usersData?.meta?.total || 0,
-            onChange: (p) => setPage(p),
-            showSizeChanger: false,
-          }}
-        />
+        {/* Data List / Table */}
+        {isLoadingUsers ? (
+          <div className="flex justify-center p-12"><Spin size="large" /></div>
+        ) : isMobile ? (
+          <div>
+            {(usersData?.data || []).length === 0 ? (
+              <Empty description="Không tìm thấy người dùng" />
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {(usersData?.data || []).map((record: User) => (
+                    <div key={record.id} className="p-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg space-y-3.5 shadow-xs">
+                      <div className="flex items-center gap-3">
+                        <Avatar src={record.avatar || undefined} icon={<UserOutlined />} className="bg-indigo-600 border border-[var(--border)] shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-[var(--text-h)] text-sm truncate">
+                            {record.name} {record.id === currentUser?.id && <Tag color="cyan" className="ml-1 text-[9px] inline-block">Bạn</Tag>}
+                          </span>
+                          <span className="text-xs text-[var(--text-secondary)] truncate">{record.email}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 pt-3.5 border-t border-[var(--border)]/60 text-xs">
+                        <div>
+                          <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">Quyền hệ thống</span>
+                          <Select
+                            value={record.role}
+                            disabled={record.id === currentUser?.id || updateRoleMutation.isPending}
+                            onChange={(newRole) => updateRoleMutation.mutate({ id: record.id, role: newRole })}
+                            className="w-full text-xs"
+                            size="small"
+                            options={[
+                              { value: 'ADMIN', label: 'Quản trị viên' },
+                              { value: 'LEADER', label: 'Trưởng nhóm' },
+                              { value: 'MEMBER', label: 'Thành viên' },
+                            ]}
+                          />
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">Trạng thái</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Switch
+                              checked={record.isActive}
+                              size="small"
+                              disabled={record.id === currentUser?.id || updateStatusMutation.isPending}
+                              onChange={(checked) => updateStatusMutation.mutate({ id: record.id, isActive: checked })}
+                            />
+                            <span className={`text-[11px] font-semibold ${record.isActive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                              {record.isActive ? 'Hoạt động' : 'Khóa'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="pt-2 text-[10px] text-[var(--text-tertiary)] flex justify-between">
+                        <span>Ngày tham gia:</span>
+                        <span className="font-medium text-[var(--text-secondary)]">{formatDate(record.createdAt)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-center mt-6">
+                  <Pagination
+                    current={page}
+                    pageSize={10}
+                    total={usersData?.meta?.total || 0}
+                    onChange={(p) => setPage(p)}
+                    simple
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <Table
+            dataSource={usersData?.data || []}
+            columns={columns}
+            rowKey="id"
+            loading={isLoadingUsers}
+            pagination={{
+              current: page,
+              pageSize: 10,
+              total: usersData?.meta?.total || 0,
+              onChange: (p) => setPage(p),
+              showSizeChanger: false,
+            }}
+          />
+        )}
       </Card>
     </div>
   );

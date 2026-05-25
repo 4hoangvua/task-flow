@@ -425,7 +425,7 @@ export const DashboardLayout: React.FC = () => {
         placement="left"
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
-        size={280}
+        width={280}
         styles={{ body: { padding: 0 } }}
         className="dark:bg-[#18181b] dark:text-white"
         style={{

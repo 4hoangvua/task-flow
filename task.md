@@ -1,8 +1,13 @@
-- [x] Thiết lập kết nối join-project và leave-project trong `ProjectDetail.tsx`
-- [x] Đăng ký lắng nghe các sự kiện socket.io (`task:created`, `task:updated`, v.v.) và tự động invalidate cache trong `ProjectDetail.tsx`
-- [x] Tải dữ liệu stats và recentActivity từ API `statsApi.getProjectStats` trong `ProjectDetail.tsx`
-- [x] Thêm tab "Nhật ký hoạt động" trong Tabs component của `ProjectDetail.tsx`
-- [x] Hiển thị Timeline hoạt động chi tiết (avatar, màu sắc, quá trình chuyển đổi trạng thái)
-- [x] Tích hợp mở `TaskDetailModal` trực tiếp khi click vào tên task trên Timeline
-- [x] Chạy biên dịch kiểm tra TypeScript (tsc check) thành công 100%
-- [x] Cập nhật tài liệu tiến độ (`PLAN.md`, `PROGRESS.md`, `changelogs`)
+- [x] Cập nhật Prisma Schema (`schema.prisma`) thêm model Subtask và Label
+- [x] Chạy migration cập nhật cơ sở dữ liệu (`prisma db push`)
+- [x] Triển khai các API controllers & routes cho Subtask và Label ở Backend
+- [x] Tích hợp API xuất dữ liệu dự án ra CSV trong `projectController.ts`
+- [x] Cập nhật TypeScript types (`types/index.ts`) ở Frontend
+- [x] Xây dựng các hàm gọi API (`labelApi.ts`, `taskApi.ts`) ở Frontend
+- [x] Cập nhật hook `useTaskDetail` hỗ trợ các mutations quản lý Subtask
+- [x] Cập nhật giao diện `TaskDetailModal.tsx` để hiển thị Checklist/Subtasks và Tags/Labels
+- [x] Cập nhật giao diện `TaskFormModal.tsx` cho phép chọn Labels cho Task
+- [x] Hiển thị Labels trên Kanban card (`TaskBoard.tsx`)
+- [x] Tạo giao diện Quản lý nhãn (Label Manager) và nút Xuất CSV trong `ProjectDetail.tsx`
+- [x] Chạy tsc biên dịch kiểm tra kiểu dữ liệu ở cả Frontend & Backend
+- [x] Cập nhật tiến trình và tài liệu (`PLAN.md`, `PROGRESS.md`, `changelogs`)

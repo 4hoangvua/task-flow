@@ -74,9 +74,23 @@ const TaskCard = React.forwardRef<HTMLDivElement, {
         )}
       </div>
 
-      <h4 className="text-base font-bold text-[var(--text-h)] line-clamp-2 mb-4 leading-relaxed">
+      <h4 className="text-base font-bold text-[var(--text-h)] line-clamp-2 mb-2 leading-relaxed">
         {task.title}
       </h4>
+
+      {task.labels && task.labels.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {task.labels.map((lbl) => (
+            <span 
+              key={lbl.id} 
+              className="text-[10px] px-1.5 py-0.5 rounded font-medium text-white truncate max-w-[100px]"
+              style={{ backgroundColor: lbl.color }}
+            >
+              {lbl.name}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="flex justify-end items-center border-t border-[var(--border)] pt-3 mt-3">
         <Space size={6}>

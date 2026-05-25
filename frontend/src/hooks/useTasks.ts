@@ -128,6 +128,7 @@ export const useTaskDetail = (taskId: string) => {
       assigneeId?: string | null;
       priority?: string;
       deadline?: string | null;
+      labelIds?: string[];
     }) => taskApi.updateTask(taskId, data),
     onSuccess: () => {
       message.success('Cập nhật nhiệm vụ thành công!');
@@ -147,6 +148,43 @@ export const useTaskDetail = (taskId: string) => {
     },
     onError: (error: any) => {
       message.error(error.response?.data?.error || 'Xóa nhiệm vụ thất bại!');
+    },
+  });
+
+  // Subtask Mutations
+  const createSubtaskMutation = useMutation({
+    mutationFn: (title: string) => taskApi.createSubtask(taskId, title),
+    onSuccess: () => {
+      message.success('Thêm công việc con thành công!');
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.error || 'Thêm công việc con thất bại!');
+    },
+  });
+
+  const updateSubtaskMutation = useMutation({
+    mutationFn: ({ id, title, isDone }: { id: string; title?: string; isDone?: boolean }) =>
+      taskApi.updateSubtask(id, { title, isDone }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.error || 'Cập nhật công việc con thất bại!');
+    },
+  });
+
+  const deleteSubtaskMutation = useMutation({
+    mutationFn: (id: string) => taskApi.deleteSubtask(id),
+    onSuccess: () => {
+      message.success('Xóa công việc con thành công!');
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.error || 'Xóa công việc con thất bại!');
     },
   });
 
@@ -185,6 +223,12 @@ export const useTaskDetail = (taskId: string) => {
     isUpdating: updateTaskMutation.isPending,
     deleteTask: deleteTaskMutation.mutateAsync,
     isDeleting: deleteTaskMutation.isPending,
+    createSubtask: createSubtaskMutation.mutateAsync,
+    isCreatingSubtask: createSubtaskMutation.isPending,
+    updateSubtask: updateSubtaskMutation.mutateAsync,
+    isUpdatingSubtask: updateSubtaskMutation.isPending,
+    deleteSubtask: deleteSubtaskMutation.mutateAsync,
+    isDeletingSubtask: deleteSubtaskMutation.isPending,
     comments: commentsQuery.data || [],
     isLoadingComments: commentsQuery.isLoading,
     addComment: addCommentMutation.mutateAsync,

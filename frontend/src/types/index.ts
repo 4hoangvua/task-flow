@@ -33,6 +33,7 @@ export interface Project {
   ownerId: string;
   owner?: User;
   members?: ProjectMember[];
+  labels?: Label[];
   createdAt: string;
   updatedAt: string;
   _count?: {
@@ -66,6 +67,22 @@ export interface TaskHistory {
   createdAt: string;
 }
 
+export interface Subtask {
+  id: string;
+  title: string;
+  isDone: boolean;
+  taskId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
+  projectId: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -81,6 +98,8 @@ export interface Task {
   creator?: User;
   comments?: Comment[];
   history?: TaskHistory[];
+  subtasks?: Subtask[];
+  labels?: Label[];
   createdAt: string;
   updatedAt: string;
 }

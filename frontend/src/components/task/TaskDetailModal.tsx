@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Modal, Tag, Avatar, Space, Button, Input, Divider, Select, Spin, Tooltip, Popconfirm } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Modal, Tag, Avatar, Space, Button, Input, Divider, Select, Spin, Tooltip, Popconfirm, Checkbox, Progress } from 'antd';
 import {
   UserOutlined,
   CalendarOutlined,
@@ -8,6 +8,8 @@ import {
   EditOutlined,
   DeleteOutlined,
   ClockCircleOutlined,
+  PlusOutlined,
+  CheckSquareOutlined,
 } from '@ant-design/icons';
 import { useTaskDetail, useTasks } from '../../hooks/useTasks';
 import { useAuth } from '../../hooks/useAuth';
@@ -42,6 +44,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     deleteComment,
     deleteTask,
     isDeleting,
+    createSubtask,
+    updateSubtask,
+    deleteSubtask,
   } = useTaskDetail(taskId);
 
   const { project } = useProjectDetail(projectId);
@@ -57,6 +62,19 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   // States
   const [commentContent, setCommentContent] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
+  const [editingSubtaskTitle, setEditingSubtaskTitle] = useState('');
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleAddComment = async () => {
     if (!commentContent.trim()) return;
@@ -93,6 +111,43 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     }
   };
 
+  // Subtask Handlers
+  const handleAddSubtask = async () => {
+    if (!newSubtaskTitle.trim()) return;
+    try {
+      await createSubtask(newSubtaskTitle.trim());
+      setNewSubtaskTitle('');
+    } catch (err) {
+      // Error handled by hook
+    }
+  };
+
+  const handleToggleSubtask = async (subtaskId: string, isDone: boolean) => {
+    try {
+      await updateSubtask({ id: subtaskId, isDone });
+    } catch (err) {
+      // Error handled by hook
+    }
+  };
+
+  const handleUpdateSubtaskTitle = async (subtaskId: string) => {
+    if (!editingSubtaskTitle.trim()) return;
+    try {
+      await updateSubtask({ id: subtaskId, title: editingSubtaskTitle.trim() });
+      setEditingSubtaskId(null);
+    } catch (err) {
+      // Error handled by hook
+    }
+  };
+
+  const handleDeleteSubtask = async (subtaskId: string) => {
+    try {
+      await deleteSubtask(subtaskId);
+    } catch (err) {
+      // Error handled by hook
+    }
+  };
+
   if (isLoading || !task) {
     return (
       <Modal open={open} onCancel={onCancel} footer={null} width={700}>
@@ -109,17 +164,18 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         footer={null}
         width={850}
         title={
-          <div className="flex justify-between items-center pr-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center pr-6">
             <span className="text-xl font-bold text-[var(--text-h)] flex items-center gap-2">
               Chi tiết công việc
             </span>
             {computedIsProjectLeader && (
-              <Space>
+              <Space className="w-full sm:w-auto justify-start sm:justify-end">
                 <Button
                   type="primary"
                   ghost
                   icon={<EditOutlined />}
                   onClick={() => setIsEditModalOpen(true)}
+                  size={isMobile ? 'small' : 'middle'}
                 >
                   Chỉnh sửa
                 </Button>
@@ -136,6 +192,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     danger
                     ghost
                     icon={<DeleteOutlined />}
+                    size={isMobile ? 'small' : 'middle'}
                   >
                     Xóa
                   </Button>
@@ -156,6 +213,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 <span className="text-xs text-[var(--text-secondary)] font-medium ml-2">Trạng thái:</span>
                 <TaskStatusTag status={task.status} />
               </div>
+              {task.labels && task.labels.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                  <span className="text-xs text-[var(--text-secondary)] font-medium">Nhãn:</span>
+                  {task.labels.map((lbl) => (
+                    <Tag key={lbl.id} color={lbl.color} style={{ border: 'none', borderRadius: '4px', fontWeight: 500 }}>
+                      {lbl.name}
+                    </Tag>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
@@ -163,6 +230,121 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               <div className="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--border)] text-sm text-[var(--text)] whitespace-pre-wrap min-h-24 shadow-inner">
                 {task.description || 'Không có mô tả chi tiết cho công việc này.'}
               </div>
+            </div>
+
+            <Divider className="my-2 border-[var(--border)]" />
+
+            {/* Checklist / Subtask Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-3 flex items-center gap-2">
+                <CheckSquareOutlined /> CÔNG VIỆC CON (CHECKLIST)
+              </h3>
+              
+              {/* Progress Bar */}
+              {task.subtasks && task.subtasks.length > 0 && (() => {
+                const total = task.subtasks.length;
+                const completed = task.subtasks.filter((s) => s.isDone).length;
+                const percent = Math.round((completed / total) * 100);
+                return (
+                  <div className="mb-4">
+                    <Progress 
+                      percent={percent} 
+                      strokeColor="var(--accent)" 
+                      trailColor="var(--border)"
+                      size="small"
+                      format={() => `${completed}/${total} hoàn thành (${percent}%)`}
+                    />
+                  </div>
+                );
+              })()}
+
+              {/* Subtasks List */}
+              <div className="space-y-1 mb-4">
+                {task.subtasks && task.subtasks.map((sub) => (
+                  <div 
+                    key={sub.id} 
+                    className="group flex items-center justify-between p-2 hover:bg-[var(--bg)]/60 rounded-lg border border-transparent hover:border-[var(--border)] transition-all"
+                  >
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <Checkbox 
+                        checked={sub.isDone} 
+                        onChange={(e) => handleToggleSubtask(sub.id, e.target.checked)}
+                        disabled={!computedIsProjectLeader && task.assigneeId !== currentUser?.id}
+                      />
+                      {editingSubtaskId === sub.id ? (
+                        <Input
+                          size="small"
+                          value={editingSubtaskTitle}
+                          onChange={(e) => setEditingSubtaskTitle(e.target.value)}
+                          onPressEnter={() => handleUpdateSubtaskTitle(sub.id)}
+                          onBlur={() => handleUpdateSubtaskTitle(sub.id)}
+                          className="py-0.5 px-1.5 text-sm"
+                          autoFocus
+                        />
+                      ) : (
+                        <span 
+                          className={`text-sm truncate ${sub.isDone ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text)]'}`}
+                          onClick={() => {
+                            if (computedIsProjectLeader || task.assigneeId === currentUser?.id) {
+                              setEditingSubtaskId(sub.id);
+                              setEditingSubtaskTitle(sub.title);
+                            }
+                          }}
+                          style={{ cursor: (computedIsProjectLeader || task.assigneeId === currentUser?.id) ? 'pointer' : 'default' }}
+                        >
+                          {sub.title}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {(computedIsProjectLeader || task.assigneeId === currentUser?.id) && (
+                      <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<EditOutlined className="text-xs" />}
+                          onClick={() => {
+                            setEditingSubtaskId(sub.id);
+                            setEditingSubtaskTitle(sub.title);
+                          }}
+                          className="h-6 w-6 flex items-center justify-center p-0"
+                        />
+                        <Button
+                          type="text"
+                          danger
+                          size="small"
+                          icon={<DeleteOutlined className="text-xs" />}
+                          onClick={() => handleDeleteSubtask(sub.id)}
+                          className="h-6 w-6 flex items-center justify-center p-0"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Add Subtask Input */}
+              {(computedIsProjectLeader || task.assigneeId === currentUser?.id) && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Thêm công việc con mới..."
+                    value={newSubtaskTitle}
+                    onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                    onPressEnter={handleAddSubtask}
+                    prefix={<PlusOutlined className="text-[var(--text-tertiary)]" />}
+                    className="rounded-lg text-sm"
+                  />
+                  <Button 
+                    type="primary" 
+                    ghost
+                    onClick={handleAddSubtask}
+                    disabled={!newSubtaskTitle.trim()}
+                    className="flex items-center"
+                  >
+                    Thêm
+                  </Button>
+                </div>
+              )}
             </div>
 
             <Divider className="my-2 border-[var(--border)]" />

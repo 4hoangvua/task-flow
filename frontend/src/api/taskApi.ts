@@ -21,6 +21,7 @@ export const taskApi = {
     assigneeId?: string | null;
     priority?: string;
     deadline?: string | null;
+    labelIds?: string[];
   }) => {
     const res = await api.post<{ success: boolean; data: Task }>('/tasks', data);
     return res.data.data;
@@ -39,6 +40,7 @@ export const taskApi = {
       assigneeId?: string | null;
       priority?: string;
       deadline?: string | null;
+      labelIds?: string[];
     }
   ) => {
     const res = await api.patch<{ success: boolean; data: Task }>(`/tasks/${id}`, data);
@@ -57,6 +59,22 @@ export const taskApi = {
 
   reorderTasks: async (data: { taskId: string; newOrder: number; status: string }) => {
     const res = await api.patch('/tasks/reorder', data);
+    return res.data;
+  },
+
+  // Subtask APIs
+  createSubtask: async (taskId: string, title: string) => {
+    const res = await api.post<{ success: boolean; data: any }>(`/subtasks/tasks/${taskId}/subtasks`, { title });
+    return res.data.data;
+  },
+
+  updateSubtask: async (id: string, data: { title?: string; isDone?: boolean }) => {
+    const res = await api.patch<{ success: boolean; data: any }>(`/subtasks/${id}`, data);
+    return res.data.data;
+  },
+
+  deleteSubtask: async (id: string) => {
+    const res = await api.delete(`/subtasks/${id}`);
     return res.data;
   },
 };

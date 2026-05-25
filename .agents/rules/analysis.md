@@ -51,6 +51,9 @@ Khi nghiên cứu tính năng mới hoặc tối ưu giao diện, Agent **bắt 
 ---
 
 ## 3. QUY TRÌNH NGHIÊN CỨU & PHÂN TÍCH (RESEARCH PROCESS)
-1. Xác định vấn đề/gap nghiệp vụ hoặc các điểm giao diện chưa được tối ưu.
-2. Đề xuất giải pháp bám sát các công nghệ cốt lõi ở phần 2.
-3. **Ghi lại báo cáo phân tích chi tiết** ý tưởng đó vào tệp: `/docs/analysis/YYYY-MM-DD.md` (sử dụng ngày hiện tại) trước khi tiến hành viết code.
+1. **Xác định vấn đề/gap nghiệp vụ hoặc các điểm giao diện chưa được tối ưu**: Chủ động tìm kiếm và đề xuất các tính năng/chức năng mới cần nghiên cứu (chứ không chỉ sửa lỗi vặt).
+2. **Làm rõ phạm vi nghiên cứu**: Xác định rõ xem tính năng/đề xuất thuộc phạm vi **Frontend**, **Backend**, hay **Cả hai** (đặc biệt đối với chức năng mới hoàn toàn).
+3. **Thiết kế giao diện trước (Design-First với Stitch)**: Nếu đề xuất liên quan đến giao diện mới hoặc nâng cấp/cải tiến giao diện, bắt buộc dùng Stitch MCP (như `generate_screen_from_text`, `edit_screens`, v.v.) để vẽ/phác thảo trước khi viết code frontend.
+4. **Đề xuất giải pháp bám sát các công nghệ cốt lõi** ở phần 2.
+5. **Ghi lại báo cáo phân tích chi tiết** ý tưởng đó vào tệp: `/docs/analysis/YYYY-MM-DD.md` (sử dụng ngày hiện tại) trước khi tiến hành viết code, bao gồm cả phạm vi nghiên cứu và mockup giao diện từ Stitch (nếu có giao diện).
+

@@ -47,8 +47,16 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 37 | Dịch vụ chạy ngầm kiểm tra Hạn chót công việc | 2026-05-24 | Thiết lập startDeadlineScheduler kiểm tra các task sắp hết hạn dưới 24h và tạo/bắn thông báo DEADLINE_APPROACHING qua Socket.io thành công, tsc thành công |
 | 38 | Đóng gói Docker & Cấu hình Docker Compose | 2026-05-24 | Khởi tạo Dockerfile cho frontend/backend, nginx.conf và docker-compose.yml chạy tsc biên dịch thành công |
 | 39 | Đồng bộ hóa cộng tác thời gian thực & Nhật ký hoạt động | 2026-05-24 | Tích hợp lắng nghe WebSocket rooms để đồng bộ hóa và xây dựng tab Timeline nhật ký hoạt động |
+| 40 | Cập nhật Quy trình Phát triển Tự động & Hướng dẫn Nghiên cứu | 2026-05-25 | Cập nhật auto-develop.md và analysis.md bổ sung lựa chọn phạm vi nghiên cứu, đề xuất tính năng mới và Stitch-first UI |
+| 41 | Rà soát & Tối ưu hóa tương thích di động (Mobile compatibility) | 2026-05-25 | Khắc phục width Drawer, layout title TaskDetailModal và triển khai card list trên mobile cho AdminDashboard, tsc compile thành công |
+| 42 | Triển khai Subtasks, Custom Labels, & CSV Export | 2026-05-25 | Hoàn thiện APIs và UI ở cả Frontend & Backend, biên dịch tsc thành công 100% không lỗi |
+| 43 | Thiết lập quy trình & Nhật ký Kiểm thử chức năng | 2026-05-25 | Cập nhật auto-develop.md/AGENTS.md và tạo docs/testing/2026-05-25.md kiểm thử thành công 5 kịch bản |
+
+
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
+
+
 
 ## Known Issues
 

@@ -133,7 +133,12 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Thiết lập dịch vụ chạy ngầm tự động kiểm tra và gửi thông báo khi công việc sắp đến hạn chót (DEADLINE_APPROACHING) (2026-05-24)
 - [x] Thiết lập Docker containerization và cấu hình Docker Compose điều phối dịch vụ cho toàn dự án (2026-05-24)
 - [x] Tích hợp đồng bộ hóa cộng tác thời gian thực (WebSocket room sync) và tab Nhật ký Hoạt động (Timeline) trong chi tiết dự án (2026-05-24)
-📁 Chi tiết: [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) (Xem thêm [`docs/changelogs/2026-05-23.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-23.md) và các log trước đó)
+- [x] Làm rõ lựa chọn phạm vi nghiên cứu (Frontend/Backend/Cả hai), đề xuất chức năng mới và vẽ giao diện bằng Stitch trước khi code (2026-05-25)
+- [x] Rà soát tương thích mobile và tối ưu hóa các trang Dashboard, Modals, Admin Dashboard và Drawer sidebar (2026-05-25)
+- [x] Triển khai 3 tính năng mới: Quản lý công việc con (Subtasks), Nhãn tùy chỉnh (Custom Labels), và Xuất báo cáo dữ liệu dự án ra CSV (Project Data Export) ở cả Frontend và Backend (2026-05-25)
+- [x] Thiết lập quy trình kiểm thử bắt buộc và tạo nhật ký kiểm thử functional test log (2026-05-25)
+📁 Chi tiết: [`docs/changelogs/2026-05-25.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-25.md) (Xem thêm [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) và các log trước đó)
+
 
 
 

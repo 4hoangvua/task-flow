@@ -48,6 +48,7 @@ export const createTaskSchema = z.object({
   assigneeId: z.string().uuid('Invalid assignee ID').nullable().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   deadline: z.string().datetime().nullable().optional(),
+  labelIds: z.array(z.string().uuid()).optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -56,6 +57,7 @@ export const updateTaskSchema = z.object({
   assigneeId: z.string().uuid('Invalid assignee ID').nullable().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   deadline: z.string().datetime().nullable().optional(),
+  labelIds: z.array(z.string().uuid()).optional(),
 });
 
 export const updateTaskStatusSchema = z.object({
@@ -71,3 +73,23 @@ export const reorderTasksSchema = z.object({
 export const createCommentSchema = z.object({
   content: z.string().min(1, 'Comment content cannot be empty'),
 });
+
+export const createSubtaskSchema = z.object({
+  title: z.string().min(1, 'Subtask title is required'),
+});
+
+export const updateSubtaskSchema = z.object({
+  title: z.string().min(1).optional(),
+  isDone: z.boolean().optional(),
+});
+
+export const createLabelSchema = z.object({
+  name: z.string().min(1, 'Label name is required'),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid HEX color code'),
+});
+
+export const updateLabelSchema = z.object({
+  name: z.string().min(1).optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid HEX color code').optional(),
+});
+

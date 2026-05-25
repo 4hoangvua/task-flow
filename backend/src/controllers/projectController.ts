@@ -353,3 +353,89 @@ export async function deleteProjectMember(req: Request, res: Response, next: Nex
     next(error);
   }
 }
+
+export async function exportProjectCSV(req: Request, res: Response, next: NextFunction) {
+  try {
+    const projectId = req.params.id;
+
+    // Verify Project existence
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        tasks: {
+          include: {
+            assignee: { select: { name: true, email: true } },
+            creator: { select: { name: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!project) {
+      return next(new AppError(404, 'NOT_FOUND', 'Project not found'));
+    }
+
+    // Verify user role - Leader or Admin
+    if (!req.user) return next(new AppError(401, 'AUTH_INVALID', 'Unauthorized'));
+    if (req.user.role !== 'ADMIN' && project.ownerId !== req.user.id) {
+      const member = await prisma.projectMember.findUnique({
+        where: {
+          projectId_userId: {
+            projectId,
+            userId: req.user.id,
+          },
+        },
+      });
+      if (member?.role !== 'LEADER') {
+        return next(new AppError(403, 'FORBIDDEN', 'Access denied: Only leaders can export project data'));
+      }
+    }
+
+    // Helper to quote CSV field
+    const quote = (val: string) => {
+      const escaped = val.replace(/"/g, '""');
+      return `"${escaped}"`;
+    };
+
+    const headers = [
+      'ID công việc',
+      'Tiêu đề',
+      'Mô tả',
+      'Trạng thái',
+      'Độ ưu tiên',
+      'Người thực hiện',
+      'Email người thực hiện',
+      'Người tạo',
+      'Hạn chót',
+      'Ngày tạo',
+    ];
+
+    const csvRows = [headers.join(',')];
+
+    for (const task of project.tasks) {
+      const row = [
+        quote(task.id),
+        quote(task.title),
+        quote(task.description || ''),
+        quote(task.status === 'TODO' ? 'Cần làm' : task.status === 'IN_PROGRESS' ? 'Đang làm' : task.status === 'REVIEW' ? 'Đánh giá' : 'Hoàn thành'),
+        quote(task.priority === 'LOW' ? 'Thấp' : task.priority === 'MEDIUM' ? 'Trung bình' : task.priority === 'HIGH' ? 'Cao' : 'Khẩn cấp'),
+        quote(task.assignee?.name || 'Chưa gán'),
+        quote(task.assignee?.email || ''),
+        quote(task.creator.name),
+        quote(task.deadline ? new Date(task.deadline).toLocaleString('vi-VN') : 'Không có'),
+        quote(new Date(task.createdAt).toLocaleString('vi-VN')),
+      ];
+      csvRows.push(row.join(','));
+    }
+
+    // Set Response Headers
+    const csvContent = '\uFEFF' + csvRows.join('\r\n'); // Add UTF-8 BOM for Excel
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="project_${encodeURIComponent(project.name.replace(/\s+/g, '_'))}_export.csv"`);
+    
+    return res.status(200).send(csvContent);
+  } catch (error) {
+    next(error);
+  }
+}
