@@ -142,12 +142,14 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Tích hợp tự động đẩy và đồng bộ cơ sở dữ liệu (`prisma db push`) vào pipeline deploy-CI/CD trên server (2026-05-25)
 - [x] Khắc phục triệt để lỗi crash React child khi nhận thông báo real-time bằng cách sử dụng App.useApp() trực tiếp trong [useNotifications.ts](file:///c:/project/task-flow/frontend/src/hooks/useNotifications.ts) (2026-05-25)
 - [x] Xóa bỏ hoàn toàn Hệ thống RACI Matrix (không phù hợp với quy mô ứng dụng) (2026-05-25)
-- [x] Triển khai tính năng Quy tắc Nhóm (Team Charter) dựa trên Tài liệu C2 — model DB, API, tab UI cho Leader/Member (2026-05-25)
-📁 Chi tiết: [`docs/changelogs/2026-05-25.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-25.md) (Xem thêm [`docs/changelogs/2026-05-24.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-24.md) và các log trước đó)
-
-
-
-
+- [x] Triển khai Quy tắc Nhóm (Team Charter) dựa trên Tài liệu C2 — model DB, API, tab UI cho Leader/Member (2026-05-25)
+- [x] Hướng dẫn cấu hình tên miền hoangtran.name.vn, cập nhật Nginx và CORS trên server (2026-05-26)
+- [x] Triển khai Tính năng Công việc Phụ thuộc (Task Dependencies) ràng buộc, cản trở DONE & ngăn chặn chu trình gián tiếp bằng DFS trên Frontend & Backend (2026-05-26)
+- [x] Khắc phục lỗ hổng bảo mật IDOR tại Team Charter và sửa lỗi phân quyền xóa bình luận cho Project LEADER (2026-05-26)
+- [x] Triển khai Tính năng Thành viên tự sở hữu dự án (Personal Projects for Member) và phân chia danh sách dự án bằng Tabs (2026-05-26)
+- [x] Bổ sung hiển thị Người thực hiện (Assignee) trong panel chi tiết công việc (2026-05-26)
+- [x] Khắc phục sai lệch thứ tự (order gaps) khi xóa công việc hoặc đổi trạng thái qua Modal (2026-05-26)
+📁 Chi tiết: [`docs/changelogs/2026-05-26.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-26.md) (Xem thêm [`docs/changelogs/2026-05-25.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-25.md) và các log trước đó)
 
 ---
 
@@ -167,3 +169,58 @@ Dựa trên đặc tả dự án tại [task-flow.md](file:///c:/project/task-fl
 * **Monorepo:** Cả `frontend/` và `backend/` nằm trong cùng thư mục gốc của dự án.
 * **Bảo mật:** Mọi API thay đổi trạng thái hoặc chỉnh sửa dữ liệu bắt buộc đi qua bộ lọc middleware RBAC để kiểm soát quyền chặt chẽ.
 * **Kiểm thử:** Độc lập kiểm thử frontend với Vitest & Testing Library; kiểm thử backend với Vitest & Supertest.
+
+---
+
+## 6. Server Access & Directory Mapping
+
+Dưới đây là hướng dẫn các bước truy cập vào server và sơ đồ các thư mục liên quan trên server AWS:
+
+### 6.1. Hướng dẫn truy cập SSH
+- **Địa chỉ IP Server:** `54.173.190.122`
+- **Tên miền:** `hoangtran.name.vn`
+- **Tài khoản SSH:** `ubuntu`
+- **Private Key (máy local):** `C:\Users\hoang\Downloads\hoang.pem`
+- **Câu lệnh kết nối:**
+  ```bash
+  ssh -i C:\Users\hoang\Downloads\hoang.pem ubuntu@54.173.190.122
+  ```
+
+### 6.2. Sơ đồ thư mục dự án trên Server AWS
+
+1. **Frontend (Web Static Files):**
+   - **Mã nguồn gốc:** `/var/www/task-flow`
+   - **Thư mục build tĩnh:** `/var/www/task-flow/frontend/dist`
+   - **Quy trình build:**
+     ```bash
+     cd /var/www/task-flow
+     git pull origin main
+     cd frontend
+     npm install
+     npm run build
+     ```
+
+2. **Backend (API & WebSockets):**
+   - **Mã nguồn gốc:** `/home/task-flow-backend`
+   - **Tệp cấu hình môi trường:** `/home/task-flow-backend/backend/.env`
+   - **SQLite Database:** `/home/task-flow-backend/backend/prisma/dev.db`
+   - **Quy trình deploy:**
+     ```bash
+     cd /home/task-flow-backend
+     git pull origin main
+     cd backend
+     npm install
+     npx prisma generate
+     npx prisma db push --accept-data-loss
+     npm run build
+     pm2 restart task-flow-backend --update-env
+     ```
+
+3. **Cấu hình Nginx (Routing & Proxy):**
+   - **Đường dẫn tệp cấu hình:** `/etc/nginx/sites-available/task-flow`
+   - **Cách cập nhật và reload:**
+     ```bash
+     sudo nano /etc/nginx/sites-available/task-flow
+     sudo nginx -t
+     sudo systemctl reload nginx
+     ```

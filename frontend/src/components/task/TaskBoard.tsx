@@ -92,7 +92,16 @@ const TaskCard = React.forwardRef<HTMLDivElement, {
         </div>
       )}
 
-      <div className="flex justify-end items-center border-t border-[var(--border)] pt-3 mt-3">
+      <div className="flex justify-between items-center border-t border-[var(--border)] pt-3 mt-3">
+        <div className="flex items-center">
+          {task.dependencies && task.dependencies.length > 0 && (
+            <Tooltip title={`Có ${task.dependencies.length} công việc tiên quyết`}>
+              <span className="text-[11px] text-[var(--accent)] flex items-center gap-0.5 font-bold border border-[var(--accent)]/20 px-1.5 py-0.5 rounded bg-[var(--accent)]/5">
+                🔗 {task.dependencies.length}
+              </span>
+            </Tooltip>
+          )}
+        </div>
         <Space size={6}>
           {task.assignee ? (
             <Tooltip title={`Người thực hiện: ${task.assignee.name}`}>

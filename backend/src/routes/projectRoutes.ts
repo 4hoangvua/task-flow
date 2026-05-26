@@ -21,7 +21,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/', getProjects);
-router.post('/', requireSystemRole(['LEADER']), createProject);
+router.post('/', requireSystemRole(['LEADER', 'MEMBER']), createProject);
 
 router.get('/:id', getProjectById);
 router.patch('/:id', updateProject);

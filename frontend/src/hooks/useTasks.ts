@@ -216,6 +216,30 @@ export const useTaskDetail = (taskId: string) => {
     },
   });
 
+  const addDependencyMutation = useMutation({
+    mutationFn: (dependsOnId: string) => taskApi.addDependency(taskId, dependsOnId),
+    onSuccess: () => {
+      message.success('Thêm liên kết phụ thuộc thành công!');
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.error || 'Thêm liên kết phụ thuộc thất bại!');
+    },
+  });
+
+  const removeDependencyMutation = useMutation({
+    mutationFn: (dependsOnId: string) => taskApi.removeDependency(taskId, dependsOnId),
+    onSuccess: () => {
+      message.success('Gỡ liên kết phụ thuộc thành công!');
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.error || 'Gỡ liên kết phụ thuộc thất bại!');
+    },
+  });
+
   return {
     task: taskQuery.data,
     isLoading: taskQuery.isLoading,
@@ -234,5 +258,11 @@ export const useTaskDetail = (taskId: string) => {
     addComment: addCommentMutation.mutateAsync,
     isAddingComment: addCommentMutation.isPending,
     deleteComment: deleteCommentMutation.mutateAsync,
+
+    // Dependency
+    addDependency: addDependencyMutation.mutateAsync,
+    isAddingDependency: addDependencyMutation.isPending,
+    removeDependency: removeDependencyMutation.mutateAsync,
+    isRemovingDependency: removeDependencyMutation.isPending,
   };
 };

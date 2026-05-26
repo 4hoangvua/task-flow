@@ -101,8 +101,29 @@ export interface Task {
   history?: TaskHistory[];
   subtasks?: Subtask[];
   labels?: Label[];
+  dependencies?: TaskDependency[];
+  dependents?: TaskDependency[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TaskDependency {
+  id: string;
+  taskId: string;
+  dependsOnId: string;
+  createdAt: string;
+  dependsOn: {
+    id: string;
+    title: string;
+    status: TaskStatus;
+    assignee?: User | null;
+  };
+  task?: {
+    id: string;
+    title: string;
+    status: TaskStatus;
+    assignee?: User | null;
+  };
 }
 
 export interface Notification {

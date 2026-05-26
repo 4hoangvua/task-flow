@@ -142,9 +142,31 @@ export async function deleteComment(req: Request, res: Response, next: NextFunct
       return next(new AppError(404, 'NOT_FOUND', 'Comment not found'));
     }
 
-    // Only creator of comment or ADMIN can delete
-    if (comment.userId !== req.user.id && req.user.role !== 'ADMIN') {
-      return next(new AppError(403, 'FORBIDDEN', 'Only the comment author can delete it'));
+    // Only creator of comment, ADMIN, or Project LEADER can delete
+    let isAllowed = comment.userId === req.user.id || req.user.role === 'ADMIN';
+
+    if (!isAllowed) {
+      const task = await prisma.task.findUnique({
+        where: { id: comment.taskId },
+        select: { projectId: true },
+      });
+      if (task) {
+        const member = await prisma.projectMember.findUnique({
+          where: {
+            projectId_userId: {
+              projectId: task.projectId,
+              userId: req.user.id,
+            },
+          },
+        });
+        if (member?.role === 'LEADER') {
+          isAllowed = true;
+        }
+      }
+    }
+
+    if (!isAllowed) {
+      return next(new AppError(403, 'FORBIDDEN', 'Only the comment author or project leader can delete it'));
     }
 
     await prisma.comment.delete({

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Card, Col, Row, Statistic, Select, Avatar, Space, Empty, Spin } from 'antd';
+import { Card, Col, Row, Statistic, Select, Avatar, Space, Empty, Spin, Tabs } from 'antd';
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   FileTextOutlined,
   UserOutlined,
   CalendarOutlined,
+  ProjectOutlined,
 } from '@ant-design/icons';
 import {
   BarChart,
@@ -35,7 +36,6 @@ const STATUS_COLORS = {
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const isMember = user?.role === 'MEMBER';
 
   // Personal statistics (For MEMBER or general overview)
   const mySummaryQuery = useQuery({
@@ -43,7 +43,7 @@ export const Dashboard: React.FC = () => {
     queryFn: statsApi.getMySummary,
   });
 
-  // Projects list for LEADER
+  // Projects list
   const { projects, isLoading: isLoadingProjects } = useProjects({ limit: 100 });
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
@@ -61,91 +61,6 @@ export const Dashboard: React.FC = () => {
     enabled: !!selectedProjectId,
   });
 
-  if (isMember) {
-    const summary = mySummaryQuery.data;
-    const isLoading = mySummaryQuery.isLoading;
-
-    return (
-      <div className="space-y-8 pt-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-h)]">
-            Chào mừng, {user?.name}!
-          </h1>
-          <p className="text-[var(--text-secondary)] mt-1.5 text-sm">
-            Dưới đây là tóm tắt tiến độ công việc và nhiệm vụ được giao của bạn.
-          </p>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center items-center p-12 min-h-[200px]"><Spin size="large" /></div>
-        ) : (
-          <Row gutter={[20, 20]}>
-            <Col xs={24} sm={8}>
-              <Card 
-                variant="borderless" 
-                className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
-              >
-                <Statistic
-                  title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Nhiệm vụ được giao</span>}
-                  value={summary?.assigned || 0}
-                  styles={{ content: { fontSize: '28px', fontWeight: 800, color: 'var(--text-h)' } }}
-                  prefix={
-                    <div className="w-10 h-10 rounded-lg bg-[var(--accent-bg)] flex items-center justify-center text-[var(--accent)] mr-3 border border-[var(--accent-border)]">
-                      <FileTextOutlined className="text-lg" />
-                    </div>
-                  }
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Card 
-                variant="borderless" 
-                className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
-              >
-                <Statistic
-                  title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Đã hoàn thành</span>}
-                  value={summary?.completed || 0}
-                  styles={{ content: { fontSize: '28px', fontWeight: 800, color: '#10b981' } }}
-                  prefix={
-                    <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mr-3 border border-emerald-100/30 dark:border-emerald-900/30">
-                      <CheckCircleOutlined className="text-lg" />
-                    </div>
-                  }
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Card 
-                variant="borderless" 
-                className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
-              >
-                <Statistic
-                  title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Quá hạn</span>}
-                  value={summary?.overdue || 0}
-                  styles={{ content: { 
-                    fontSize: '28px', 
-                    fontWeight: 800, 
-                    color: summary?.overdue && summary.overdue > 0 ? '#ef4444' : 'var(--text-h)' 
-                  } }}
-                  prefix={
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 border transition-colors ${
-                      summary?.overdue && summary.overdue > 0
-                        ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-100/30 dark:border-rose-900/30'
-                        : 'bg-[var(--bg)] border-[var(--border)] text-[var(--text-tertiary)]'
-                    }`}>
-                      <ClockCircleOutlined className="text-lg" />
-                    </div>
-                  }
-                />
-              </Card>
-            </Col>
-          </Row>
-        )}
-      </div>
-    );
-  }
-
-  // Leader / Admin Dashboard
   const stats = projectStatsQuery.data;
   const isLoadingStats = projectStatsQuery.isLoading;
 
@@ -178,34 +93,102 @@ export const Dashboard: React.FC = () => {
     return null;
   };
 
-  return (
-    <div className="space-y-8 pt-6">
+  const personalSummary = mySummaryQuery.data;
+
+  const personalTabContent = mySummaryQuery.isLoading ? (
+    <div className="flex justify-center items-center p-12 min-h-[200px]"><Spin size="large" /></div>
+  ) : (
+    <Row gutter={[20, 20]} className="mt-4">
+      <Col xs={24} sm={8}>
+        <Card 
+          variant="borderless" 
+          className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
+        >
+          <Statistic
+            title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Nhiệm vụ được giao</span>}
+            value={personalSummary?.assigned || 0}
+            styles={{ content: { fontSize: '28px', fontWeight: 800, color: 'var(--text-h)' } }}
+            prefix={
+              <div className="w-10 h-10 rounded-lg bg-[var(--accent-bg)] flex items-center justify-center text-[var(--accent)] mr-3 border border-[var(--accent-border)]">
+                <FileTextOutlined className="text-lg" />
+              </div>
+            }
+          />
+        </Card>
+      </Col>
+      <Col xs={24} sm={8}>
+        <Card 
+          variant="borderless" 
+          className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
+        >
+          <Statistic
+            title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Đã hoàn thành</span>}
+            value={personalSummary?.completed || 0}
+            styles={{ content: { fontSize: '28px', fontWeight: 800, color: '#10b981' } }}
+            prefix={
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mr-3 border border-emerald-100/30 dark:border-emerald-900/30">
+                <CheckCircleOutlined className="text-lg" />
+              </div>
+            }
+          />
+        </Card>
+      </Col>
+      <Col xs={24} sm={8}>
+        <Card 
+          variant="borderless" 
+          className="premium-card bg-[var(--bg-card)] border border-[var(--border)] shadow-sm"
+        >
+          <Statistic
+            title={<span className="text-[var(--text-secondary)] font-semibold tracking-wide text-xs uppercase">Quá hạn</span>}
+            value={personalSummary?.overdue || 0}
+            styles={{ content: { 
+              fontSize: '28px', 
+              fontWeight: 800, 
+              color: personalSummary?.overdue && personalSummary.overdue > 0 ? '#ef4444' : 'var(--text-h)' 
+            } }}
+            prefix={
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 border transition-colors ${
+                personalSummary?.overdue && personalSummary.overdue > 0
+                  ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-100/30 dark:border-rose-900/30'
+                  : 'bg-[var(--bg)] border-[var(--border)] text-[var(--text-tertiary)]'
+              }`}>
+                <ClockCircleOutlined className="text-lg" />
+              </div>
+            }
+          />
+        </Card>
+      </Col>
+    </Row>
+  );
+
+  const projectTabContent = isLoadingProjects ? (
+    <div className="flex justify-center items-center p-12 min-h-[300px]"><Spin size="large" /></div>
+  ) : projects.length === 0 ? (
+    <Card className="shadow-sm rounded-lg border border-[var(--border)] notebook-card mt-4">
+      <Empty description="Bạn chưa tham gia dự án nào. Hãy tạo dự án hoặc nhờ trưởng nhóm thêm vào dự án để xem thống kê!" />
+    </Card>
+  ) : (
+    <div className="space-y-6 mt-4">
+      {/* Project Selector Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-h)]">Bảng Quản Trị</h1>
-          <p className="text-[var(--text-secondary)] mt-1.5 text-sm">Tổng quan tiến độ và hiệu năng toàn bộ dự án.</p>
+          <h2 className="text-xl font-bold tracking-tight text-[var(--text-h)]">Tiến độ dự án</h2>
+          <p className="text-[var(--text-secondary)] mt-1 text-xs">Thống kê chi tiết cho từng dự án của bạn.</p>
         </div>
-
-        {projects.length > 0 && (
-          <div className="flex items-center gap-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-1.5 px-3 shadow-xs">
-            <span className="text-xs text-[var(--text-secondary)] font-semibold shrink-0">Xem dự án:</span>
-            <Select
-              value={selectedProjectId}
-              onChange={(val) => setSelectedProjectId(val)}
-              className="w-48 border-none"
-              variant="borderless"
-              options={projects.map((p) => ({ value: p.id, label: p.name }))}
-            />
-          </div>
-        )}
+        <div className="flex items-center gap-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-1.5 px-3 shadow-xs">
+          <span className="text-xs text-[var(--text-secondary)] font-semibold shrink-0">Xem dự án:</span>
+          <Select
+            value={selectedProjectId}
+            onChange={(val) => setSelectedProjectId(val)}
+            className="w-48 border-none"
+            variant="borderless"
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+          />
+        </div>
       </div>
 
-      {isLoadingProjects || (selectedProjectId && isLoadingStats) ? (
-        <div className="flex justify-center items-center p-12 min-h-[300px]"><Spin size="large" /></div>
-      ) : projects.length === 0 ? (
-        <Card className="shadow-sm rounded-lg border border-[var(--border)] notebook-card">
-          <Empty description="Bạn chưa có dự án nào. Chuyển sang tab Dự án để tạo mới!" />
-        </Card>
+      {selectedProjectId && isLoadingStats ? (
+        <div className="flex justify-center items-center p-12 min-h-[200px]"><Spin size="large" /></div>
       ) : (
         <Space orientation="vertical" size={20} className="w-full">
           {/* KPI Section */}
@@ -368,7 +351,7 @@ export const Dashboard: React.FC = () => {
                       <Avatar src={item.user.avatar} className="border border-[var(--border)] shadow-xs shrink-0" icon={<UserOutlined />}>
                         {item.user.name[0]}
                       </Avatar>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-grow min-w-0">
                         <div className="text-xs font-semibold text-[var(--text)] leading-relaxed">
                           <span className="font-bold text-[var(--text-h)]">{item.user.name} </span>
                           <span className="font-medium text-[var(--text-secondary)]">
@@ -390,5 +373,46 @@ export const Dashboard: React.FC = () => {
       )}
     </div>
   );
+
+  return (
+    <div className="space-y-8 pt-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-h)]">
+          Chào mừng, {user?.name}!
+        </h1>
+        <p className="text-[var(--text-secondary)] mt-1.5 text-sm">
+          Tổng quan tiến độ và hiệu năng các công việc của bạn.
+        </p>
+      </div>
+
+      {/* Tabs Layout */}
+      <Tabs
+        defaultActiveKey="personal"
+        className="custom-tabs"
+        items={[
+          {
+            key: 'personal',
+            label: (
+              <span className="flex items-center gap-2">
+                <UserOutlined /> Cá nhân
+              </span>
+            ),
+            children: personalTabContent,
+          },
+          {
+            key: 'project',
+            label: (
+              <span className="flex items-center gap-2">
+                <ProjectOutlined /> Dự án
+              </span>
+            ),
+            children: projectTabContent,
+          },
+        ]}
+      />
+    </div>
+  );
 };
+
 export default Dashboard;

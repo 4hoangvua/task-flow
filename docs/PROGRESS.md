@@ -57,6 +57,13 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 47 | Sửa lỗi crash khi nhận thông báo Real-time | 2026-05-25 | Sử dụng App.useApp() trực tiếp trong [useNotifications.ts](file:///c:/project/task-flow/frontend/src/hooks/useNotifications.ts), tsc biên dịch thành công |
 | 48 | Xóa bỏ Hệ thống RACI Matrix (không phù hợp) | 2026-05-25 | Xóa toàn bộ code RACI khỏi backend/frontend, biên dịch tsc thành công 100% |
 | 49 | Triển khai Quy tắc Nhóm (Team Charter) | 2026-05-25 | Model DB, API GET/PUT, tab UI (Leader editable, Member read-only), API test 4/4 PASS, tsc thành công 100% |
+| 50 | Hướng dẫn cấu hình tên miền & CORS | 2026-05-26 | Đã cung cấp các bước cấu hình Nginx, backend .env và SSL Certbot |
+| 51  | Triển khai Công việc Phụ thuộc (Task Dependencies) | 2026-05-26 | Thiết lập model, API thêm/xóa phụ thuộc, chặn DONE khi prerequisite chưa hoàn thành, UI chi tiết và badge Kanban, biên dịch tsc thành công 100%, 5/5 test cases đạt PASS |
+| 52  | Khắc phục Bảo mật Team Charter (IDOR/BOLA) & Quyền Xóa Bình luận | 2026-05-26 | Áp dụng middleware requireProjectRole cho Team Charter APIs, cập nhật deleteComment cho phép Project Leader xóa comment, test cases đạt PASS 100% |
+| 53  | Thành viên tự sở hữu dự án & Phân chia Dự án | 2026-05-26 | Cho phép MEMBER tạo dự án, chia tách tab Cá nhân / Dự án trên Dashboard, và phân chia danh sách dự án bằng Tabs, biên dịch tsc thành công 100%, test cases đạt PASS 100% |
+| 54  | Ngăn chặn Phụ thuộc tuần hoàn Gián tiếp | 2026-05-26 | Phát hiện chu trình bằng DFS đệ quy ở backend (hasCircularPath) và frontend (isReachable), biên dịch tsc thành công 100%, test cases đạt PASS |
+| 55  | Hiển thị Người thực hiện trong Chi tiết Công việc | 2026-05-26 | Bổ sung phần NGƯỜI THỰC HIỆN hiển thị avatar và tên bên cạnh các trường Hạn chót, Người tạo, tsc thành công 100% |
+| 56  | Khắc phục Sai lệch Thứ tự Công việc | 2026-05-26 | Dùng transaction dồn order khi xóa task và khi đổi trạng thái qua modal, tsc backend thành công 100%, test cases đạt PASS |
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 

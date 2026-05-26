@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Col, Row, Button, Input, Select, Table, Modal, Form, Space, Empty, Spin } from 'antd';
+import { Card, Col, Row, Button, Input, Select, Table, Modal, Form, Space, Empty, Spin, Tabs } from 'antd';
 import {
   ProjectOutlined,
   PlusOutlined,
@@ -21,12 +21,12 @@ import { SearchAutoComplete } from '../components/common/SearchAutoComplete';
 export const Projects: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isLeaderOrAdmin = user?.role === 'LEADER' || user?.role === 'ADMIN';
 
   // State
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [activeTab, setActiveTab] = useState<'all' | 'owned' | 'joined'>('all');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
 
@@ -48,7 +48,15 @@ export const Projects: React.FC = () => {
     const matchesSearch = project.name.toLowerCase().includes(searchText.toLowerCase()) ||
       (project.description && project.description.toLowerCase().includes(searchText.toLowerCase()));
     const matchesStatus = statusFilter === 'ALL' || project.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    let matchesTab = true;
+    if (activeTab === 'owned') {
+      matchesTab = project.ownerId === user?.id;
+    } else if (activeTab === 'joined') {
+      matchesTab = project.ownerId !== user?.id;
+    }
+    
+    return matchesSearch && matchesStatus && matchesTab;
   });
 
   const columns = [
@@ -120,18 +128,37 @@ export const Projects: React.FC = () => {
           <p className="text-[var(--text-secondary)] mt-1.5 text-sm">Quản lý và xem tiến độ các dự án trong hệ thống.</p>
         </div>
 
-        {isLeaderOrAdmin && (
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            size="large"
-            className="shadow-md font-semibold"
-            onClick={() => setIsModalVisible(true)}
-          >
-            Tạo dự án mới
-          </Button>
-        )}
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          size="large"
+          className="shadow-md font-semibold"
+          onClick={() => setIsModalVisible(true)}
+        >
+          Tạo dự án mới
+        </Button>
       </div>
+
+      {/* Tabs */}
+      <Tabs
+        activeKey={activeTab}
+        onChange={(key) => setActiveTab(key as any)}
+        className="custom-tabs mb-6"
+        items={[
+          {
+            key: 'all',
+            label: `Tất cả (${projects.length})`,
+          },
+          {
+            key: 'owned',
+            label: `Dự án sở hữu (${projects.filter((p) => p.ownerId === user?.id).length})`,
+          },
+          {
+            key: 'joined',
+            label: `Dự án tham gia (${projects.filter((p) => p.ownerId !== user?.id).length})`,
+          },
+        ]}
+      />
 
       {/* Filter and View toggles */}
       <Card className="mb-10 shadow-sm border border-[var(--border)] notebook-card">

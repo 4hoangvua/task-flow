@@ -73,8 +73,21 @@ model Task {
   history     TaskHistory[]
   subtasks    Subtask[]
   labels      Label[]
+  dependencies TaskDependency[] @relation("TaskDependents")
+  dependents   TaskDependency[] @relation("TaskDependencies")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model TaskDependency {
+  id          String   @id @default(uuid())
+  taskId      String
+  dependsOnId String
+  task        Task     @relation("TaskDependents", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn   Task     @relation("TaskDependencies", fields: [dependsOnId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([taskId, dependsOnId])
 }
 
 model Comment {

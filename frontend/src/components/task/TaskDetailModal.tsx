@@ -47,6 +47,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     createSubtask,
     updateSubtask,
     deleteSubtask,
+    addDependency,
+    isAddingDependency,
+    removeDependency,
   } = useTaskDetail(taskId);
 
   const { project } = useProjectDetail(projectId);
@@ -57,7 +60,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     ? isProjectLeader
     : (currentMember?.role === 'LEADER' || currentUser?.role === 'ADMIN' || project?.ownerId === currentUser?.id);
 
-  const { updateStatus } = useTasks(projectId);
+  const { updateStatus, tasks: projectTasks } = useTasks(projectId);
 
   // States
   const [commentContent, setCommentContent] = useState('');
@@ -147,6 +150,56 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       // Error handled by hook
     }
   };
+
+  // Dependency Handlers
+  const handleAddDependency = async (dependsOnId: string) => {
+    try {
+      await addDependency(dependsOnId);
+    } catch (err) {
+      // Handled by hook
+    }
+  };
+
+  const handleRemoveDependency = async (dependsOnId: string) => {
+    try {
+      await removeDependency(dependsOnId);
+    } catch (err) {
+      // Handled by hook
+    }
+  };
+
+  const existingDepIds = task?.dependencies?.map((d) => d.dependsOnId) || [];
+  const existingDependentIds = task?.dependents?.map((d) => d.taskId) || [];
+
+  // Check if targetId is reachable from startId in the dependency graph
+  const isReachable = (startId: string, targetId: string, visited = new Set<string>()): boolean => {
+    if (startId === targetId) return true;
+    visited.add(startId);
+
+    const startTask = projectTasks.find((pt) => pt.id === startId);
+    if (!startTask || !startTask.dependencies) return false;
+
+    for (const dep of startTask.dependencies) {
+      if (!visited.has(dep.dependsOnId)) {
+        if (isReachable(dep.dependsOnId, targetId, visited)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const availableTasksOptions = projectTasks
+    .filter((t) => {
+      if (t.id === taskId) return false;
+      if (existingDepIds.includes(t.id)) return false;
+      if (existingDependentIds.includes(t.id)) return false;
+      return !isReachable(t.id, taskId);
+    })
+    .map((t) => ({
+      value: t.id,
+      label: t.title,
+    }));
 
   if (isLoading || !task) {
     return (
@@ -349,6 +402,107 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
             <Divider className="my-2 border-[var(--border)]" />
 
+            {/* Task Dependencies Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-3 flex items-center gap-2">
+                <ClockCircleOutlined /> CÔNG VIỆC TIÊN QUYẾT (PHỤ THUỘC)
+              </h3>
+
+              {/* List of prerequisites (tasks this task depends on) */}
+              <div className="space-y-2 mb-4">
+                {task.dependencies && task.dependencies.length > 0 ? (
+                  task.dependencies.map((dep) => {
+                    const isCompleted = dep.dependsOn.status === 'DONE';
+                    return (
+                      <div 
+                        key={dep.id} 
+                        className="flex items-center justify-between p-2 bg-[var(--bg)]/40 border border-[var(--border)] rounded-lg text-sm"
+                      >
+                        <Space className="min-w-0 flex-1">
+                          {!isCompleted && (
+                            <Tooltip title="Công việc này cần hoàn thành trước">
+                              <Tag color="warning" className="m-0 py-0.5 px-1.5" style={{ fontSize: '10px', borderRadius: '4px', border: 'none' }}>CẦN TRƯỚC</Tag>
+                            </Tooltip>
+                          )}
+                          <span className="text-sm text-[var(--text)] font-medium truncate">
+                            {dep.dependsOn.title}
+                          </span>
+                        </Space>
+
+                        <Space size={8}>
+                          <Tooltip title={dep.dependsOn.assignee?.name || 'Chưa gán'}>
+                            <Avatar src={dep.dependsOn.assignee?.avatar} size="small" icon={<UserOutlined />} />
+                          </Tooltip>
+                          <TaskStatusTag status={dep.dependsOn.status} />
+                          {(computedIsProjectLeader || task.assigneeId === currentUser?.id) && (
+                            <Popconfirm
+                              title="Gỡ bỏ liên kết phụ thuộc"
+                              description="Bạn có chắc muốn gỡ bỏ liên kết này?"
+                              onConfirm={() => handleRemoveDependency(dep.dependsOnId)}
+                              okText="Gỡ"
+                              cancelText="Hủy"
+                              okButtonProps={{ danger: true }}
+                            >
+                              <Button
+                                type="text"
+                                danger
+                                size="small"
+                                icon={<DeleteOutlined className="text-xs" />}
+                                className="h-6 w-6 flex items-center justify-center p-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                              />
+                            </Popconfirm>
+                          )}
+                        </Space>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-2 text-xs text-[var(--text-tertiary)] italic">Không có công việc tiên quyết.</div>
+                )}
+              </div>
+
+              {/* List of dependents (tasks that depend on this task) */}
+              {task.dependents && task.dependents.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">Công việc bị ảnh hưởng (Bị phụ thuộc)</h4>
+                  <div className="space-y-1.5">
+                    {task.dependents.map((dep) => (
+                      <div 
+                        key={dep.id} 
+                        className="flex items-center justify-between p-2 bg-[var(--bg)]/20 border border-[var(--border)] rounded-lg text-xs"
+                      >
+                        <span className="text-[var(--text-secondary)] truncate">{dep.task?.title}</span>
+                        <Space>
+                          <Avatar src={dep.task?.assignee?.avatar} size="small" icon={<UserOutlined />} />
+                          <TaskStatusTag status={dep.task?.status || 'TODO'} />
+                        </Space>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add Dependency Select Dropdown */}
+              {(computedIsProjectLeader || task.assigneeId === currentUser?.id) && (
+                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                  <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">Thêm công việc tiên quyết:</span>
+                  <Select
+                    showSearch
+                    placeholder="Tìm kiếm công việc trong dự án..."
+                    optionFilterProp="label"
+                    value={null}
+                    onChange={handleAddDependency}
+                    loading={isAddingDependency}
+                    className="flex-1"
+                    options={availableTasksOptions}
+                    notFoundContent="Không có công việc phù hợp"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Divider className="my-2 border-[var(--border)]" />
+
             {/* Comments Section */}
             <div>
               <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -445,6 +599,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <CalendarOutlined className="text-xs" />
                   <span className="text-sm font-medium">
                     {task.deadline ? formatDate(task.deadline).split(' ')[0] : 'Không có'}
+                  </span>
+                </Space>
+              </div>
+
+              <div>
+                <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">NGƯỜI THỰC HIỆN</span>
+                <Space size={6} className="mt-1.5">
+                  <Avatar src={task.assignee?.avatar} icon={<UserOutlined />} size="small" className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold" />
+                  <span className="text-sm font-medium text-[var(--text)]">
+                    {task.assignee?.name || 'Chưa gán'}
                   </span>
                 </Space>
               </div>

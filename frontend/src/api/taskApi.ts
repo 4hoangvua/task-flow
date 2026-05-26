@@ -77,4 +77,15 @@ export const taskApi = {
     const res = await api.delete(`/subtasks/${id}`);
     return res.data;
   },
+
+  // Dependency APIs
+  addDependency: async (taskId: string, dependsOnId: string) => {
+    const res = await api.post<{ success: boolean; data: any }>(`/tasks/${taskId}/dependencies`, { dependsOnId });
+    return res.data.data;
+  },
+
+  removeDependency: async (taskId: string, dependsOnId: string) => {
+    const res = await api.delete(`/tasks/${taskId}/dependencies/${dependsOnId}`);
+    return res.data;
+  },
 };

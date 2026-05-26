@@ -7,6 +7,8 @@ import {
   deleteTask,
   updateTaskStatus,
   reorderTasks,
+  addDependency,
+  removeDependency,
 } from '../controllers/taskController';
 import { authMiddleware } from '../middlewares/auth';
 import { requireProjectRole, requireTaskProjectRole } from '../middlewares/rbac';
@@ -26,5 +28,8 @@ router.get('/:id', requireTaskProjectRole(['LEADER', 'MEMBER']), getTaskById);
 router.patch('/:id', requireTaskProjectRole(['LEADER']), updateTask);
 router.delete('/:id', requireTaskProjectRole(['LEADER']), deleteTask);
 router.patch('/:id/status', requireTaskProjectRole(['LEADER', 'MEMBER']), updateTaskStatus);
+
+router.post('/:id/dependencies', requireTaskProjectRole(['LEADER', 'MEMBER']), addDependency);
+router.delete('/:id/dependencies/:dependsOnId', requireTaskProjectRole(['LEADER', 'MEMBER']), removeDependency);
 
 export default router;

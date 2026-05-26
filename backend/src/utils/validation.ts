@@ -104,3 +104,7 @@ export const updateCharterSchema = z.object({
   disciplineRules: z.string().max(2000).optional().nullable(),
   rolesDescription: z.string().max(2000).optional().nullable(),
 });
+
+export const addDependencySchema = z.object({
+  dependsOnId: z.string().uuid('Mã công việc tiên quyết không hợp lệ'),
+});

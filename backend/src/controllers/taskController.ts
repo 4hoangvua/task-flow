@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma';
 import { AppError } from '../utils/errors';
-import { createTaskSchema, updateTaskSchema, updateTaskStatusSchema, reorderTasksSchema } from '../utils/validation';
+import { createTaskSchema, updateTaskSchema, updateTaskStatusSchema, reorderTasksSchema, addDependencySchema } from '../utils/validation';
 
 export async function getTasks(req: Request, res: Response, next: NextFunction) {
   try {
@@ -32,6 +32,13 @@ export async function getTasks(req: Request, res: Response, next: NextFunction) 
 
           labels: { select: { id: true, name: true, color: true } },
           subtasks: true,
+          dependencies: {
+            include: {
+              dependsOn: {
+                select: { id: true, title: true, status: true }
+              }
+            }
+          },
         },
         orderBy: [
           { status: 'asc' },
@@ -159,6 +166,30 @@ export async function getTaskById(req: Request, res: Response, next: NextFunctio
             user: { select: { id: true, name: true, email: true } },
           },
           orderBy: { createdAt: 'desc' },
+        },
+        dependencies: {
+          include: {
+            dependsOn: {
+              select: {
+                id: true,
+                title: true,
+                status: true,
+                assignee: { select: { id: true, name: true, email: true, avatar: true } }
+              }
+            }
+          }
+        },
+        dependents: {
+          include: {
+            task: {
+              select: {
+                id: true,
+                title: true,
+                status: true,
+                assignee: { select: { id: true, name: true, email: true, avatar: true } }
+              }
+            }
+          }
         },
       },
     });
@@ -304,9 +335,22 @@ export async function deleteTask(req: Request, res: Response, next: NextFunction
       return next(new AppError(404, 'NOT_FOUND', 'Task not found'));
     }
 
-    await prisma.task.delete({
-      where: { id: taskId },
-    });
+    // Delete task and shift down orders of subsequent tasks in the same column
+    await prisma.$transaction([
+      prisma.task.delete({
+        where: { id: taskId },
+      }),
+      prisma.task.updateMany({
+        where: {
+          projectId: task.projectId,
+          status: task.status,
+          order: { gt: task.order },
+        },
+        data: {
+          order: { decrement: 1 },
+        },
+      }),
+    ]);
 
     const io = req.app.get('io');
     if (io) {
@@ -337,7 +381,12 @@ export async function updateTaskStatus(req: Request, res: Response, next: NextFu
       return next(new AppError(404, 'NOT_FOUND', 'Task not found'));
     }
 
-    // Verify permission: LEADER, or Assigned Member
+    // Verify permission: LEADER, or Assigned Member, or Project Owner
+    const project = await prisma.project.findUnique({
+      where: { id: task.projectId },
+      select: { ownerId: true },
+    });
+
     const member = await prisma.projectMember.findUnique({
       where: {
         projectId_userId: {
@@ -348,42 +397,108 @@ export async function updateTaskStatus(req: Request, res: Response, next: NextFu
     });
 
     const isAssignee = task.assigneeId === req.user.id;
-    const isLeaderOrAdmin = member?.role === 'LEADER' || req.user.role === 'ADMIN';
+    const isLeaderOrAdmin = member?.role === 'LEADER' || req.user.role === 'ADMIN' || project?.ownerId === req.user.id;
 
     if (!isAssignee && !isLeaderOrAdmin) {
       return next(new AppError(403, 'FORBIDDEN', 'Only the assignee or project leader can change task status'));
     }
 
-    const updatedTask = await prisma.task.update({
-      where: { id: taskId },
-      data: { status: data.status },
-      include: {
-        assignee: { select: { id: true, name: true, email: true, avatar: true } },
-      },
-    });
+    if (data.status === 'DONE') {
+      const incompleteDependencies = await prisma.taskDependency.findMany({
+        where: {
+          taskId,
+          dependsOn: {
+            status: { not: 'DONE' },
+          },
+        },
+        include: {
+          dependsOn: {
+            select: { title: true },
+          },
+        },
+      });
 
-    await prisma.taskHistory.create({
-      data: {
-        taskId,
-        userId: req.user.id,
-        field: 'status',
-        oldValue: task.status,
-        newValue: data.status,
-      },
-    });
+      if (incompleteDependencies.length > 0) {
+        const titles = incompleteDependencies.map((d) => `"${d.dependsOn.title}"`).join(', ');
+        return next(new AppError(400, 'VALIDATION_ERROR', `Không thể hoàn thành công việc vì các công việc tiên quyết chưa hoàn thành: ${titles}`));
+      }
+    }
+
+    const oldStatus = task.status;
+    const newStatus = data.status;
+    let updatedTask;
+
+    if (oldStatus !== newStatus) {
+      // Count tasks in target column to set new order at the end
+      const newStatusCount = await prisma.task.count({
+        where: {
+          projectId: task.projectId,
+          status: newStatus,
+        },
+      });
+
+      const result = await prisma.$transaction([
+        // Decrease order of tasks in old status column that were after the moved task
+        prisma.task.updateMany({
+          where: {
+            projectId: task.projectId,
+            status: oldStatus,
+            order: { gt: task.order },
+          },
+          data: {
+            order: { decrement: 1 },
+          },
+        }),
+        // Update moved task's status and its new order index
+        prisma.task.update({
+          where: { id: taskId },
+          data: {
+            status: newStatus,
+            order: newStatusCount,
+          },
+          include: {
+            assignee: { select: { id: true, name: true, email: true, avatar: true } },
+          },
+        }),
+      ]);
+      updatedTask = result[1];
+    } else {
+      updatedTask = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+          assignee: { select: { id: true, name: true, email: true, avatar: true } },
+        },
+      });
+    }
+
+    if (!updatedTask) {
+      return next(new AppError(404, 'NOT_FOUND', 'Task not found'));
+    }
+
+    if (oldStatus !== newStatus) {
+      await prisma.taskHistory.create({
+        data: {
+          taskId,
+          userId: req.user.id,
+          field: 'status',
+          oldValue: oldStatus,
+          newValue: newStatus,
+        },
+      });
+    }
 
     const io = req.app.get('io');
-    if (io) {
+    if (io && oldStatus !== newStatus) {
       io.to(task.projectId).emit('task:status-changed', {
         taskId,
-        oldStatus: task.status,
-        newStatus: data.status,
+        oldStatus,
+        newStatus,
         userId: req.user.id,
       });
 
       // Send notification to task creator if updated by assignee
       if (isAssignee && task.creatorId !== req.user.id) {
-        const statusText = data.status === 'TODO' ? 'Cần làm' : data.status === 'IN_PROGRESS' ? 'Đang thực hiện' : data.status === 'REVIEW' ? 'Chờ đánh giá' : 'Hoàn thành';
+        const statusText = newStatus === 'TODO' ? 'Cần làm' : newStatus === 'IN_PROGRESS' ? 'Đang thực hiện' : newStatus === 'REVIEW' ? 'Chờ đánh giá' : 'Hoàn thành';
         const roleText = req.user.role === 'ADMIN' ? 'Quản trị viên' : req.user.role === 'LEADER' ? 'Trưởng nhóm' : 'Thành viên';
         const notification = await prisma.notification.create({
           data: {
@@ -451,6 +566,27 @@ export async function reorderTasks(req: Request, res: Response, next: NextFuncti
 
       if (!isAssignee && !isLeaderOrAdmin) {
         return next(new AppError(403, 'FORBIDDEN', 'Only the assignee or project leader can change task status'));
+      }
+
+      if (status === 'DONE') {
+        const incompleteDependencies = await prisma.taskDependency.findMany({
+          where: {
+            taskId,
+            dependsOn: {
+              status: { not: 'DONE' },
+            },
+          },
+          include: {
+            dependsOn: {
+              select: { title: true },
+            },
+          },
+        });
+
+        if (incompleteDependencies.length > 0) {
+          const titles = incompleteDependencies.map((d) => `"${d.dependsOn.title}"`).join(', ');
+          return next(new AppError(400, 'VALIDATION_ERROR', `Không thể hoàn thành công việc vì các công việc tiên quyết chưa hoàn thành: ${titles}`));
+        }
       }
     }
 
@@ -527,6 +663,166 @@ export async function reorderTasks(req: Request, res: Response, next: NextFuncti
     res.status(200).json({
       success: true,
       message: 'Tasks reordered successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function hasCircularPath(currentId: string, targetId: string, visited = new Set<string>()): Promise<boolean> {
+  if (currentId === targetId) return true;
+  visited.add(currentId);
+
+  const dependencies = await prisma.taskDependency.findMany({
+    where: { taskId: currentId },
+    select: { dependsOnId: true },
+  });
+
+  for (const dep of dependencies) {
+    if (!visited.has(dep.dependsOnId)) {
+      const found = await hasCircularPath(dep.dependsOnId, targetId, visited);
+      if (found) return true;
+    }
+  }
+
+  return false;
+}
+
+export async function addDependency(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) return next(new AppError(401, 'AUTH_INVALID', 'Unauthorized'));
+    const taskId = req.params.id;
+    const { dependsOnId } = addDependencySchema.parse(req.body);
+
+    if (taskId === dependsOnId) {
+      return next(new AppError(400, 'VALIDATION_ERROR', 'Một công việc không thể phụ thuộc vào chính nó'));
+    }
+
+    const [task, prerequisite] = await Promise.all([
+      prisma.task.findUnique({ where: { id: taskId } }),
+      prisma.task.findUnique({ where: { id: dependsOnId } }),
+    ]);
+
+    if (!task || !prerequisite) {
+      return next(new AppError(404, 'NOT_FOUND', 'Không tìm thấy công việc'));
+    }
+
+    if (task.projectId !== prerequisite.projectId) {
+      return next(new AppError(400, 'VALIDATION_ERROR', 'Các công việc phải thuộc cùng một dự án'));
+    }
+
+    // Check circular dependency (direct or indirect)
+    const isCircular = await hasCircularPath(dependsOnId, taskId);
+
+    if (isCircular) {
+      return next(new AppError(400, 'VALIDATION_ERROR', `Liên kết phụ thuộc tuần hoàn: công việc "${prerequisite.title}" đã phụ thuộc vào "${task.title}"`));
+    }
+
+    // Check if duplicate dependency
+    const existing = await prisma.taskDependency.findFirst({
+      where: {
+        taskId,
+        dependsOnId,
+      },
+    });
+
+    if (existing) {
+      return res.status(200).json({ success: true, message: 'Liên kết phụ thuộc đã tồn tại' });
+    }
+
+    const dependency = await prisma.taskDependency.create({
+      data: {
+        taskId,
+        dependsOnId,
+      },
+      include: {
+        dependsOn: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            assignee: { select: { id: true, name: true, email: true, avatar: true } }
+          },
+        },
+      },
+    });
+
+    // Create history
+    await prisma.taskHistory.create({
+      data: {
+        taskId,
+        userId: req.user.id,
+        field: 'dependency',
+        oldValue: null,
+        newValue: `Đã thêm phụ thuộc vào: ${prerequisite.title}`,
+      },
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(task.projectId).emit('task:updated', { taskId, changes: { dependencyAdded: dependency } });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: dependency,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function removeDependency(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) return next(new AppError(401, 'AUTH_INVALID', 'Unauthorized'));
+    const taskId = req.params.id;
+    const dependsOnId = req.params.dependsOnId;
+
+    const dependency = await prisma.taskDependency.findUnique({
+      where: {
+        taskId_dependsOnId: {
+          taskId,
+          dependsOnId,
+        },
+      },
+      include: {
+        dependsOn: { select: { title: true } },
+        task: { select: { projectId: true } },
+      },
+    });
+
+    if (!dependency) {
+      return next(new AppError(404, 'NOT_FOUND', 'Không tìm thấy liên kết phụ thuộc'));
+    }
+
+    await prisma.taskDependency.delete({
+      where: {
+        taskId_dependsOnId: {
+          taskId,
+          dependsOnId,
+        },
+      },
+    });
+
+    // Create history
+    await prisma.taskHistory.create({
+      data: {
+        taskId,
+        userId: req.user.id,
+        field: 'dependency',
+        oldValue: `Đã gỡ phụ thuộc: ${dependency.dependsOn.title}`,
+        newValue: 'None',
+      },
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(dependency.task.projectId).emit('task:updated', { taskId, changes: { dependencyRemovedId: dependsOnId } });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Đã gỡ bỏ công việc phụ thuộc',
     });
   } catch (error) {
     next(error);

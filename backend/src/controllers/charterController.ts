@@ -46,21 +46,6 @@ export async function updateCharter(req: Request, res: Response, next: NextFunct
       return next(new AppError(404, 'NOT_FOUND', 'Project not found'));
     }
 
-    // RBAC: Only LEADER or ADMIN can update
-    if (req.user.role !== 'ADMIN') {
-      const member = await prisma.projectMember.findUnique({
-        where: {
-          projectId_userId: {
-            projectId,
-            userId: req.user.id,
-          },
-        },
-      });
-      if (member?.role !== 'LEADER') {
-        return next(new AppError(403, 'FORBIDDEN', 'Only project leaders can update team charter'));
-      }
-    }
-
     const charter = await prisma.teamCharter.upsert({
       where: { projectId },
       create: {

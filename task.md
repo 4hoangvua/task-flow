@@ -1,14 +1,7 @@
-- [x] Chuẩn bị & Cập nhật Cơ sở dữ liệu
-  - [x] Cập nhật Prisma Schema (`schema.prisma`) thêm các trường RACI vào Task
-  - [x] Chạy lệnh `prisma db push` cập nhật cơ sở dữ liệu
-- [x] Triển khai Backend
-  - [x] Cập nhật Zod validation schemas (`validation.ts`)
-  - [x] Cập nhật controllers (`taskController.ts`) để lưu và lấy dữ liệu RACI
-- [x] Triển khai Frontend
-  - [x] Cập nhật TypeScript types (`types/index.ts`)
-  - [x] Cập nhật form tạo/sửa (`TaskFormModal.tsx`) hỗ trợ cấu hình RACI
-  - [x] Cập nhật giao diện chi tiết (`TaskDetailModal.tsx`) hiển thị/chỉnh sửa trực tiếp ma trận RACI
+- [x] Khắc phục Sai lệch Thứ tự Công việc (Task Reordering Gaps)
+  - [x] Cập nhật `deleteTask` trong `taskController.ts` thực hiện giảm order trong transaction khi xóa task
+  - [x] Cập nhật `updateTaskStatus` trong `taskController.ts` thực hiện giảm order cột cũ và gán order cuối cột mới trong transaction
 - [x] Kiểm thử & Hoàn thiện
-  - [x] Biên dịch TypeScript (tsc) ở cả Frontend & Backend
-  - [x] Thực hiện kiểm thử chức năng các kịch bản RACI
-  - [x] Cập nhật tài liệu (`PLAN.md`, `PROGRESS.md`, `changelogs`, `testing log`)
+  - [x] Biên dịch TypeScript (tsc) của Backend
+  - [x] Tạo nhật ký kiểm thử functional test trong `docs/testing/2026-05-26.md`
+  - [x] Cập nhật tài liệu (`PLAN.md`, `PROGRESS.md`, `changelogs/2026-05-26.md`)
