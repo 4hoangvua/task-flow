@@ -6,6 +6,7 @@ import { useTasks, useTaskDetail } from '../../hooks/useTasks';
 import { labelApi } from '../../api/labelApi';
 import type { Task } from '../../types';
 import dayjs from 'dayjs';
+import { MarkdownEditor } from '../common/MarkdownEditor';
 
 interface TaskFormModalProps {
   projectId: string;
@@ -16,6 +17,7 @@ interface TaskFormModalProps {
 
 export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, open, onCancel }) => {
   const [form] = Form.useForm();
+  const taskTitle = Form.useWatch('title', form);
   const { members, isLoading: isLoadingMembers } = useProjectMembers(projectId);
   const { createTask, isCreating } = useTasks(projectId);
 
@@ -129,7 +131,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
         </Form.Item>
 
         <Form.Item label="Mô tả" name="description">
-          <Input.TextArea placeholder="Mô tả chi tiết công việc..." rows={4} />
+          <MarkdownEditor taskTitle={taskTitle} />
         </Form.Item>
 
         <Form.Item
@@ -182,8 +184,30 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
           />
         </Form.Item>
 
-        <Form.Item label="Hạn chót" name="deadline">
-          <DatePicker className="w-full" showTime format="YYYY-MM-DD HH:mm" />
+        <Form.Item
+          label="Hạn chót"
+          name="deadline"
+          rules={[
+            {
+              validator: (_, value) => {
+                if (value) {
+                  const originalDeadline = task?.deadline ? dayjs(task.deadline) : null;
+                  const isChanged = !originalDeadline || !value.isSame(originalDeadline);
+                  if (isChanged && value.isBefore(dayjs().startOf('minute'))) {
+                    return Promise.reject(new Error('Hạn chót không thể ở trong quá khứ!'));
+                  }
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
+          <DatePicker 
+            className="w-full" 
+            showTime 
+            format="YYYY-MM-DD HH:mm" 
+            disabledDate={(current) => current && current < dayjs().startOf('day')}
+          />
         </Form.Item>
       </Form>
     </Modal>

@@ -7,9 +7,9 @@ export async function getProjects(req: Request, res: Response, next: NextFunctio
   try {
     if (!req.user) return next(new AppError(401, 'AUTH_INVALID', 'Unauthorized'));
 
-    const status = req.query.status as string | undefined;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
     const skip = (page - 1) * limit;
 
     const whereClause: any = {

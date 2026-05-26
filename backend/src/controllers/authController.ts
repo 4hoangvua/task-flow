@@ -236,7 +236,7 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
 
 export async function searchUsers(req: Request, res: Response, next: NextFunction) {
   try {
-    const query = req.query.query as string || '';
+    const query = typeof req.query.query === 'string' ? req.query.query : '';
 
     const users = await prisma.user.findMany({
       where: query ? {

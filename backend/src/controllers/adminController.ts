@@ -4,11 +4,11 @@ import { AppError } from '../utils/errors';
 
 export async function getSystemUsers(req: Request, res: Response, next: NextFunction) {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = req.query.search as string;
-    const role = req.query.role as string;
-    const status = req.query.status as string;
+    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
+    const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+    const role = typeof req.query.role === 'string' ? req.query.role : undefined;
+    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
 
     const skip = (page - 1) * limit;
 

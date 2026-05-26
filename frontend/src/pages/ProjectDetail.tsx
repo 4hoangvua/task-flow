@@ -864,7 +864,27 @@ export const ProjectDetail: React.FC = () => {
                           </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                          <Form.Item label="Giờ kết thúc" name="workingTimeEnd">
+                          <Form.Item
+                            label="Giờ kết thúc"
+                            name="workingTimeEnd"
+                            dependencies={['workingTimeStart']}
+                            rules={[
+                              ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                  const start = getFieldValue('workingTimeStart');
+                                  if (!value || !start) {
+                                    return Promise.resolve();
+                                  }
+                                  const startStr = start.format('HH:mm');
+                                  const endStr = value.format('HH:mm');
+                                  if (endStr > startStr) {
+                                    return Promise.resolve();
+                                  }
+                                  return Promise.reject(new Error('Giờ kết thúc phải sau giờ bắt đầu!'));
+                                },
+                              }),
+                            ]}
+                          >
                             <TimePicker format="HH:mm" className="w-full" placeholder="Chọn giờ kết thúc" />
                           </Form.Item>
                         </Col>

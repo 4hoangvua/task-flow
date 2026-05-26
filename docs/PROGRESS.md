@@ -64,6 +64,9 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 54  | Ngăn chặn Phụ thuộc tuần hoàn Gián tiếp | 2026-05-26 | Phát hiện chu trình bằng DFS đệ quy ở backend (hasCircularPath) và frontend (isReachable), biên dịch tsc thành công 100%, test cases đạt PASS |
 | 55  | Hiển thị Người thực hiện trong Chi tiết Công việc | 2026-05-26 | Bổ sung phần NGƯỜI THỰC HIỆN hiển thị avatar và tên bên cạnh các trường Hạn chót, Người tạo, tsc thành công 100% |
 | 56  | Khắc phục Sai lệch Thứ tự Công việc | 2026-05-26 | Dùng transaction dồn order khi xóa task và khi đổi trạng thái qua modal, tsc backend thành công 100%, test cases đạt PASS |
+| 57  | Khắc phục Lỗ hổng Validation & Tránh Crash App | 2026-05-26 | Tích hợp .trim()/.max() vào schemas, bọc kiểm tra kiểu typeof === 'string' cho query parameters, tsc biên dịch thành công 100%, test cases đạt PASS |
+| 58  | Tối ưu hóa Validation Ngày tháng & Thời gian | 2026-05-26 | Chặn hạn chót trong quá khứ trên DatePicker và Zod schema; bắt buộc giờ kết thúc sau giờ bắt đầu trong Team Charter ở cả Frontend và Backend, tsc biên dịch thành công 100%, test cases đạt PASS 100% |
+| 59  | Trình soạn thảo Markdown, Slash Commands & Trợ lý AI Soạn thảo | 2026-05-27 | Triển khai MarkdownEditor (với toolbar, slash commands popover và Gemini AI description generator) và MarkdownRenderer trong Modal chi tiết công việc, tsc biên dịch thành công 100%, test cases đạt PASS 100% |
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 

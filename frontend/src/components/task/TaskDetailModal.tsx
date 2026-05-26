@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Tag, Avatar, Space, Button, Input, Divider, Select, Spin, Tooltip, Popconfirm, Checkbox, Progress } from 'antd';
+import { Modal, Tag, Avatar, Space, Button, Input, Divider, Select, Spin, Tooltip, Popconfirm, Checkbox, Progress, message } from 'antd';
 import {
   UserOutlined,
   CalendarOutlined,
@@ -18,6 +18,7 @@ import { formatDate, getPriorityColor, getStatusColor } from '../../utils/helper
 import { TaskFormModal } from './TaskFormModal';
 import { PriorityTag } from '../common/PriorityTag';
 import { TaskStatusTag } from '../common/TaskStatusTag';
+import { MarkdownRenderer } from '../common/MarkdownRenderer';
 
 interface TaskDetailModalProps {
   taskId: string;
@@ -38,6 +39,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const {
     task,
     isLoading,
+    updateTask,
     comments,
     addComment,
     isAddingComment,
@@ -66,6 +68,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const [commentContent, setCommentContent] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [editingSubtaskTitle, setEditingSubtaskTitle] = useState('');
@@ -157,6 +160,32 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       await addDependency(dependsOnId);
     } catch (err) {
       // Handled by hook
+    }
+  };
+
+  const handleDescriptionCheckboxChange = async (lineIndex: number, checked: boolean) => {
+    if (!task || !task.description) return;
+
+    if (!computedIsProjectLeader && task.assigneeId !== currentUser?.id) {
+      message.warning('Bạn không có quyền cập nhật công việc này!');
+      return;
+    }
+
+    const lines = task.description.split('\n');
+    if (lineIndex >= 0 && lineIndex < lines.length) {
+      const line = lines[lineIndex];
+      if (checked) {
+        lines[lineIndex] = line.replace(/^(\s*-\s+\[)\s(\])/, '$1x$2');
+      } else {
+        lines[lineIndex] = line.replace(/^(\s*-\s+\[)x(\])/i, '$1 $2');
+      }
+
+      const newDescription = lines.join('\n');
+      try {
+        await updateTask({ description: newDescription });
+      } catch (err) {
+        console.error('Failed to update description checkbox:', err);
+      }
     }
   };
 
@@ -280,8 +309,35 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
             <div>
               <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">MÔ TẢ CÔNG VIỆC</h3>
-              <div className="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--border)] text-sm text-[var(--text)] whitespace-pre-wrap min-h-24 shadow-inner">
-                {task.description || 'Không có mô tả chi tiết cho công việc này.'}
+              <div className="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--border)] min-h-24 shadow-inner relative">
+                {task.description && task.description.length > 250 ? (
+                  <>
+                    <div className={`${!isDescriptionExpanded ? 'max-h-36 overflow-hidden' : ''} transition-all duration-300 relative`}>
+                      <MarkdownRenderer 
+                        content={task.description} 
+                        onCheckboxChange={handleDescriptionCheckboxChange}
+                      />
+                      {!isDescriptionExpanded && (
+                        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[var(--bg)] to-transparent pointer-events-none" />
+                      )}
+                    </div>
+                    <div className="mt-2 text-right">
+                      <Button 
+                        type="link" 
+                        size="small" 
+                        onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)} 
+                        className="p-0 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-500"
+                      >
+                        {isDescriptionExpanded ? 'Thu gọn' : 'Xem chi tiết'}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <MarkdownRenderer 
+                    content={task.description || undefined} 
+                    onCheckboxChange={handleDescriptionCheckboxChange}
+                  />
+                )}
               </div>
             </div>
 

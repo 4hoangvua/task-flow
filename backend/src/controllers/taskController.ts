@@ -5,16 +5,16 @@ import { createTaskSchema, updateTaskSchema, updateTaskStatusSchema, reorderTask
 
 export async function getTasks(req: Request, res: Response, next: NextFunction) {
   try {
-    const projectId = req.query.projectId as string;
+    const projectId = typeof req.query.projectId === 'string' ? req.query.projectId : '';
     if (!projectId) {
       return next(new AppError(400, 'VALIDATION_ERROR', 'Project ID is required'));
     }
 
-    const status = req.query.status as string | undefined;
-    const assigneeId = req.query.assigneeId as string | undefined;
-    const priority = req.query.priority as any | undefined;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+    const assigneeId = typeof req.query.assigneeId === 'string' ? req.query.assigneeId : undefined;
+    const priority = typeof req.query.priority === 'string' ? req.query.priority : undefined;
+    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 50 : 50;
     const skip = (page - 1) * limit;
 
     const whereClause: any = { projectId };

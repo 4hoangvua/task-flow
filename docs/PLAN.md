@@ -149,7 +149,10 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Triển khai Tính năng Thành viên tự sở hữu dự án (Personal Projects for Member) và phân chia danh sách dự án bằng Tabs (2026-05-26)
 - [x] Bổ sung hiển thị Người thực hiện (Assignee) trong panel chi tiết công việc (2026-05-26)
 - [x] Khắc phục sai lệch thứ tự (order gaps) khi xóa công việc hoặc đổi trạng thái qua Modal (2026-05-26)
-📁 Chi tiết: [`docs/changelogs/2026-05-26.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-26.md) (Xem thêm [`docs/changelogs/2026-05-25.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-25.md) và các log trước đó)
+- [x] Khắc phục lỗ hổng validation (trimming, max length) và chống crash do injection mảng vào query parameters (2026-05-26)
+- [x] Tối ưu hóa validation ngày tháng & thời gian (hạn chót công việc và giờ giấc hoạt động nhóm) (2026-05-26)
+- [x] Triển khai trình soạn thảo Markdown, Slash Commands (/) và Trợ lý AI Soạn thảo (Gemini 1.5 Flash) (2026-05-27)
+📁 Chi tiết: [`docs/changelogs/2026-05-27.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-27.md) (Xem thêm [`docs/changelogs/2026-05-26.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-26.md) và các log trước đó)
 
 ---
 
