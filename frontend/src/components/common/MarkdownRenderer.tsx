@@ -169,25 +169,55 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content = ''
       continue;
     }
 
-    // Bullet List
+    // Bullet List Grouping
     if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-      const restOfLine = line.trim().substring(2);
-      renderedElements.push(
-        <ul key={`ul-${i}`} className="list-disc pl-5 my-1 text-[var(--text)]">
-          <li className="text-sm">{parseInline(restOfLine)}</li>
-        </ul>
-      );
-      continue;
+      const bulletItems: React.ReactNode[] = [];
+      let j = i;
+      while (j < lines.length && (lines[j].trim().startsWith('- ') || lines[j].trim().startsWith('* '))) {
+        const itemLine = lines[j];
+        if (itemLine.trim().startsWith('- [ ] ') || itemLine.trim().startsWith('- [x] ') || itemLine.trim().startsWith('- [X] ')) {
+          break;
+        }
+        const restOfLine = itemLine.trim().substring(2);
+        bulletItems.push(
+          <li key={`li-${j}`} className="text-sm">
+            {parseInline(restOfLine)}
+          </li>
+        );
+        j++;
+      }
+      if (bulletItems.length > 0) {
+        renderedElements.push(
+          <ul key={`ul-${i}`} className="list-disc pl-5 my-1 text-[var(--text)] space-y-1">
+            {bulletItems}
+          </ul>
+        );
+        i = j - 1;
+        continue;
+      }
     }
 
-    // Numbered List
+    // Numbered List Grouping
     const numMatch = line.trim().match(/^(\d+)\.\s(.*)$/);
     if (numMatch) {
+      const numItems: React.ReactNode[] = [];
+      let j = i;
+      while (j < lines.length) {
+        const itemMatch = lines[j].trim().match(/^(\d+)\.\s(.*)$/);
+        if (!itemMatch) break;
+        numItems.push(
+          <li key={`li-${j}`} className="text-sm">
+            {parseInline(itemMatch[2])}
+          </li>
+        );
+        j++;
+      }
       renderedElements.push(
-        <ol key={`ol-${i}`} className="list-decimal pl-5 my-1 text-[var(--text)]">
-          <li className="text-sm">{parseInline(numMatch[2])}</li>
+        <ol key={`ol-${i}`} className="list-decimal pl-5 my-1 text-[var(--text)] space-y-1">
+          {numItems}
         </ol>
       );
+      i = j - 1;
       continue;
     }
 

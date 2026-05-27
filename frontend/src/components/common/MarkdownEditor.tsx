@@ -316,7 +316,7 @@ Viết bằng tiếng Việt, ngắn gọn, súc tích. Không viết bất kỳ
               <Card 
                 size="small"
                 className="absolute z-50 left-4 top-10 w-64 shadow-lg border border-[var(--border)] max-h-56 overflow-y-auto bg-[var(--bg)]"
-                bodyStyle={{ padding: '4px' }}
+                styles={{ body: { padding: '4px' } }}
               >
                 <div className="text-[10px] font-bold text-[var(--text-tertiary)] px-2.5 py-1 border-b border-[var(--border)] flex items-center gap-1 select-none">
                   <InfoCircleOutlined /> LỆNH SOẠN THẢO NHANH

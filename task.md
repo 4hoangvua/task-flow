@@ -1,9 +1,4 @@
-- [x] Triển khai trình soạn thảo Markdown, Slash Commands & Trợ lý AI (Gemini 1.5 Flash)
-  - [x] Tạo component `MarkdownRenderer` và `MarkdownEditor` dùng chung ở frontend
-  - [x] Tích hợp menu gõ nhanh Slash Commands (`/` trigger) và phím tắt điều chỉnh vị trí con trỏ chuột
-  - [x] Tích hợp Trợ lý AI Soạn thảo (Gemini 1.5 Flash) tạo mô tả tự động theo tiêu đề hoặc prompt tùy chỉnh
-  - [x] Thay thế và tích hợp vào các form `TaskFormModal` và `TaskDetailModal`
-- [x] Kiểm thử & Biên dịch (Compile & Verification)
-  - [x] Biên dịch TypeScript Frontend thành công không lỗi
-  - [x] Ghi nhận nhật ký kiểm thử functional test trong `docs/testing/2026-05-27.md`
-  - [x] Cập nhật tài liệu (`PLAN.md`, `PROGRESS.md`, `changelogs/2026-05-27.md`)
+- [x] Nâng cấp cơ chế đồng bộ hóa Socket.io và tự động phục hồi lỗi kết nối
+  - [x] Nâng cấp [SocketProvider.tsx](file:///c:/project/task-flow/frontend/src/providers/SocketProvider.tsx) tự động làm mới Access Token bằng Refresh Token khi gặp lỗi `connect_error` do xác thực thất bại
+  - [x] Nâng cấp [ProjectDetail.tsx](file:///c:/project/task-flow/frontend/src/pages/ProjectDetail.tsx) để tự động gửi lại lệnh `join-project` tái nhập phòng dự án mỗi khi Socket.io kết nối lại thành công sau khi rớt mạng
+  - [x] Thực hiện chạy kiểm tra kiểu dữ liệu tĩnh (`npx.cmd tsc -b`) và kiểm thử tự động (`npx.cmd vitest run`)

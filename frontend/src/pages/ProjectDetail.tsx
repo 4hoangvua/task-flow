@@ -22,11 +22,13 @@ import {
   EditOutlined,
   DownloadOutlined,
   FileTextOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useProjectDetail, useProjectMembers } from '../hooks/useProjects';
 import { useTasks } from '../hooks/useTasks';
 import { TaskBoard } from '../components/task/TaskBoard';
+import { TaskCalendar } from '../components/task/TaskCalendar';
 import { formatDate, getRoleColor } from '../utils/helpers';
 import type { ProjectMember, User } from '../types';
 import { ProjectStatusTag } from '../components/common/ProjectStatusTag';
@@ -128,8 +130,15 @@ export const ProjectDetail: React.FC = () => {
   useEffect(() => {
     if (!socket || !id) return;
 
-    // Join project room
-    socket.emit('join-project', { projectId: id });
+    const joinRoom = () => {
+      socket.emit('join-project', { projectId: id });
+    };
+
+    // Join project room initially
+    joinRoom();
+
+    // Re-join on connection/reconnection events
+    socket.on('connect', joinRoom);
 
     const handleTaskEvent = () => {
       // Invalidate queries to fetch fresh tasks, stats
@@ -159,6 +168,7 @@ export const ProjectDetail: React.FC = () => {
 
     return () => {
       // Clean up
+      socket.off('connect', joinRoom);
       socket.off('task:created', handleTaskEvent);
       socket.off('task:updated', handleTaskEvent);
       socket.off('task:deleted', handleTaskEvent);
@@ -513,6 +523,15 @@ export const ProjectDetail: React.FC = () => {
               </span>
             ),
             children: <TaskBoard projectId={id} isProjectLeader={isProjectLeader} />,
+          },
+          {
+            key: 'calendar',
+            label: (
+              <span className="flex items-center gap-2">
+                <CalendarOutlined /> Lịch công việc
+              </span>
+            ),
+            children: <TaskCalendar projectId={id} isProjectLeader={isProjectLeader} />,
           },
           {
             key: 'members',

@@ -70,7 +70,9 @@ app.set('io', io);
 setupSocketIO(io);
 
 // Start background deadline checking scheduler
-startDeadlineScheduler(io);
+if (!process.env.VITEST) {
+  startDeadlineScheduler(io);
+}
 
 // Mount main routing
 app.use('/api', router);
@@ -79,8 +81,10 @@ app.use('/api', router);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
-  logger.info(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+if (!process.env.VITEST) {
+  httpServer.listen(PORT, () => {
+    logger.info(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  });
+}
 
 export { app, httpServer, io };

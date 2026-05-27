@@ -13,9 +13,10 @@ interface TaskFormModalProps {
   task?: Task | null;
   open: boolean;
   onCancel: () => void;
+  initialDeadline?: dayjs.Dayjs | null;
 }
 
-export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, open, onCancel }) => {
+export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, open, onCancel, initialDeadline }) => {
   const [form] = Form.useForm();
   const taskTitle = Form.useWatch('title', form);
   const { members, isLoading: isLoadingMembers } = useProjectMembers(projectId);
@@ -65,11 +66,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
         form.setFieldsValue({
           priority: 'MEDIUM',
           labelIds: [],
-
+          deadline: initialDeadline || null,
         });
       }
     }
-  }, [open, task, form]);
+  }, [open, task, form, initialDeadline]);
 
   const handleSubmit = async () => {
     try {

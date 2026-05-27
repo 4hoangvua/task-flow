@@ -92,9 +92,9 @@ Dưới đây là chi tiết phân chia công việc từ F01 đến F10 dựa t
 - [x] Tạo các custom hooks sử dụng TanStack Query v5 để quản lý cache dữ liệu từ Server.
 - [x] Tích hợp kéo thả trên Kanban board dùng `@dnd-kit/core` kết hợp cơ chế **Optimistic Updates** qua React Query.
 
-### F10. Testing & Deployment [in-progress]
-- [ ] Viết Unit Test cho Frontend sử dụng Vitest và React Testing Library.
-- [ ] Viết Integration Test cho các API Backend sử dụng Vitest và Supertest.
+### F10. Testing & Deployment [done]
+- [x] Viết Unit Test cho Frontend sử dụng Vitest và React Testing Library.
+- [x] Viết Integration Test cho các API Backend sử dụng Vitest và Supertest.
 - [x] Thiết lập Docker cấu hình `Dockerfile` và `docker-compose.yml` để chạy ứng dụng ở môi trường local.
 
 ---
@@ -152,7 +152,11 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Khắc phục lỗ hổng validation (trimming, max length) và chống crash do injection mảng vào query parameters (2026-05-26)
 - [x] Tối ưu hóa validation ngày tháng & thời gian (hạn chót công việc và giờ giấc hoạt động nhóm) (2026-05-26)
 - [x] Triển khai trình soạn thảo Markdown, Slash Commands (/) và Trợ lý AI Soạn thảo (Gemini 1.5 Flash) (2026-05-27)
-📁 Chi tiết: [`docs/changelogs/2026-05-27.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-27.md) (Xem thêm [`docs/changelogs/2026-05-26.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-26.md) và các log trước đó)
+- [x] Triển khai Tính năng Lịch công việc dự án (Task Calendar View) hiển thị công việc theo lưới ngày tháng, hỗ trợ bộ lọc và tạo nhanh task mới (2026-05-27)
+- [x] Tối ưu hóa giao diện di động cho Lịch công việc (Day-Grouped List), sửa cảnh báo Antd bodyStyle và gom nhóm list Markdown (2026-05-27)
+- [x] Thiết lập và Triển khai Bộ kiểm thử tự động (Unit Test Frontend Vitest + RTL, Integration Test Backend Vitest + Supertest) (2026-05-27)
+- [x] Nâng cấp cơ chế đồng bộ hóa Socket.io, tự kết nối lại phòng dự án và tự làm mới access token (2026-05-27)
+📁 Chi tiết: [`docs/changelogs/2026-05-27.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-27.md) (Xem thêm các log trước đó)
 
 ---
 

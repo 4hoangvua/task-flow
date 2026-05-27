@@ -67,6 +67,9 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 57  | Khắc phục Lỗ hổng Validation & Tránh Crash App | 2026-05-26 | Tích hợp .trim()/.max() vào schemas, bọc kiểm tra kiểu typeof === 'string' cho query parameters, tsc biên dịch thành công 100%, test cases đạt PASS |
 | 58  | Tối ưu hóa Validation Ngày tháng & Thời gian | 2026-05-26 | Chặn hạn chót trong quá khứ trên DatePicker và Zod schema; bắt buộc giờ kết thúc sau giờ bắt đầu trong Team Charter ở cả Frontend và Backend, tsc biên dịch thành công 100%, test cases đạt PASS 100% |
 | 59  | Trình soạn thảo Markdown, Slash Commands & Trợ lý AI Soạn thảo | 2026-05-27 | Triển khai MarkdownEditor (với toolbar, slash commands popover và Gemini AI description generator) và MarkdownRenderer trong Modal chi tiết công việc, tsc biên dịch thành công 100%, test cases đạt PASS 100% |
+| 60  | Triển khai Lịch công việc dự án (Task Calendar View) | 2026-05-27 | Triển khai giao diện lịch tháng với đầy đủ bộ lọc, stats sidebar, click mở chi tiết, rê chuột click "+" tạo task pre-filled deadline cho Leader/Admin, tsc biên dịch thành công 100%, test cases đạt PASS |
+| 61  | Tối ưu hóa Giao diện, Responsive & Cảnh báo | 2026-05-27 | Triển khai chế độ xem di động Day-Grouped List cho Lịch, đổi bodyStyle sang styles.body trong MarkdownEditor, và tối ưu gom nhóm list trong MarkdownRenderer, tsc biên dịch thành công 100%, test cases đạt PASS |
+| 62  | Bộ kiểm thử tự động (Frontend & Backend Testing) | 2026-05-27 | 15/15 Backend tests (Vitest + Supertest) và 12/12 Frontend tests (Vitest + RTL) đạt trạng thái PASS 100%, biên dịch tsc thành công 100% |
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 
