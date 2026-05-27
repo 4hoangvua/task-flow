@@ -156,7 +156,11 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Tối ưu hóa giao diện di động cho Lịch công việc (Day-Grouped List), sửa cảnh báo Antd bodyStyle và gom nhóm list Markdown (2026-05-27)
 - [x] Thiết lập và Triển khai Bộ kiểm thử tự động (Unit Test Frontend Vitest + RTL, Integration Test Backend Vitest + Supertest) (2026-05-27)
 - [x] Nâng cấp cơ chế đồng bộ hóa Socket.io, tự kết nối lại phòng dự án và tự làm mới access token (2026-05-27)
+- [x] Khắc phục lỗi cấu hình cơ sở dữ liệu môi trường phát triển (DATABASE_URL postgresql/sqlite mismatch) (2026-05-27)
+- [x] Khắc phục lỗi xung đột lockfile khi chạy CI/CD (CI/CD Lockfile Conflict Fix) (2026-05-27)
 📁 Chi tiết: [`docs/changelogs/2026-05-27.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-27.md) (Xem thêm các log trước đó)
+
+
 
 ---
 

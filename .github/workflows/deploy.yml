@@ -21,6 +21,7 @@ jobs:
             # 1. Deploy Frontend to /var/www/task-flow
             echo "Deploying Frontend..."
             cd /var/www/task-flow
+            git reset --hard
             git pull origin main
             rm -f AGENTS.md task-flow.md
             cd frontend
@@ -30,6 +31,7 @@ jobs:
             # 2. Deploy Backend to /home/task-flow-backend
             echo "Deploying Backend..."
             cd /home/task-flow-backend
+            git reset --hard
             git pull origin main
             rm -f AGENTS.md task-flow.md
             cd backend
