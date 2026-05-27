@@ -158,7 +158,9 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Nâng cấp cơ chế đồng bộ hóa Socket.io, tự kết nối lại phòng dự án và tự làm mới access token (2026-05-27)
 - [x] Khắc phục lỗi cấu hình cơ sở dữ liệu môi trường phát triển (DATABASE_URL postgresql/sqlite mismatch) (2026-05-27)
 - [x] Khắc phục lỗi xung đột lockfile khi chạy CI/CD (CI/CD Lockfile Conflict Fix) (2026-05-27)
+- [x] Cấu hình tham số --update-env cho PM2 trên máy chủ sản phẩm để đảm bảo cập nhật biến môi trường mới nhất từ .env (2026-05-27)
 📁 Chi tiết: [`docs/changelogs/2026-05-27.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-27.md) (Xem thêm các log trước đó)
+
 
 
 

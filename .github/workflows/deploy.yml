@@ -39,4 +39,4 @@ jobs:
             npx prisma generate
             npx prisma db push --accept-data-loss
             npm run build
-            pm2 restart task-flow-backend || pm2 start dist/index.js --name "task-flow-backend"
+            pm2 restart task-flow-backend --update-env || pm2 start dist/index.js --name "task-flow-backend"
