@@ -1,12 +1,81 @@
-import React, { useEffect } from 'react';
-import { Card, Form, Input, Button, Row, Col, Avatar, Divider } from 'antd';
-import { UserOutlined, LockOutlined, SettingOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Card, Form, Input, Button, Row, Col, Avatar, Divider, message } from 'antd';
+import { UserOutlined, LockOutlined, SettingOutlined, RobotOutlined, KeyOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 
 export const Settings: React.FC = () => {
   const { user, updateProfile, isUpdatingProfile, changePassword, isChangingPassword } = useAuth();
   const [profileForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
+  
+  // AI Key configuration states
+  const [apiKey, setApiKey] = useState('');
+  const [isTesting, setIsTesting] = useState(false);
+  const [hasSavedKey, setHasSavedKey] = useState(false);
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) {
+      setApiKey(savedKey);
+      setHasSavedKey(true);
+    }
+  }, []);
+
+  const handleSaveApiKey = () => {
+    if (!apiKey.trim()) {
+      message.warning('Vui lòng nhập API Key trước khi lưu!');
+      return;
+    }
+    localStorage.setItem('gemini_api_key', apiKey.trim());
+    setHasSavedKey(true);
+    message.success('Đã lưu Gemini API Key cá nhân thành công!');
+  };
+
+  const handleDeleteApiKey = () => {
+    localStorage.removeItem('gemini_api_key');
+    setApiKey('');
+    setHasSavedKey(false);
+    message.success('Đã xóa Gemini API Key cá nhân khỏi trình duyệt!');
+  };
+
+  const handleTestConnection = async () => {
+    if (!apiKey.trim()) {
+      message.warning('Vui lòng nhập API Key để kiểm tra!');
+      return;
+    }
+    setIsTesting(true);
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${apiKey.trim()}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'say ok' }] }],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorResult = await response.json().catch(() => ({}));
+        throw new Error(errorResult.error?.message || 'API Key không hợp lệ hoặc đã hết hạn mức.');
+      }
+
+      const result = await response.json();
+      const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
+        message.success('Kiểm tra kết nối thành công! API Key hoạt động tốt.');
+      } else {
+        throw new Error('Không nhận được phản hồi từ AI.');
+      }
+    } catch (error: any) {
+      message.error(`Kết nối thất bại: ${error.message}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
 
   // Populate profile form when user info is loaded
   useEffect(() => {
@@ -176,6 +245,63 @@ export const Settings: React.FC = () => {
                 </Button>
               </Form.Item>
             </Form>
+          </Card>
+        </Col>
+
+        {/* AI Configuration Card */}
+        <Col xs={24} lg={12}>
+          <Card
+            title={
+              <span className="font-bold text-[var(--text-h)] flex items-center gap-2">
+                <RobotOutlined className="text-sky-500 animate-pulse" /> Cấu hình trợ lý AI cá nhân
+              </span>
+            }
+            className="shadow-sm border border-[var(--border)] h-full"
+          >
+            <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
+              Bạn có thể sử dụng API Key Gemini cá nhân để sử dụng trợ lý AI soạn thảo mô tả công việc. Key của bạn sẽ được lưu an toàn tại <strong>localStorage</strong> của trình duyệt này và không gửi đi bất kỳ máy chủ trung gian nào.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                  Gemini API Key
+                </label>
+                <Input.Password
+                  placeholder="Nhập Gemini API Key của bạn (từ Google AI Studio)..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  prefix={<KeyOutlined className="text-[var(--text-tertiary)]" />}
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <Button
+                  type="primary"
+                  onClick={handleSaveApiKey}
+                  className="flex-1"
+                >
+                  Lưu cấu hình
+                </Button>
+                <Button
+                  onClick={handleTestConnection}
+                  loading={isTesting}
+                  className="flex-1 border-sky-500 text-sky-600 hover:text-sky-500 hover:border-sky-400"
+                >
+                  Kiểm tra kết nối
+                </Button>
+                {hasSavedKey && (
+                  <Button
+                    danger
+                    onClick={handleDeleteApiKey}
+                  >
+                    Xóa cấu hình
+                  </Button>
+                )}
+              </div>
+              <p className="text-[10px] text-[var(--text-tertiary)] leading-relaxed">
+                * Chưa có API Key? Bạn có thể đăng ký tạo key miễn phí tại <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">Google AI Studio</a>.
+              </p>
+            </div>
           </Card>
         </Col>
       </Row>

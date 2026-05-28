@@ -69,7 +69,18 @@ export const updateTaskSchema = z.object({
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   deadline: z.string().datetime().nullable().optional(),
   labelIds: z.array(z.string().uuid()).optional(),
-});
+}).refine(
+  (data) => {
+    if (data.deadline) {
+      return new Date(data.deadline).getTime() >= Date.now() - 60000;
+    }
+    return true;
+  },
+  {
+    message: 'Hạn chót không thể ở trong quá khứ',
+    path: ['deadline'],
+  }
+);
 
 export const updateTaskStatusSchema = z.object({
   status: z.enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE']),
@@ -83,6 +94,7 @@ export const reorderTasksSchema = z.object({
 
 export const createCommentSchema = z.object({
   content: z.string().trim().min(1, 'Comment content cannot be empty').max(3000),
+  parentId: z.string().uuid().nullable().optional(),
 });
 
 export const createSubtaskSchema = z.object({

@@ -147,7 +147,11 @@ Viết bằng tiếng Việt, ngắn gọn, súc tích. Không viết bất kỳ
 
       let generatedMarkdown = '';
       let lastErrorMessage = 'Không thể kết nối đến máy chủ AI';
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const apiKey = localStorage.getItem('gemini_api_key');
+
+      if (!apiKey) {
+        throw new Error('Vui lòng cấu hình Gemini API Key cá nhân trong trang Cài đặt để sử dụng trợ lý AI.');
+      }
 
       // Xoay vòng qua các model để phòng ngừa quá giới hạn RPM (Rate Limit - 429)
       for (const model of GEMINI_MODELS) {
@@ -287,6 +291,11 @@ Viết bằng tiếng Việt, ngắn gọn, súc tích. Không viết bất kỳ
           ghost
           icon={isAiLoading ? <Spin size="small" /> : <RobotOutlined className="text-sky-500 animate-pulse" />}
           onClick={() => {
+            const userKey = localStorage.getItem('gemini_api_key');
+            if (!userKey) {
+              message.error('Vui lòng cấu hình Gemini API Key cá nhân trong trang Cài đặt để sử dụng trợ lý AI.');
+              return;
+            }
             setAiPrompt('');
             setIsAiModalOpen(true);
           }}

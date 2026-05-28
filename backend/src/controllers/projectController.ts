@@ -336,14 +336,25 @@ export async function deleteProjectMember(req: Request, res: Response, next: Nex
       return next(new AppError(400, 'FORBIDDEN', 'Cannot remove the project owner'));
     }
 
-    await prisma.projectMember.delete({
-      where: {
-        projectId_userId: {
-          projectId,
-          userId,
+    await prisma.$transaction([
+      prisma.projectMember.delete({
+        where: {
+          projectId_userId: {
+            projectId,
+            userId,
+          },
         },
-      },
-    });
+      }),
+      prisma.task.updateMany({
+        where: {
+          projectId,
+          assigneeId: userId,
+        },
+        data: {
+          assigneeId: null,
+        },
+      }),
+    ]);
 
     // Realtime Emit
     const io = req.app.get('io');

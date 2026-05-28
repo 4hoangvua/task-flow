@@ -10,6 +10,7 @@ import { TaskDetailModal } from '../components/task/TaskDetailModal';
 import { PriorityTag } from '../components/common/PriorityTag';
 import { TaskIdBadge } from '../components/common/TaskIdBadge';
 import { SearchAutoComplete } from '../components/common/SearchAutoComplete';
+import { message } from '../utils/antd';
 
 export const MyTasks: React.FC = () => {
   const { user: currentUser } = useAuth();
@@ -60,6 +61,17 @@ export const MyTasks: React.FC = () => {
   });
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    if (newStatus === 'DONE') {
+      const task = myTasks.find((t) => t.id === taskId);
+      if (task) {
+        const incompletePrereqs = task.dependencies?.filter((dep) => dep.dependsOn.status !== 'DONE') || [];
+        if (incompletePrereqs.length > 0) {
+          const titles = incompletePrereqs.map((d) => `"${d.dependsOn.title}"`).join(', ');
+          message.error(`Không thể hoàn thành công việc vì các công việc tiên quyết chưa hoàn thành: ${titles}`);
+          return;
+        }
+      }
+    }
     try {
       await updateStatus({ id: taskId, status: newStatus });
     } catch (err) {

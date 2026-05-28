@@ -73,6 +73,21 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [editingSubtaskTitle, setEditingSubtaskTitle] = useState('');
 
+  // Threaded Comment States
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [expandedCommentIds, setExpandedCommentIds] = useState<Set<string>>(new Set());
+
+  const toggleExpandComment = (commentId: string) => {
+    const next = new Set(expandedCommentIds);
+    if (next.has(commentId)) {
+      next.delete(commentId);
+    } else {
+      next.add(commentId);
+    }
+    setExpandedCommentIds(next);
+  };
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -85,8 +100,24 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const handleAddComment = async () => {
     if (!commentContent.trim()) return;
     try {
-      await addComment(commentContent);
+      await addComment({ content: commentContent.trim() });
       setCommentContent('');
+    } catch (err) {
+      // Error handled by hook
+    }
+  };
+
+  const handleAddReply = async (parentId: string) => {
+    if (!replyContent.trim()) return;
+    try {
+      await addComment({ content: replyContent.trim(), parentId });
+      setReplyContent('');
+      setReplyingToId(null);
+      
+      // Auto-expand replies list
+      const next = new Set(expandedCommentIds);
+      next.add(parentId);
+      setExpandedCommentIds(next);
     } catch (err) {
       // Error handled by hook
     }
@@ -101,6 +132,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   };
 
   const handleStatusChange = async (value: string) => {
+    if (value === 'DONE' && task) {
+      const incompletePrereqs = task.dependencies?.filter((dep) => dep.dependsOn.status !== 'DONE') || [];
+      if (incompletePrereqs.length > 0) {
+        const titles = incompletePrereqs.map((d) => `"${d.dependsOn.title}"`).join(', ');
+        message.error(`Không thể hoàn thành công việc vì các công việc tiên quyết chưa hoàn thành: ${titles}`);
+        return;
+      }
+    }
     try {
       await updateStatus({ id: taskId, status: value });
     } catch (err) {
@@ -591,42 +630,156 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
               {comments.length === 0 ? (
                 <div className="py-4 text-center text-xs text-[var(--text-tertiary)]">Chưa có bình luận nào</div>
-              ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-                  {comments.map((item) => (
-                    <div key={item.id} className="flex gap-3 p-3.5 bg-[var(--bg)]/40 border border-[var(--border)] rounded-lg hover:shadow-xs transition-shadow">
-                      <Avatar src={item.user?.avatar} className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold mt-0.5">
-                        {item.user?.name ? item.user.name[0] : 'U'}
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center">
-                          <div className="text-xs font-semibold text-[var(--text-h)]">
-                            {item.user?.name}
+              ) : (() => {
+                const rootComments = comments.filter((c) => !c.parentId);
+                const replies = comments.filter((c) => c.parentId);
+
+                return (
+                  <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                    {rootComments.map((rootComment) => {
+                      const commentReplies = replies.filter((r) => r.parentId === rootComment.id);
+                      const isExpanded = expandedCommentIds.has(rootComment.id);
+                      const visibleReplies = isExpanded ? commentReplies : commentReplies.slice(0, 2);
+
+                      return (
+                        <div key={rootComment.id} className="space-y-2 border-b border-[var(--border)]/30 pb-3 last:border-b-0 last:pb-0">
+                          {/* Root Comment Card */}
+                          <div className="flex gap-3 p-3 bg-[var(--bg)]/40 border border-[var(--border)] rounded-lg hover:shadow-xs transition-shadow">
+                            <Avatar src={rootComment.user?.avatar} className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold mt-0.5 shrink-0">
+                              {rootComment.user?.name ? rootComment.user.name[0] : 'U'}
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-center">
+                                <div className="text-xs font-semibold text-[var(--text-h)] truncate">
+                                  {rootComment.user?.name}
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-[10px] text-[var(--text-tertiary)]">{formatDate(rootComment.createdAt)}</span>
+                                  {(currentUser?.id === rootComment.userId || computedIsProjectLeader) && (
+                                    <Tooltip title="Xóa bình luận">
+                                      <Button
+                                        type="text"
+                                        danger
+                                        icon={<DeleteOutlined className="text-xs" />}
+                                        size="small"
+                                        className="h-6 w-6 flex items-center justify-center p-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                        onClick={() => handleDeleteComment(rootComment.id)}
+                                      />
+                                    </Tooltip>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-xs text-[var(--text-secondary)] mt-1 whitespace-pre-wrap break-words">
+                                {rootComment.content}
+                              </div>
+                              
+                              {/* Action Footer (Reply trigger) */}
+                              {rootComment.userId !== currentUser?.id && (
+                                <div className="mt-2 flex items-center gap-2">
+                                  <Button 
+                                    type="link" 
+                                    size="small"
+                                    className="p-0 text-[10px] font-bold text-sky-600 dark:text-sky-400 hover:text-sky-500 flex items-center gap-1"
+                                    onClick={() => {
+                                      setReplyingToId(rootComment.id);
+                                      setReplyContent('');
+                                    }}
+                                  >
+                                    Trả lời
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-[var(--text-tertiary)]">{formatDate(item.createdAt)}</span>
-                            {(currentUser?.id === item.userId || computedIsProjectLeader) && (
-                              <Tooltip title="Xóa bình luận">
-                                <Button
-                                  type="text"
-                                  danger
-                                  icon={<DeleteOutlined className="text-xs" />}
+
+                          {/* Replies Thread */}
+                          {commentReplies.length > 0 && (
+                            <div className="ml-6 sm:ml-8 pl-3 sm:pl-4 border-l border-[var(--border)] space-y-2">
+                              {visibleReplies.map((reply) => (
+                                <div key={reply.id} className="flex gap-2.5 p-2.5 bg-[var(--bg)]/20 border border-[var(--border)]/70 rounded-lg text-xs hover:shadow-xs transition-shadow">
+                                  <Avatar src={reply.user?.avatar} size="small" className="bg-[var(--accent-bg)] text-[var(--accent)] font-semibold mt-0.5 shrink-0">
+                                    {reply.user?.name ? reply.user.name[0] : 'U'}
+                                  </Avatar>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-center">
+                                      <div className="text-[11px] font-semibold text-[var(--text-h)] truncate">
+                                        {reply.user?.name}
+                                      </div>
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        <span className="text-[9px] text-[var(--text-tertiary)]">{formatDate(reply.createdAt)}</span>
+                                        {(currentUser?.id === reply.userId || computedIsProjectLeader) && (
+                                          <Tooltip title="Xóa phản hồi">
+                                            <Button
+                                              type="text"
+                                              danger
+                                              icon={<DeleteOutlined className="text-[10px]" />}
+                                              size="small"
+                                              className="h-5 w-5 flex items-center justify-center p-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                              onClick={() => handleDeleteComment(reply.id)}
+                                            />
+                                          </Tooltip>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-[var(--text-secondary)] mt-0.5 whitespace-pre-wrap break-words">
+                                      {reply.content}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {/* Collapse/Expand button */}
+                              {commentReplies.length > 2 && (
+                                <Button 
+                                  type="link" 
                                   size="small"
-                                  className="h-6 w-6 flex items-center justify-center p-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-                                  onClick={() => handleDeleteComment(item.id)}
+                                  className="p-0 text-[10px] font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-500"
+                                  onClick={() => toggleExpandComment(rootComment.id)}
+                                >
+                                  {isExpanded ? 'Thu gọn phản hồi' : `Xem thêm ${commentReplies.length - 2} phản hồi...`}
+                                </Button>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Inline Reply Form */}
+                          {replyingToId === rootComment.id && (
+                            <div className="ml-6 sm:ml-8 flex gap-3 p-3 bg-[var(--bg)]/30 border border-[var(--border)]/50 rounded-lg">
+                              <Avatar src={currentUser?.avatar} size="small" className="bg-[var(--accent)] text-white font-semibold shrink-0 mt-1">
+                                {currentUser?.name ? currentUser.name[0] : 'U'}
+                              </Avatar>
+                              <div className="flex-1 space-y-2">
+                                <Input.TextArea
+                                  placeholder={`Phản hồi bình luận của ${rootComment.user?.name}...`}
+                                  rows={1}
+                                  autoSize={{ minRows: 1, maxRows: 3 }}
+                                  value={replyContent}
+                                  onChange={(e) => setReplyContent(e.target.value)}
+                                  className="rounded-lg text-xs"
+                                  autoFocus
                                 />
-                              </Tooltip>
-                            )}
-                          </div>
+                                <div className="flex justify-end gap-1.5">
+                                  <Button size="small" style={{ fontSize: '11px' }} onClick={() => setReplyingToId(null)}>Hủy</Button>
+                                  <Button 
+                                    size="small" 
+                                    type="primary" 
+                                    style={{ fontSize: '11px' }}
+                                    onClick={() => handleAddReply(rootComment.id)}
+                                    loading={isAddingComment}
+                                    disabled={!replyContent.trim()}
+                                  >
+                                    Phản hồi
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-xs text-[var(--text-secondary)] mt-1">
-                          {item.content}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

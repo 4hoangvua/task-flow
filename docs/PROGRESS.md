@@ -70,6 +70,11 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 60  | Triển khai Lịch công việc dự án (Task Calendar View) | 2026-05-27 | Triển khai giao diện lịch tháng với đầy đủ bộ lọc, stats sidebar, click mở chi tiết, rê chuột click "+" tạo task pre-filled deadline cho Leader/Admin, tsc biên dịch thành công 100%, test cases đạt PASS |
 | 61  | Tối ưu hóa Giao diện, Responsive & Cảnh báo | 2026-05-27 | Triển khai chế độ xem di động Day-Grouped List cho Lịch, đổi bodyStyle sang styles.body trong MarkdownEditor, và tối ưu gom nhóm list trong MarkdownRenderer, tsc biên dịch thành công 100%, test cases đạt PASS |
 | 62  | Bộ kiểm thử tự động (Frontend & Backend Testing) | 2026-05-27 | 15/15 Backend tests (Vitest + Supertest) và 12/12 Frontend tests (Vitest + RTL) đạt trạng thái PASS 100%, biên dịch tsc thành công 100% |
+| 63  | Khắc phục lỗi và Tối ưu hóa UI/UX toàn hệ thống | 2026-05-28 | Rà soát khóa active status, gỡ gán task khi xóa member, đồng bộ validation deadline, chặn kéo DONE khi thiếu prerequisite, tối ưu chọn dự án Dashboard, type check & tests 100% PASS |
+| 64  | Di chuyển Cơ sở dữ liệu sang Neon PostgreSQL | 2026-05-28 | Thay thế SQLite provider bằng PostgreSQL trong Prisma schema, cấu hình dynamic schema test isolation, 15/15 backend & 12/12 frontend tests PASS |
+| 65  | Khôi phục cơ sở dữ liệu SQLite | 2026-05-28 | Hoàn tác cấu hình provider và connection string về SQLite do độ trễ mạng cao từ Neon, chạy 100% bộ kiểm thử tự động đạt trạng thái PASS |
+| 66  | Cấu hình Gemini API Key cá nhân (BYOK) | 2026-05-28 | Lưu key cá nhân ở localStorage, thêm tính năng test connection trong Settings, 12/12 frontend tests PASS, tsc compile thành công |
+| 67  | Bình luận phản hồi lồng nhau (Threaded Comments) | 2026-05-28 | Thêm parentId self-relation, API logic, UI lồng nhau có kẻ dọc, collapse khi nhiều phản hồi con, 12/12 frontend & 15/15 backend tests PASS |
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 

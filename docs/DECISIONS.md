@@ -57,3 +57,11 @@ Record important architectural, design, or implementation choices here so future
 **Decision:** Refactored the Kanban board to use a visual-only `<TaskCard>` rendering inside `@dnd-kit`'s `<DragOverlay>` (mounted to viewport body), escaping container clipping. Synchronized backend permissions inside the `reorderTasks` controller to deny status changes (column transitions) unless the caller is a Project Leader, Owner, Admin, or the task assignee.
 **Why:** Fixes the UI clipping bug natively while maintaining a clean, floaty feel. Resolves the security gap between frontend client-side validation and backend API enforcement.
 
+### D-005: Switch to Neon Serverless PostgreSQL
+
+**Date:** 2026-05-28
+**Context:** The local SQLite database causes errors during database migrations or when multiple changes are made, and conflicts with production PostgreSQL deployment settings.
+**Decision:** Switched backend Prisma provider from `sqlite` to `postgresql` and configured Neon cloud database URL.
+**Why:** Improves stability, standardizes development and production environments, and avoids SQLite constraints and locking issues.
+
+

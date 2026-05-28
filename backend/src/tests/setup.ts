@@ -4,9 +4,6 @@ import fs from 'fs';
 import { prisma } from '../lib/prisma';
 import { beforeAll, afterAll } from 'vitest';
 
-// Force environment variables
-process.env.NODE_ENV = 'test';
-process.env.DATABASE_URL = 'file:./test.db';
 
 beforeAll(async () => {
   try {

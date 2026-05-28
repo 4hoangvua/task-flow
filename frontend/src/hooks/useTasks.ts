@@ -45,11 +45,11 @@ export const useTasks = (projectId: string, filters?: { status?: string; assigne
 
       return { previousTasksData };
     },
-    onError: (err, _variables, context) => {
+    onError: (err: any, _variables, context) => {
       if (context?.previousTasksData) {
         queryClient.setQueryData(queryKey, context.previousTasksData);
       }
-      message.error(err instanceof Error ? err.message : 'Di chuyển nhiệm vụ thất bại!');
+      message.error(err.response?.data?.error || err.message || 'Di chuyển nhiệm vụ thất bại!');
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
@@ -196,7 +196,8 @@ export const useTaskDetail = (taskId: string) => {
   });
 
   const addCommentMutation = useMutation({
-    mutationFn: (content: string) => commentApi.createComment(taskId, content),
+    mutationFn: ({ content, parentId }: { content: string; parentId?: string | null }) =>
+      commentApi.createComment(taskId, content, parentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments', taskId] });
     },

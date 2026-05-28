@@ -48,6 +48,7 @@ export interface Comment {
   taskId: string;
   userId: string;
   user: User;
+  parentId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

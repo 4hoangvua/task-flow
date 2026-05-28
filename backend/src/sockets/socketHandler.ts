@@ -4,7 +4,7 @@ import { logger } from '../utils/logger';
 
 export function setupSocketIO(io: Server) {
   // Authentication Middleware
-  io.use((socket: Socket, next) => {
+  io.use(async (socket: Socket, next) => {
     try {
       const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(' ')[1];
       
@@ -13,6 +13,17 @@ export function setupSocketIO(io: Server) {
       }
 
       const decoded = verifyAccessToken(token);
+      
+      const { prisma } = await import('../lib/prisma');
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { isActive: true },
+      });
+
+      if (!user || !user.isActive) {
+        return next(new Error('Authentication error: User account is inactive or not found'));
+      }
+
       socket.data.user = decoded;
       next();
     } catch (error) {

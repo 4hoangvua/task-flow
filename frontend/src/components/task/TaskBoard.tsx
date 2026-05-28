@@ -297,6 +297,15 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ projectId, isProjectLeader
         message.error('Chỉ người thực hiện hoặc quản trị dự án mới có thể chuyển trạng thái công việc!');
         return;
       }
+
+      if (targetStatus === 'DONE') {
+        const incompletePrereqs = activeTask.dependencies?.filter((dep) => dep.dependsOn.status !== 'DONE') || [];
+        if (incompletePrereqs.length > 0) {
+          const titles = incompletePrereqs.map((d) => `"${d.dependsOn.title}"`).join(', ');
+          message.error(`Không thể hoàn thành công việc vì các công việc tiên quyết chưa hoàn thành: ${titles}`);
+          return;
+        }
+      }
     }
 
     reorderTasks({

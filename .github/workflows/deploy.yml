@@ -35,8 +35,17 @@ jobs:
             git pull origin main
             rm -f AGENTS.md task-flow.md
             cd backend
+
+            # Backup database before running db push to ensure data safety
+            if [ -f "prisma/dev.db" ]; then
+              echo "Backing up SQLite database..."
+              mkdir -p /home/task-flow-backend/backups
+              cp prisma/dev.db /home/task-flow-backend/backups/dev.db.bak.$(date +%Y%m%d%H%M%S)
+            fi
+
             npm install
             npx prisma generate
-            npx prisma db push --accept-data-loss
+            npx prisma db push
             npm run build
             pm2 restart task-flow-backend --update-env || pm2 start dist/index.js --name "task-flow-backend"
+

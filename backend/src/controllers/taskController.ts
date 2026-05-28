@@ -159,7 +159,7 @@ export async function getTaskById(req: Request, res: Response, next: NextFunctio
           include: {
             user: { select: { id: true, name: true, email: true, avatar: true } },
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: 'asc' },
         },
         history: {
           include: {

@@ -232,4 +232,52 @@ describe('Task API Integration Tests', () => {
     expect(delRes.status).toBe(200);
     expect(delRes.body.success).toBe(true);
   });
+
+  it('should prevent user from replying to their own comment but allow others to reply', async () => {
+    // 1. Create a root comment as Leader
+    const rootCommentRes = await request(app)
+      .post(`/api/tasks/${taskAId}/comments`)
+      .set('Authorization', `Bearer ${leaderToken}`)
+      .send({
+        content: 'Root comment by leader',
+      });
+
+    expect(rootCommentRes.status).toBe(201);
+    const rootCommentId = rootCommentRes.body.data.id;
+
+    // 2. Try to reply to own comment as Leader
+    const selfReplyRes = await request(app)
+      .post(`/api/tasks/${taskAId}/comments`)
+      .set('Authorization', `Bearer ${leaderToken}`)
+      .send({
+        content: 'Self reply',
+        parentId: rootCommentId,
+      });
+
+    expect(selfReplyRes.status).toBe(400);
+    expect(selfReplyRes.body.success).toBe(false);
+    expect(selfReplyRes.body.error).toContain('tự trả lời bình luận');
+
+    // 3. Login Member
+    const memberLoginRes = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: 'member@example.com',
+        password: 'password123',
+      });
+    const memberToken = memberLoginRes.body.data.accessToken;
+
+    // 4. Reply to Leader's comment as Member
+    const memberReplyRes = await request(app)
+      .post(`/api/tasks/${taskAId}/comments`)
+      .set('Authorization', `Bearer ${memberToken}`)
+      .send({
+        content: 'Reply by member',
+        parentId: rootCommentId,
+      });
+
+    expect(memberReplyRes.status).toBe(201);
+    expect(memberReplyRes.body.success).toBe(true);
+    expect(memberReplyRes.body.data.parentId).toBe(rootCommentId);
+  });
 });

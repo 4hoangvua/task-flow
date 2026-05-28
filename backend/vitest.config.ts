@@ -9,5 +9,9 @@ export default defineConfig({
     testTimeout: 30000,
     hookTimeout: 30000,
     fileParallelism: false, // Run test files sequentially to avoid SQLite db locked
+    env: {
+      NODE_ENV: 'test',
+      DATABASE_URL: 'file:./test.db',
+    },
   },
 });

@@ -47,10 +47,15 @@ export const Dashboard: React.FC = () => {
   const { projects, isLoading: isLoadingProjects } = useProjects({ limit: 100 });
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-  // If projects load, default to first project
+  // If projects load, default to first project or update selected project if it is no longer in the list
   React.useEffect(() => {
-    if (projects.length > 0 && !selectedProjectId) {
-      setSelectedProjectId(projects[0].id);
+    if (projects.length > 0) {
+      const exists = projects.some((p) => p.id === selectedProjectId);
+      if (!exists) {
+        setSelectedProjectId(projects[0].id);
+      }
+    } else {
+      setSelectedProjectId(null);
     }
   }, [projects, selectedProjectId]);
 

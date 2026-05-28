@@ -7,8 +7,8 @@ export const commentApi = {
     return res.data.data;
   },
 
-  createComment: async (taskId: string, content: string) => {
-    const res = await api.post<{ success: boolean; data: Comment }>(`/tasks/${taskId}/comments`, { content });
+  createComment: async (taskId: string, content: string, parentId?: string | null) => {
+    const res = await api.post<{ success: boolean; data: Comment }>(`/tasks/${taskId}/comments`, { content, parentId });
     return res.data.data;
   },
 

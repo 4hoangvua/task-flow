@@ -1,4 +1,28 @@
-- [x] Nâng cấp cơ chế đồng bộ hóa Socket.io và tự động phục hồi lỗi kết nối
-  - [x] Nâng cấp [SocketProvider.tsx](file:///c:/project/task-flow/frontend/src/providers/SocketProvider.tsx) tự động làm mới Access Token bằng Refresh Token khi gặp lỗi `connect_error` do xác thực thất bại
-  - [x] Nâng cấp [ProjectDetail.tsx](file:///c:/project/task-flow/frontend/src/pages/ProjectDetail.tsx) để tự động gửi lại lệnh `join-project` tái nhập phòng dự án mỗi khi Socket.io kết nối lại thành công sau khi rớt mạng
-  - [x] Thực hiện chạy kiểm tra kiểu dữ liệu tĩnh (`npx.cmd tsc -b`) và kiểm thử tự động (`npx.cmd vitest run`)
+- [x] [Backend] Cập nhật `authMiddleware` trong [auth.ts](file:///c:/project/task-flow/backend/src/middlewares/auth.ts) để kiểm tra `isActive: true`
+- [x] [Backend] Cập nhật socket handshake trong [socketHandler.ts](file:///c:/project/task-flow/backend/src/sockets/socketHandler.ts) để kiểm tra `isActive: true`
+- [x] [Backend] Cập nhật `deleteProjectMember` trong [projectController.ts](file:///c:/project/task-flow/backend/src/controllers/projectController.ts) set `assigneeId = null` cho tasks của user bị xóa
+- [x] [Backend] Bổ sung refine check `deadline` quá khứ cho `updateTaskSchema` trong [validation.ts](file:///c:/project/task-flow/backend/src/utils/validation.ts)
+- [x] [Frontend] Cập nhật `updateTaskStatusMutation.onError` trong [useTasks.ts](file:///c:/project/task-flow/frontend/src/hooks/useTasks.ts) để hiển thị chi tiết lỗi nghiệp vụ
+- [x] [Frontend] Thêm logic kiểm tra & chặn chuyển DONE nếu dependencies chưa hoàn tất trong `handleDragEnd` của [TaskBoard.tsx](file:///c:/project/task-flow/frontend/src/components/task/TaskBoard.tsx)
+- [x] [Frontend] Thêm logic kiểm tra & chặn chuyển DONE trong `handleStatusChange` của [MyTasks.tsx](file:///c:/project/task-flow/frontend/src/pages/MyTasks.tsx)
+- [x] [Frontend] Thêm logic kiểm tra & chặn chuyển DONE trong `handleStatusChange` của [TaskDetailModal.tsx](file:///c:/project/task-flow/frontend/src/components/task/TaskDetailModal.tsx)
+- [x] [Frontend] Invalidate query `['tasks']` khi nhận sự kiện `member:removed` qua socket trong [ProjectDetail.tsx](file:///c:/project/task-flow/frontend/src/pages/ProjectDetail.tsx)
+- [x] [Frontend] Tối ưu hóa `useEffect` cập nhật `selectedProjectId` khi danh sách dự án thay đổi trong [Dashboard.tsx](file:///c:/project/task-flow/frontend/src/pages/Dashboard.tsx)
+- [x] [Frontend] Chạy type check và chạy test suites để xác minh
+- [x] [Frontend] Thêm Card "Cấu hình AI (Gemini API)" trong [Settings.tsx](file:///c:/project/task-flow/frontend/src/pages/Settings.tsx)
+- [x] [Frontend] Tích hợp kiểm tra kết nối API Key và Lưu/Xóa API Key vào localStorage trong [Settings.tsx](file:///c:/project/task-flow/frontend/src/pages/Settings.tsx)
+- [x] [Frontend] Cập nhật hàm gọi AI trong [MarkdownEditor.tsx](file:///c:/project/task-flow/frontend/src/components/common/MarkdownEditor.tsx) để sử dụng API Key cá nhân từ localStorage và hiển thị cảnh báo nếu chưa cấu hình
+- [x] [Frontend] Chạy type check `npx.cmd tsc -b` trong thư mục `frontend/` để kiểm tra độ tin cậy
+- [x] [Frontend] Thực hiện kiểm thử chức năng Cài đặt API Key, Kiểm tra kết nối và tạo mô tả bằng AI
+- [x] [Backend/Database] Đồng bộ database schema và generate Prisma Client cho trường parentId
+- [x] [Backend] Cập nhật logic createComment, getComments, getTaskById trong controllers để hỗ trợ parentId và sắp xếp thời gian tăng dần
+- [x] [Frontend] Cập nhật commentApi và addCommentMutation trong useTasks.ts để truyền parentId
+- [x] [Frontend] Thiết kế UI bình luận dạng Thread lồng nhau thụt lề pl-6/pl-8 di động trong [TaskDetailModal.tsx](file:///c:/project/task-flow/frontend/src/components/task/TaskDetailModal.tsx)
+- [x] [Frontend] Tích hợp nút Trả lời Inline, form nhập phản hồi và cơ chế expand/collapse khi có nhiều phản hồi con trong [TaskDetailModal.tsx](file:///c:/project/task-flow/frontend/src/components/task/TaskDetailModal.tsx)
+- [x] [Frontend] Chạy type check `npx.cmd tsc -b` và chạy bộ test suites
+- [x] [Frontend/Backend] Kiểm thử chức năng comment phản hồi, xem thu gọn/mở rộng và kiểm tra giao diện di động
+- [x] [Backend] Chặn người dùng tự phản hồi bình luận của chính mình trong [commentController.ts](file:///c:/project/task-flow/backend/src/controllers/commentController.ts)
+- [x] [Frontend] Ẩn nút "Trả lời" đối với bình luận của chính người dùng đăng nhập trong [TaskDetailModal.tsx](file:///c:/project/task-flow/frontend/src/components/task/TaskDetailModal.tsx)
+- [x] [Backend] Bổ sung integration test và chạy kiểm tra tự động thành công 100%
+- [x] [Backend] Phát sự kiện socket `comment:deleted` khi xóa bình luận trong [commentController.ts](file:///c:/project/task-flow/backend/src/controllers/commentController.ts)
+- [x] [Frontend] Lắng nghe các sự kiện socket `comment:added` và `comment:deleted` để cập nhật cache query `['comments', data.taskId]` trong [ProjectDetail.tsx](file:///c:/project/task-flow/frontend/src/pages/ProjectDetail.tsx)

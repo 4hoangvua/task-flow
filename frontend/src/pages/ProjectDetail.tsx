@@ -146,9 +146,17 @@ export const ProjectDetail: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['projectStats', id] });
     };
 
+    const handleCommentEvent = (data: any) => {
+      if (data && data.taskId) {
+        queryClient.invalidateQueries({ queryKey: ['comments', data.taskId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['projectStats', id] });
+    };
+
     const handleMemberEvent = () => {
       queryClient.invalidateQueries({ queryKey: ['members', id] });
       queryClient.invalidateQueries({ queryKey: ['projectStats', id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     };
 
     const handleProjectEvent = () => {
@@ -161,7 +169,8 @@ export const ProjectDetail: React.FC = () => {
     socket.on('task:deleted', handleTaskEvent);
     socket.on('task:status-changed', handleTaskEvent);
     socket.on('task:reordered', handleTaskEvent);
-    socket.on('comment:added', handleTaskEvent);
+    socket.on('comment:added', handleCommentEvent);
+    socket.on('comment:deleted', handleCommentEvent);
     socket.on('member:added', handleMemberEvent);
     socket.on('member:removed', handleMemberEvent);
     socket.on('project:updated', handleProjectEvent);
@@ -174,7 +183,8 @@ export const ProjectDetail: React.FC = () => {
       socket.off('task:deleted', handleTaskEvent);
       socket.off('task:status-changed', handleTaskEvent);
       socket.off('task:reordered', handleTaskEvent);
-      socket.off('comment:added', handleTaskEvent);
+      socket.off('comment:added', handleCommentEvent);
+      socket.off('comment:deleted', handleCommentEvent);
       socket.off('member:added', handleMemberEvent);
       socket.off('member:removed', handleMemberEvent);
       socket.off('project:updated', handleProjectEvent);
