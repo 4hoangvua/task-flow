@@ -21,6 +21,7 @@ import {
   ClockCircleOutlined,
   MenuOutlined,
   SafetyCertificateOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { useUiStore } from '../stores/uiStore';
 import { useNotifications } from '../hooks/useNotifications';
@@ -84,6 +85,11 @@ export const DashboardLayout: React.FC = () => {
       key: '/settings',
       icon: <SettingOutlined />,
       label: 'Cấu hình',
+    },
+    {
+      key: '/help',
+      icon: <QuestionCircleOutlined />,
+      label: 'Hướng dẫn sử dụng',
     },
     ...(user?.role === 'ADMIN' ? [{
       key: '/admin',
@@ -288,6 +294,14 @@ export const DashboardLayout: React.FC = () => {
         <span key="settings" className={activeClass}>
           <SettingOutlined className="text-indigo-500 text-sm shrink-0" />
           <span>Cấu hình</span>
+        </span>
+      );
+    } else if (path.startsWith('/help')) {
+      items.push(
+        <span key="divider-help" className="text-[var(--border)] shrink-0">/</span>,
+        <span key="help" className={activeClass}>
+          <QuestionCircleOutlined className="text-indigo-500 text-sm shrink-0" />
+          <span>Hướng dẫn sử dụng</span>
         </span>
       );
     }

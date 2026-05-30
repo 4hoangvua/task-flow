@@ -17,6 +17,7 @@ import { ProjectDetail } from './pages/ProjectDetail';
 import { MyTasks } from './pages/MyTasks';
 import { Settings } from './pages/Settings';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { Help } from './pages/Help';
 import { NotFound } from './pages/NotFound';
 
 export const App: React.FC = () => {
@@ -53,6 +54,7 @@ export const App: React.FC = () => {
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/my-tasks" element={<MyTasks />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/help" element={<Help />} />
 
           {/* Admin Protected Routes */}
           <Route element={<RoleGuard roles={['ADMIN']} />}>

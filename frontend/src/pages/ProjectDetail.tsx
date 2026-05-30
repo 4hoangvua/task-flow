@@ -23,12 +23,16 @@ import {
   DownloadOutlined,
   FileTextOutlined,
   CalendarOutlined,
+  RobotOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useProjectDetail, useProjectMembers } from '../hooks/useProjects';
 import { useTasks } from '../hooks/useTasks';
 import { TaskBoard } from '../components/task/TaskBoard';
 import { TaskCalendar } from '../components/task/TaskCalendar';
+import { TaskTimeline } from '../components/task/TaskTimeline';
+import { TaskFormModal } from '../components/task/TaskFormModal';
+import { ProjectAiAssistant } from '../components/task/ProjectAiAssistant';
 import { formatDate, getRoleColor } from '../utils/helpers';
 import type { ProjectMember, User } from '../types';
 import { ProjectStatusTag } from '../components/common/ProjectStatusTag';
@@ -54,6 +58,14 @@ export const ProjectDetail: React.FC = () => {
   // Task details modal state (for timeline actions)
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formInitialStartDate, setFormInitialStartDate] = useState<dayjs.Dayjs | null>(null);
+
+  // Chatbot floating widget state
+  const [isAiOpen, setIsAiOpen] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [hintText, setHintText] = useState('');
+  const [hintPrompt, setHintPrompt] = useState('');
 
   // Project statistics / history query
   const projectStatsQuery = useQuery({
@@ -66,6 +78,45 @@ export const ProjectDetail: React.FC = () => {
   const { project, isLoading: isLoadingProject, updateProject, deleteProject } = useProjectDetail(id || '');
   const { members, isLoading: isLoadingMembers, addMember, updateMemberRole, deleteMember } = useProjectMembers(id || '');
   const { tasks } = useTasks(id || '');
+
+  // useEffect to scan project risks and set proactive suggestions
+  useEffect(() => {
+    if (!project || !tasks || tasks.length === 0) return;
+
+    // Check for overdue tasks (deadline in the past and status !== DONE)
+    const todayStr = new Date().toISOString().split('T')[0];
+    const overdueTasksList = tasks.filter(
+      (t) => t.status !== 'DONE' && t.deadline && t.deadline < todayStr
+    );
+
+    // Check for unassigned tasks
+    const unassignedTasksList = tasks.filter((t) => t.status !== 'DONE' && !t.assigneeId);
+
+    let text = 'Tôi có thể giúp bạn tóm tắt tiến độ dự án hôm nay. Nhấp để xem! 📊';
+    let prompt = 'Hãy phân tích và viết một báo cáo tóm tắt tiến độ dự án hiện tại dưới dạng Markdown.';
+
+    if (overdueTasksList.length > 0) {
+      text = `Dự án có ${overdueTasksList.length} công việc quá hạn! Nhấp để phân tích rủi ro & blockers. ⚠️`;
+      prompt = 'Hãy phân tích các rủi ro của dự án. Xác định xem có công việc nào đang quá hạn và đưa ra đề xuất giải quyết.';
+    } else if (unassignedTasksList.length > 0) {
+      text = `Có ${unassignedTasksList.length} công việc chưa phân công. Nhấp để tối ưu phân bổ nhân lực. 👥`;
+      prompt = 'Hãy phân tích mức độ phân chia công việc giữa các thành viên và đưa ra gợi ý phân công các task chưa giao.';
+    }
+
+    setHintText(text);
+    setHintPrompt(prompt);
+
+    // Show hint bubble after 5 seconds
+    const timer = setTimeout(() => {
+      const hintDismissed = sessionStorage.getItem('ai_hint_dismissed');
+      if (!hintDismissed) {
+        setShowHint(true);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [project, tasks]);
+
   const { charter, isLoading: isLoadingCharter, updateCharter: updateCharterApi, isUpdating: isUpdatingCharter } = useCharter(id || '');
 
   const [charterForm] = Form.useForm();
@@ -542,6 +593,28 @@ export const ProjectDetail: React.FC = () => {
               </span>
             ),
             children: <TaskCalendar projectId={id} isProjectLeader={isProjectLeader} />,
+          },
+          {
+            key: 'timeline',
+            label: (
+              <span className="flex items-center gap-2">
+                <ClockCircleOutlined /> Lịch biểu (Timeline)
+              </span>
+            ),
+            children: (
+              <TaskTimeline
+                projectId={id}
+                isProjectLeader={isProjectLeader}
+                onOpenTaskDetail={(taskId) => {
+                  setSelectedTaskId(taskId);
+                  setIsDetailOpen(true);
+                }}
+                onOpenCreateTask={(startDate) => {
+                  setFormInitialStartDate(startDate ? dayjs(startDate) : null);
+                  setIsFormOpen(true);
+                }}
+              />
+            ),
           },
           {
             key: 'members',
@@ -1061,6 +1134,7 @@ export const ProjectDetail: React.FC = () => {
               </Card>
             ),
           },
+
           isProjectLeader ? {
             key: 'settings',
             label: (
@@ -1222,6 +1296,127 @@ export const ProjectDetail: React.FC = () => {
             setSelectedTaskId(null);
           }}
         />
+      )}
+
+      {isFormOpen && (
+        <TaskFormModal
+          projectId={id}
+          open={isFormOpen}
+          initialStartDate={formInitialStartDate}
+          initialDeadline={null}
+          onCancel={() => {
+            setIsFormOpen(false);
+            setFormInitialStartDate(null);
+          }}
+        />
+      )}
+
+      {/* Floating chatbot widgets */}
+      {!isAiOpen && (
+        <div className="fixed bottom-6 right-6 z-45 flex flex-col items-end pointer-events-auto">
+          {/* Bong bóng gợi ý thoại chủ động */}
+          {showHint && hintText && (
+            <div className="bg-[var(--bg-card)] border border-[var(--border)] p-3 rounded-lg shadow-xl mb-3 max-w-[260px] relative animate-in fade-in slide-in-from-bottom-3 duration-300">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowHint(false);
+                  sessionStorage.setItem('ai_hint_dismissed', 'true');
+                }}
+                className="absolute top-1.5 right-1.5 text-xs text-[var(--text-tertiary)] hover:text-[var(--text)] font-bold cursor-pointer bg-transparent border-none p-0 outline-none"
+              >
+                ×
+              </button>
+              <div
+                onClick={() => {
+                  setShowHint(false);
+                  setIsAiOpen(true);
+                  // Chờ chatbot render rồi gửi prompt gợi ý tự động
+                  setTimeout(() => {
+                    const chatInput = document.querySelector('textarea') as HTMLTextAreaElement;
+                    if (chatInput) {
+                      chatInput.value = hintPrompt;
+                      // Kích hoạt thay đổi giá trị để nút Send sáng lên
+                      const event = new Event('input', { bubbles: true });
+                      chatInput.dispatchEvent(event);
+                      
+                      // Tìm nút gửi và click
+                      setTimeout(() => {
+                        const sendButton = chatInput.parentElement?.querySelector('button') as HTMLButtonElement;
+                        if (sendButton) {
+                          sendButton.click();
+                        } else {
+                          // Fallback gửi nếu nút nằm cạnh
+                          const nextButton = chatInput.nextSibling as HTMLButtonElement;
+                          if (nextButton) nextButton.click();
+                        }
+                      }, 100);
+                    }
+                  }, 300);
+                }}
+                className="text-[11px] text-[var(--text)] font-medium leading-relaxed pr-3 cursor-pointer hover:text-[var(--accent)] transition-colors"
+              >
+                {hintText}
+              </div>
+            </div>
+          )}
+
+          {/* Nút Chat nổi tròn */}
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<RobotOutlined style={{ fontSize: 24 }} />}
+            size="large"
+            onClick={() => {
+              setIsAiOpen(true);
+              setShowHint(false);
+            }}
+            className="w-14 h-14 bg-gradient-to-tr from-sky-500 to-indigo-600 border-none shadow-lg flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+          />
+        </div>
+      )}
+
+      {isAiOpen && (
+        <div className="fixed z-50 bg-[var(--bg-card)] md:shadow-2xl md:border md:border-[var(--border)] md:rounded-xl flex flex-col transition-all duration-300 md:w-[400px] md:h-[580px] md:bottom-24 md:right-6 bottom-0 right-0 w-full h-full md:inset-auto">
+          <ProjectAiAssistant
+            projectId={id || ''}
+            project={project}
+            tasks={tasks}
+            members={members}
+            onTaskClick={(taskId) => {
+              setSelectedTaskId(taskId);
+              setIsDetailOpen(true);
+            }}
+            onTabClick={(tabKey) => {
+              setActiveTab(tabKey);
+              if (window.innerWidth < 768) {
+                setIsAiOpen(false);
+              }
+            }}
+            onProjectClick={(projId) => {
+              if (projId === 'list' || projId === 'all') {
+                navigate('/projects');
+              } else {
+                navigate(`/projects/${projId}`);
+              }
+            }}
+            onActionClick={(actionKey) => {
+              if (actionKey === 'create-task') {
+                setFormInitialStartDate(null);
+                setIsFormOpen(true);
+              } else if (actionKey === 'export-csv') {
+                handleExportCSV();
+              } else if (actionKey === 'invite-member') {
+                setActiveTab('members');
+                if (window.innerWidth < 768) setIsAiOpen(false);
+              } else if (actionKey === 'manage-labels') {
+                setActiveTab('settings');
+                if (window.innerWidth < 768) setIsAiOpen(false);
+              }
+            }}
+            onClose={() => setIsAiOpen(false)}
+          />
+        </div>
       )}
     </div>
   );

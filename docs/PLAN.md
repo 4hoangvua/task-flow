@@ -167,8 +167,14 @@ Chi tiết từng bản sửa được ghi theo ngày trong thư mục [`docs/ch
 - [x] Khôi phục lại cơ sở dữ liệu SQLite local để tránh trễ mạng cao từ Neon Cloud khi phát triển (2026-05-28)
 - [x] Triển khai Mô hình Gemini API Key cá nhân (Bring Your Own Key - BYOK) nâng cao bảo mật và tránh rate limit chung (2026-05-28)
 - [x] Triển khai Bình luận phản hồi lồng nhau (Threaded Comments) lồng tối đa 2 cấp bảo vệ mobile, hỗ trợ thu gọn/mở rộng khi có nhiều phản hồi con (2026-05-28)
-📁 Chi tiết: [`docs/changelogs/2026-05-28.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-28.md) (Xem thêm các log trước đó)
-
+- [x] Triển khai Sơ đồ Lịch biểu Dự án (Gantt Chart / Timeline View) hiển thị trực quan tiến độ thực hiện và đường liên kết dependencies SVG; 17/17 backend & 15/15 frontend tests PASS (2026-05-29)
+- [x] Thiết lập Agent Skill: task-flow-ops quy định quy trình kiểm thử, chạy migration, sao lưu DB, deploy và Nginx configuration (2026-05-29)
+- [x] Triển khai Trang Hướng dẫn sử dụng (Help & User Guide) dạng Obsidian theme tích hợp thanh Sidebar và bộ lọc tìm kiếm động (2026-05-29)
+- [x] Triển khai Tính năng Trợ lý Dự án AI (AI Project Assistant Chatbot) phân tích tiến độ, rủi ro, blockers và tối ưu phân công nhân sự qua Gemini API cá nhân (2026-05-30)
+- [x] Nâng cấp Trợ lý Dự án AI hỗ trợ liên kết tương tác thông minh (task, tab, project, action) và phản hồi ngắn gọn súc tích (2026-05-30)
+- [x] Tách chatbot AI thành Nút Chat nổi (Floating Chat Widget) & Gợi ý thoại chủ động (Proactive Hints) (2026-05-31)
+- [x] Tối ưu hóa quy trình phân tích và hợp nhất tệp nghiên cứu hàng ngày (2026-05-31)
+📁 Chi tiết: [`docs/changelogs/2026-05-31.md`](file:///c:/project/task-flow/docs/changelogs/2026-05-31.md) (Xem thêm các log trước đó)
 
 
 

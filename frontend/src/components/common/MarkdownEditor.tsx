@@ -13,6 +13,7 @@ import {
   InfoCircleOutlined,
 } from '@ant-design/icons';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { callGeminiAPI } from '../../utils/gemini';
 
 interface MarkdownEditorProps {
   value?: string;
@@ -20,16 +21,6 @@ interface MarkdownEditorProps {
   placeholder?: string;
   taskTitle?: string; // Optional: to let AI generate description based on task title
 }
-
-// Danh sách các mô hình hỗ trợ xoay vòng để phòng ngừa vượt giới hạn gọi (Rate Limit - 429)
-const GEMINI_MODELS = [
-  'gemini-flash-latest',
-  'gemini-3.1-flash-lite',
-  'gemini-2.5-flash-lite',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
-  'gemini-1.5-pro'
-];
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   value = '',
@@ -66,13 +57,13 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     const replacement = before + (selection || '') + after;
 
     const newValue = text.substring(0, start) + replacement + text.substring(end);
-    
+
     if (onChange) {
       onChange(newValue);
     }
 
     focusEditor();
-    
+
     // Set selection after insert
     setTimeout(() => {
       if (textareaRef.current) {
@@ -114,11 +105,11 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     const text = textarea.value;
     // Replace the "/" with our syntax
     const newValue = text.substring(0, slashIndex) + syntax + text.substring(textarea.selectionStart);
-    
+
     if (onChange) {
       onChange(newValue);
     }
-    
+
     setShowCommands(false);
     focusEditor();
 
@@ -145,65 +136,15 @@ Mô tả nên được định dạng Markdown sạch đẹp, có cấu trúc r�
 - 🧪 **Yêu cầu nghiệm thu**: Các kết quả mong đợi hoặc phương án kiểm thử.
 Viết bằng tiếng Việt, ngắn gọn, súc tích. Không viết bất kỳ lời dẫn nào bên ngoài nội dung Markdown.`;
 
-      let generatedMarkdown = '';
-      let lastErrorMessage = 'Không thể kết nối đến máy chủ AI';
       const apiKey = localStorage.getItem('gemini_api_key');
 
       if (!apiKey) {
         throw new Error('Vui lòng cấu hình Gemini API Key cá nhân trong trang Cài đặt để sử dụng trợ lý AI.');
       }
 
-      // Xoay vòng qua các model để phòng ngừa quá giới hạn RPM (Rate Limit - 429)
-      for (const model of GEMINI_MODELS) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-goog-api-key': apiKey,
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    {
-                      text: promptText,
-                    },
-                  ],
-                },
-              ],
-            }),
-          });
-
-          if (response.status === 429) {
-            console.warn(`Model ${model} bị quá giới hạn RPM (Rate Limit). Đang chuyển sang model kế tiếp...`);
-            lastErrorMessage = 'Các mô hình AI đều vượt quá giới hạn lượt dùng (Rate Limit - 429).';
-            continue;
-          }
-
-          if (!response.ok) {
-            const errorDetails = await response.json().catch(() => ({}));
-            console.warn(`Model ${model} trả về lỗi:`, errorDetails);
-            lastErrorMessage = errorDetails.error?.message || `Model ${model} gặp sự cố khi xử lý.`;
-            continue;
-          }
-
-          const result = await response.json();
-          const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          if (text) {
-            generatedMarkdown = text;
-            break; // Xử lý thành công -> dừng vòng lặp
-          }
-        } catch (error: any) {
-          console.warn(`Lỗi kết nối tới model ${model}:`, error);
-          lastErrorMessage = error.message || lastErrorMessage;
-        }
-      }
-
-      if (!generatedMarkdown) {
-        throw new Error(lastErrorMessage);
-      }
+      const generatedMarkdown = await callGeminiAPI(apiKey, [
+        { role: 'user', parts: [{ text: promptText }] },
+      ]);
 
       if (onChange) {
         // Clean markdown block wrappers if model outputs markdown block backticks
@@ -319,10 +260,10 @@ Viết bằng tiếng Việt, ngắn gọn, súc tích. Không viết bất kỳ
               className="w-full flex-1 p-2 bg-transparent text-[var(--text)] outline-none border-0 resize-y min-h-[160px] text-sm leading-relaxed font-sans placeholder-slate-400 focus:ring-0"
               style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
             />
-            
+
             {/* Slash commands popover menu */}
             {showCommands && (
-              <Card 
+              <Card
                 size="small"
                 className="absolute z-50 left-4 top-10 w-64 shadow-lg border border-[var(--border)] max-h-56 overflow-y-auto bg-[var(--bg)]"
                 styles={{ body: { padding: '4px' } }}
@@ -378,7 +319,7 @@ Viết bằng tiếng Việt, ngắn gọn, súc tích. Không viết bất kỳ
       >
         <div className="space-y-3 mt-4">
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Nhập yêu cầu chi tiết hoặc các chỉ thị soạn thảo bên dưới. Nếu để trống, AI sẽ tự động tạo một mô tả chuyên nghiệp đầy đủ cấu trúc mục tiêu, checklist công việc và tiêu chí nghiệm thu dựa trên tiêu đề: 
+            Nhập yêu cầu chi tiết hoặc các chỉ thị soạn thảo bên dưới. Nếu để trống, AI sẽ tự động tạo một mô tả chuyên nghiệp đầy đủ cấu trúc mục tiêu, checklist công việc và tiêu chí nghiệm thu dựa trên tiêu đề:
             <strong className="text-[var(--text)] block mt-1">"{taskTitle || 'Chưa nhập tiêu đề'}"</strong>
           </p>
           <Input.TextArea

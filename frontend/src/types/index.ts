@@ -92,6 +92,7 @@ export interface Task {
   priority: Priority;
   order: number;
   deadline: string | null;
+  startDate: string | null;
   projectId: string;
   assigneeId: string | null;
   creatorId: string;

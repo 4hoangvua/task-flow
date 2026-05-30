@@ -75,6 +75,16 @@ Record completed tasks or features here with timestamps and verifiable proof.
 | 65  | Khôi phục cơ sở dữ liệu SQLite | 2026-05-28 | Hoàn tác cấu hình provider và connection string về SQLite do độ trễ mạng cao từ Neon, chạy 100% bộ kiểm thử tự động đạt trạng thái PASS |
 | 66  | Cấu hình Gemini API Key cá nhân (BYOK) | 2026-05-28 | Lưu key cá nhân ở localStorage, thêm tính năng test connection trong Settings, 12/12 frontend tests PASS, tsc compile thành công |
 | 67  | Bình luận phản hồi lồng nhau (Threaded Comments) | 2026-05-28 | Thêm parentId self-relation, API logic, UI lồng nhau có kẻ dọc, collapse khi nhiều phản hồi con, 12/12 frontend & 15/15 backend tests PASS |
+| 78  | Sơ đồ Lịch biểu Dự án (Gantt Chart / Timeline View) | 2026-05-29 | Thêm startDate trong DB schema, APIs, Forms; vẽ biểu đồ Gantt SVG/CSS hiển thị trực quan tiến độ và dependencies; 17/17 backend & 15/15 frontend tests PASS |
+| 79  | Thiết lập Agent Skill: task-flow-ops | 2026-05-29 | Tạo cấu trúc .agents/skills/task-flow-ops/ với SKILL.md, scripts, examples và resources |
+| 80  | Trang Hướng dẫn sử dụng (Help & User Guide) | 2026-05-29 | Triển khai giao diện Help.tsx, tìm kiếm tài liệu động, bảng Privilege Matrix và FAQ accordion; npx tsc -b thành công |
+| 81  | Trợ lý Dự án AI (AI Project Assistant) | 2026-05-30 | Triển khai tab "Trợ lý AI" trong ProjectDetail.tsx, gọi API Gemini qua API Key localStorage; 17/17 backend & 15/15 frontend tests PASS |
+| 82  | Liên kết điều hướng tương tác cho Trợ lý AI | 2026-05-30 | Nâng cấp MarkdownRenderer hỗ trợ task:taskId và tab:tabKey, kết nối callback điều hướng trang project từ ProjectDetail; 17/17 backend & 15/15 frontend tests PASS |
+| 83  | Liên kết điều hướng tương tác trợ lý AI nâng cao | 2026-05-30 | Nâng cấp MarkdownRenderer hỗ trợ project:projectId và action:actionKey, thêm biểu tượng trực quan, tsc & vitest run PASS |
+| 84  | Nút Chat nổi AI & Gợi ý thoại chủ động | 2026-05-31 | Tách chatbot khỏi tab tĩnh thành Widget chat nổi, ẩn avatar trên di động, hỗ trợ gợi ý thoại thông minh quét rủi ro sau 5 giây, tsc & vitest run PASS |
+
+
+
 
 **Proof** = how we know it works. Examples: "tested manually", "unit test passes", "screenshot", "runs on localhost".
 

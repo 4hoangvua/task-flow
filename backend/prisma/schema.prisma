@@ -62,6 +62,7 @@ model Task {
   priority    String     @default("MEDIUM")
   order       Int        @default(0)
   deadline    DateTime?
+  startDate   DateTime?
   projectId   String
   assigneeId  String?
   creatorId   String

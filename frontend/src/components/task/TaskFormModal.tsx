@@ -14,9 +14,10 @@ interface TaskFormModalProps {
   open: boolean;
   onCancel: () => void;
   initialDeadline?: dayjs.Dayjs | null;
+  initialStartDate?: dayjs.Dayjs | null;
 }
 
-export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, open, onCancel, initialDeadline }) => {
+export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, open, onCancel, initialDeadline, initialStartDate }) => {
   const [form] = Form.useForm();
   const taskTitle = Form.useWatch('title', form);
   const { members, isLoading: isLoadingMembers } = useProjectMembers(projectId);
@@ -58,14 +59,15 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
           priority: task.priority,
           assigneeId: task.assigneeId || undefined,
           deadline: task.deadline ? dayjs(task.deadline) : null,
+          startDate: task.startDate ? dayjs(task.startDate) : null,
           labelIds: task.labels ? task.labels.map((l) => l.id) : [],
-
         });
       } else {
         form.resetFields();
         form.setFieldsValue({
           priority: 'MEDIUM',
           labelIds: [],
+          startDate: initialStartDate || null,
           deadline: initialDeadline || null,
         });
       }
@@ -78,7 +80,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
       const payload = {
         ...values,
         assigneeId: values.assigneeId || null,
-
+        startDate: values.startDate ? values.startDate.toISOString() : null,
         deadline: values.deadline ? values.deadline.toISOString() : null,
       };
 
@@ -185,31 +187,63 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ projectId, task, o
           />
         </Form.Item>
 
-        <Form.Item
-          label="Hạn chót"
-          name="deadline"
-          rules={[
-            {
-              validator: (_, value) => {
-                if (value) {
-                  const originalDeadline = task?.deadline ? dayjs(task.deadline) : null;
-                  const isChanged = !originalDeadline || !value.isSame(originalDeadline);
-                  if (isChanged && value.isBefore(dayjs().startOf('minute'))) {
-                    return Promise.reject(new Error('Hạn chót không thể ở trong quá khứ!'));
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Form.Item
+            label="Ngày bắt đầu"
+            name="startDate"
+            dependencies={['deadline']}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (value && getFieldValue('deadline')) {
+                    if (value.isAfter(getFieldValue('deadline'))) {
+                      return Promise.reject(new Error('Ngày bắt đầu không thể sau hạn chót!'));
+                    }
                   }
-                }
-                return Promise.resolve();
-              },
-            },
-          ]}
-        >
-          <DatePicker 
-            className="w-full" 
-            showTime 
-            format="YYYY-MM-DD HH:mm" 
-            disabledDate={(current) => current && current < dayjs().startOf('day')}
-          />
-        </Form.Item>
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <DatePicker
+              className="w-full"
+              showTime
+              format="YYYY-MM-DD HH:mm"
+              placeholder="Chọn ngày bắt đầu..."
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Hạn chót"
+            name="deadline"
+            dependencies={['startDate']}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (value) {
+                    const originalDeadline = task?.deadline ? dayjs(task.deadline) : null;
+                    const isChanged = !originalDeadline || !value.isSame(originalDeadline);
+                    if (isChanged && value.isBefore(dayjs().startOf('minute'))) {
+                      return Promise.reject(new Error('Hạn chót không thể ở trong quá khứ!'));
+                    }
+                    if (getFieldValue('startDate') && value.isBefore(getFieldValue('startDate'))) {
+                      return Promise.reject(new Error('Hạn chót không thể trước ngày bắt đầu!'));
+                    }
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <DatePicker
+              className="w-full"
+              showTime
+              format="YYYY-MM-DD HH:mm"
+              disabledDate={(current) => current && current < dayjs().startOf('day')}
+              placeholder="Chọn ngày hạn chót..."
+            />
+          </Form.Item>
+        </div>
       </Form>
     </Modal>
   );

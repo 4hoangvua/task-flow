@@ -84,6 +84,7 @@ export async function createTask(req: Request, res: Response, next: NextFunction
         priority: data.priority || 'MEDIUM',
         order: taskCount,
         deadline: data.deadline ? new Date(data.deadline) : null,
+        startDate: data.startDate ? new Date(data.startDate) : null,
         projectId: data.projectId,
         assigneeId: data.assigneeId,
         creatorId: req.user.id,
@@ -222,6 +223,14 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
       return next(new AppError(404, 'NOT_FOUND', 'Task not found'));
     }
 
+    // Validate startDate vs deadline relation with old task data
+    const finalStartDate = data.startDate !== undefined ? (data.startDate ? new Date(data.startDate) : null) : oldTask.startDate;
+    const finalDeadline = data.deadline !== undefined ? (data.deadline ? new Date(data.deadline) : null) : oldTask.deadline;
+
+    if (finalStartDate && finalDeadline && finalStartDate.getTime() > finalDeadline.getTime()) {
+      return next(new AppError(400, 'VALIDATION_ERROR', 'Ngày bắt đầu không thể sau hạn chót'));
+    }
+
     const updates: any = {};
     const historyPromises = [];
 
@@ -255,6 +264,19 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
         updates.deadline = newDeadline;
         historyPromises.push(prisma.taskHistory.create({
           data: { taskId, userId: req.user.id, field: 'deadline', oldValue: oldTask.deadline?.toISOString() || null, newValue: newDeadline?.toISOString() || 'None' },
+        }));
+      }
+    }
+
+    if (data.startDate !== undefined) {
+      const newStartDate = data.startDate ? new Date(data.startDate) : null;
+      const oldTime = oldTask.startDate ? new Date(oldTask.startDate).getTime() : 0;
+      const newTime = newStartDate ? newStartDate.getTime() : 0;
+
+      if (oldTime !== newTime) {
+        updates.startDate = newStartDate;
+        historyPromises.push(prisma.taskHistory.create({
+          data: { taskId, userId: req.user.id, field: 'startDate', oldValue: oldTask.startDate?.toISOString() || null, newValue: newStartDate?.toISOString() || 'None' },
         }));
       }
     }

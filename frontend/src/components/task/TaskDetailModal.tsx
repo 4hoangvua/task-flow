@@ -802,14 +802,25 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 />
               </div>
 
-              <div>
-                <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">HẠN CHÓT</span>
-                <Space size={6} className="mt-1.5 text-[var(--text-secondary)]">
-                  <CalendarOutlined className="text-xs" />
-                  <span className="text-sm font-medium">
-                    {task.deadline ? formatDate(task.deadline).split(' ')[0] : 'Không có'}
-                  </span>
-                </Space>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">BẮT ĐẦU</span>
+                  <Space size={6} className="mt-1.5 text-[var(--text-secondary)]">
+                    <CalendarOutlined className="text-xs" />
+                    <span className="text-sm font-medium">
+                      {task.startDate ? formatDate(task.startDate).split(' ')[0] : 'Không có'}
+                    </span>
+                  </Space>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[var(--text-tertiary)] block mb-1 uppercase font-bold tracking-wider">HẠN CHÓT</span>
+                  <Space size={6} className="mt-1.5 text-[var(--text-secondary)]">
+                    <CalendarOutlined className="text-xs" />
+                    <span className="text-sm font-medium">
+                      {task.deadline ? formatDate(task.deadline).split(' ')[0] : 'Không có'}
+                    </span>
+                  </Space>
+                </div>
               </div>
 
               <div>

@@ -280,4 +280,60 @@ describe('Task API Integration Tests', () => {
     expect(memberReplyRes.body.success).toBe(true);
     expect(memberReplyRes.body.data.parentId).toBe(rootCommentId);
   });
+
+  it('should support startDate creation, updates and validate startDate <= deadline', async () => {
+    const startStr = new Date(Date.now() + 3600000).toISOString(); // +1 hr
+    const deadlineStr = new Date(Date.now() + 7200000).toISOString(); // +2 hrs
+    const invalidStartStr = new Date(Date.now() + 10800000).toISOString(); // +3 hrs
+
+    // 1. Create task with valid startDate and deadline
+    const createRes = await request(app)
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${leaderToken}`)
+      .send({
+        title: 'Task with start date',
+        projectId,
+        startDate: startStr,
+        deadline: deadlineStr,
+      });
+
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.data.startDate).toBeDefined();
+
+    const taskId = createRes.body.data.id;
+
+    // 2. Create task with invalid startDate (startDate > deadline)
+    const createInvalidRes = await request(app)
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${leaderToken}`)
+      .send({
+        title: 'Invalid task',
+        projectId,
+        startDate: invalidStartStr,
+        deadline: deadlineStr,
+      });
+
+    expect(createInvalidRes.status).toBe(400);
+    expect(createInvalidRes.body.success).toBe(false);
+
+    // 3. Update task with valid startDate
+    const updateRes = await request(app)
+      .patch(`/api/tasks/${taskId}`)
+      .set('Authorization', `Bearer ${leaderToken}`)
+      .send({
+        startDate: new Date(Date.now() + 4000000).toISOString(),
+      });
+
+    expect(updateRes.status).toBe(200);
+
+    // 4. Update task with invalid startDate (startDate > deadline)
+    const updateInvalidRes = await request(app)
+      .patch(`/api/tasks/${taskId}`)
+      .set('Authorization', `Bearer ${leaderToken}`)
+      .send({
+        startDate: invalidStartStr,
+      });
+
+    expect(updateInvalidRes.status).toBe(400);
+  });
 });

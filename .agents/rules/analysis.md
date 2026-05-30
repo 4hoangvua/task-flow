@@ -57,3 +57,10 @@ Khi nghiên cứu tính năng mới hoặc tối ưu giao diện, Agent **bắt 
 4. **Đề xuất giải pháp bám sát các công nghệ cốt lõi** ở phần 2.
 5. **Ghi lại báo cáo phân tích chi tiết** ý tưởng đó vào tệp: `/docs/analysis/YYYY-MM-DD.md` (sử dụng ngày hiện tại) trước khi tiến hành viết code, bao gồm cả phạm vi nghiên cứu và mockup giao diện từ Stitch (nếu có giao diện).
 
+> [!IMPORTANT]
+> **Quy tắc duy nhất một tệp phân tích mỗi ngày (Single Analysis File Per Day):**
+> * Tất cả các nghiên cứu/phân tích diễn ra trong cùng một ngày **BẮT BUỘC** chỉ được tạo và lưu trữ trong duy nhất một tệp `/docs/analysis/YYYY-MM-DD.md`.
+> * **Tuyệt đối không tạo thêm** các tệp phụ có hậu tố khác (ví dụ: không tạo `YYYY-MM-DD-feature.md`).
+> * Nếu có nhiều phân tích hoặc tính năng khác nhau trong cùng ngày, hãy ghi nhận chúng thành các phần (`PHẦN 1`, `PHẦN 2`, ...) hoặc các đề mục (`h2`/`h3`) riêng biệt trong cùng tệp đó.
+> * Nếu tệp của ngày hôm đó đã tồn tại, hãy **đọc và bổ sung thêm (append/update)** nội dung mới vào tệp hiện có thay vì ghi đè hoàn toàn hoặc tạo tệp mới.
+

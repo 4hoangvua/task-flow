@@ -20,7 +20,9 @@ Tài liệu này định nghĩa quy trình tự động hóa hoạt động phá
 4. **Quy chuẩn thiết kế giao diện (Design-First với Stitch)**:
    - Nếu đề xuất liên quan đến **giao diện mới** hoặc **nâng cấp/cải tiến giao diện**, Agent **bắt buộc phải sử dụng các công cụ Stitch MCP** (như `generate_screen_from_text`, `edit_screens`, v.v.) để thiết kế, vẽ phác thảo giao diện trực quan trước khi bắt tay vào viết code frontend.
    - Ghi nhận đường dẫn hình ảnh hoặc mockup được thiết kế bởi Stitch vào file phân tích.
-5. **Ghi nhận ý tưởng chi tiết vào file phân tích**: Tạo tệp `/docs/analysis/YYYY-MM-DD.md` (sử dụng ngày hiện tại, ví dụ: `2026-05-24.md`) chứa phân tích hiện trạng, phạm vi nghiên cứu (Frontend/Backend/Cả hai), mockup UI từ Stitch (nếu có giao diện), giải pháp đề xuất, và cấu trúc code dự kiến thay đổi.
+5. **Ghi nhận ý tưởng chi tiết vào file phân tích**: Tạo hoặc cập nhật tệp `/docs/analysis/YYYY-MM-DD.md` (sử dụng ngày hiện tại, ví dụ: `2026-05-24.md`) chứa phân tích hiện trạng, phạm vi nghiên cứu (Frontend/Backend/Cả hai), mockup UI từ Stitch (nếu có giao diện), giải pháp đề xuất, và cấu trúc code dự kiến thay đổi.
+   - **BẮT BUỘC:** Tất cả các phân tích/nghiên cứu trong một ngày chỉ được tạo trong **duy nhất một tệp** `/docs/analysis/YYYY-MM-DD.md`. Không tạo nhiều tệp riêng lẻ (ví dụ: không tạo `YYYY-MM-DD-suffix.md`).
+   - Nếu tệp ngày hôm đó đã tồn tại, hãy đọc tệp cũ và **bổ sung thêm** (append) nội dung mới dưới dạng các đề mục hoặc các phần phân tích riêng biệt, giữ nguyên nội dung phân tích cũ.
 6. Tìm kiếm các file liên quan bằng công cụ `grep_search` hoặc `list_dir` trong dự án.
 7. Phân tích sự phụ thuộc (dependencies), cấu trúc dữ liệu (`prisma/schema.prisma`), các API endpoints hiện có và thiết kế UI liên quan đến đề xuất tự phát triển này.
 

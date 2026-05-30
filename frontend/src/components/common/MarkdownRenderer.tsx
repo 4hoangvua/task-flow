@@ -3,9 +3,20 @@ import React from 'react';
 interface MarkdownRendererProps {
   content?: string;
   onCheckboxChange?: (lineIndex: number, checked: boolean) => void;
+  onTaskClick?: (taskId: string) => void;
+  onTabClick?: (tabKey: string) => void;
+  onProjectClick?: (projectId: string) => void;
+  onActionClick?: (actionKey: string) => void;
 }
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content = '', onCheckboxChange }) => {
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+  content = '',
+  onCheckboxChange,
+  onTaskClick,
+  onTabClick,
+  onProjectClick,
+  onActionClick,
+}) => {
   if (!content) {
     return <span className="text-slate-400 dark:text-slate-500 italic text-sm">Không có mô tả chi tiết cho công việc này.</span>;
   }
@@ -61,11 +72,92 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content = ''
           </code>
         );
       } else if (first.type === 'link') {
-        parts.push(
-          <a key={keyIndex++} href={m[3]} target="_blank" rel="noopener noreferrer" className="text-sky-600 dark:text-sky-400 hover:underline">
-            {m[2]}
-          </a>
-        );
+        const url = m[3];
+        const textLabel = m[2];
+        const isTaskLink = url.startsWith('task:');
+        const isTabLink = url.startsWith('tab:');
+
+        if (isTaskLink) {
+          const taskId = url.substring(5);
+          parts.push(
+            <a
+              key={keyIndex++}
+              href={`#task-${taskId}`}
+              onClick={(e) => {
+                e.preventDefault();
+                if (onTaskClick) {
+                  onTaskClick(taskId);
+                }
+              }}
+              className="text-[var(--accent)] hover:underline font-bold inline-flex items-center gap-0.5"
+            >
+              📋 {textLabel}
+            </a>
+          );
+        } else if (isTabLink) {
+          const tabKey = url.substring(4);
+          parts.push(
+            <a
+              key={keyIndex++}
+              href={`#tab-${tabKey}`}
+              onClick={(e) => {
+                e.preventDefault();
+                if (onTabClick) {
+                  onTabClick(tabKey);
+                }
+              }}
+              className="text-sky-600 dark:text-sky-400 hover:underline font-bold inline-flex items-center gap-0.5"
+            >
+              🔗 {textLabel}
+            </a>
+          );
+        } else if (url.startsWith('project:')) {
+          const projectId = url.substring(8);
+          parts.push(
+            <a
+              key={keyIndex++}
+              href={`/projects/${projectId === 'list' || projectId === 'all' ? '' : projectId}`}
+              onClick={(e) => {
+                e.preventDefault();
+                if (onProjectClick) {
+                  onProjectClick(projectId);
+                }
+              }}
+              className="text-emerald-600 dark:text-emerald-400 hover:underline font-bold inline-flex items-center gap-0.5"
+            >
+              📁 {textLabel}
+            </a>
+          );
+        } else if (url.startsWith('action:')) {
+          const actionKey = url.substring(7);
+          parts.push(
+            <a
+              key={keyIndex++}
+              href={`#action-${actionKey}`}
+              onClick={(e) => {
+                e.preventDefault();
+                if (onActionClick) {
+                  onActionClick(actionKey);
+                }
+              }}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-950/30 text-[var(--accent)] hover:bg-sky-100 dark:hover:bg-sky-900/40 font-bold border border-sky-200/50 dark:border-sky-800/30 text-xs transition-colors"
+            >
+              ⚡ {textLabel}
+            </a>
+          );
+        } else {
+          parts.push(
+            <a
+              key={keyIndex++}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-600 dark:text-sky-400 hover:underline"
+            >
+              {textLabel}
+            </a>
+          );
+        }
       }
 
       remaining = m[m.length - 1];

@@ -21,6 +21,7 @@ export const taskApi = {
     assigneeId?: string | null;
     priority?: string;
     deadline?: string | null;
+    startDate?: string | null;
     labelIds?: string[];
   }) => {
     const res = await api.post<{ success: boolean; data: Task }>('/tasks', data);
@@ -40,6 +41,7 @@ export const taskApi = {
       assigneeId?: string | null;
       priority?: string;
       deadline?: string | null;
+      startDate?: string | null;
       labelIds?: string[];
     }
   ) => {

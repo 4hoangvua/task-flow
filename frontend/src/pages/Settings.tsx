@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Form, Input, Button, Row, Col, Avatar, Divider, message } from 'antd';
 import { UserOutlined, LockOutlined, SettingOutlined, RobotOutlined, KeyOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
+import { callGeminiAPI } from '../utils/gemini';
 
 export const Settings: React.FC = () => {
   const { user, updateProfile, isUpdatingProfile, changePassword, isChangingPassword } = useAuth();
@@ -45,26 +46,9 @@ export const Settings: React.FC = () => {
     }
     setIsTesting(true);
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${apiKey.trim()}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: 'say ok' }] }],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorResult = await response.json().catch(() => ({}));
-        throw new Error(errorResult.error?.message || 'API Key không hợp lệ hoặc đã hết hạn mức.');
-      }
-
-      const result = await response.json();
-      const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      const text = await callGeminiAPI(apiKey.trim(), [
+        { role: 'user', parts: [{ text: 'say ok' }] },
+      ]);
       if (text) {
         message.success('Kiểm tra kết nối thành công! API Key hoạt động tốt.');
       } else {

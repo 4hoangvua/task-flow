@@ -48,6 +48,7 @@ export const createTaskSchema = z.object({
   assigneeId: z.string().uuid('Invalid assignee ID').nullable().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   deadline: z.string().datetime().nullable().optional(),
+  startDate: z.string().datetime().nullable().optional(),
   labelIds: z.array(z.string().uuid()).optional(),
 }).refine(
   (data) => {
@@ -60,6 +61,17 @@ export const createTaskSchema = z.object({
     message: 'Hạn chót không thể ở trong quá khứ',
     path: ['deadline'],
   }
+).refine(
+  (data) => {
+    if (data.startDate && data.deadline) {
+      return new Date(data.startDate).getTime() <= new Date(data.deadline).getTime();
+    }
+    return true;
+  },
+  {
+    message: 'Ngày bắt đầu không thể sau hạn chót',
+    path: ['startDate'],
+  }
 );
 
 export const updateTaskSchema = z.object({
@@ -68,6 +80,7 @@ export const updateTaskSchema = z.object({
   assigneeId: z.string().uuid('Invalid assignee ID').nullable().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   deadline: z.string().datetime().nullable().optional(),
+  startDate: z.string().datetime().nullable().optional(),
   labelIds: z.array(z.string().uuid()).optional(),
 }).refine(
   (data) => {
@@ -79,6 +92,17 @@ export const updateTaskSchema = z.object({
   {
     message: 'Hạn chót không thể ở trong quá khứ',
     path: ['deadline'],
+  }
+).refine(
+  (data) => {
+    if (data.startDate && data.deadline) {
+      return new Date(data.startDate).getTime() <= new Date(data.deadline).getTime();
+    }
+    return true;
+  },
+  {
+    message: 'Ngày bắt đầu không thể sau hạn chót',
+    path: ['startDate'],
   }
 );
 
